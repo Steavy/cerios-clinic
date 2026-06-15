@@ -24,7 +24,7 @@ export default function AppointmentsPage(): React.ReactElement {
 	const [total, setTotal] = useState(0);
 	const [page, setPage] = useState(0);
 	const [loading, setLoading] = useState(true);
-	const [status, setStatus] = useState<(typeof STATUSES)[number]>("ALL");
+	const [statusFilter, setStatusFilter] = useState<(typeof STATUSES)[number]>("ALL");
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [sortCol, setSortCol] = useState<SortColumn>("date");
@@ -37,7 +37,7 @@ export default function AppointmentsPage(): React.ReactElement {
 	}, [search]);
 
 	const load = useCallback(
-		(pageIndex: number, searchTerm: string, statusFilter: string, col: SortColumn, dir: SortDirection) => {
+		(pageIndex: number, searchTerm: string, nextStatusFilter: string, col: SortColumn, dir: SortDirection) => {
 			setLoading(true);
 			const params: Record<string, string | number> = {
 				limit: PAGE_SIZE,
@@ -46,7 +46,7 @@ export default function AppointmentsPage(): React.ReactElement {
 				sortOrder: dir,
 			};
 			if (searchTerm) params.search = searchTerm;
-			if (statusFilter !== "ALL") params.status = statusFilter;
+			if (nextStatusFilter !== "ALL") params.status = nextStatusFilter;
 			void api
 				.get<{ data: Appointment[]; total: number }>("/appointments", { params })
 				.then(r => {
@@ -60,8 +60,8 @@ export default function AppointmentsPage(): React.ReactElement {
 	);
 
 	useEffect(() => {
-		load(page, debouncedSearch, status, sortCol, sortDir);
-	}, [load, page, debouncedSearch, status, sortCol, sortDir]);
+		load(page, debouncedSearch, statusFilter, sortCol, sortDir);
+	}, [load, page, debouncedSearch, statusFilter, sortCol, sortDir]);
 
 	const handleSort = (col: SortColumn): void => {
 		setPage(0);
@@ -73,12 +73,12 @@ export default function AppointmentsPage(): React.ReactElement {
 		setSortDir("asc");
 	};
 
-	const sortIndicator = (col: SortColumn): string => (sortCol === col ? (sortDir === "asc" ? " ▲" : " ▼") : " ↕");
+	const sortIndicator = (col: SortColumn): string => (sortCol === col ? (sortDir === "asc" ? "▲" : "▼") : "↕");
 
 	const handleCancel = async (id: string): Promise<void> => {
 		await api.delete(`/appointments/${id}`);
 		setCancelConfirm(null);
-		load(page, debouncedSearch, status, sortCol, sortDir);
+		load(page, debouncedSearch, statusFilter, sortCol, sortDir);
 	};
 
 	return (
@@ -101,11 +101,11 @@ export default function AppointmentsPage(): React.ReactElement {
 						<button
 							key={s}
 							onClick={() => {
-								setStatus(s);
+								setStatusFilter(s);
 								setPage(0);
 							}}
 							className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-								status === s
+								statusFilter === s
 									? "bg-brand-accent text-white"
 									: "bg-white border border-gray-200 text-gray-500 hover:border-brand-accent hover:text-brand-accent"
 							}`}
@@ -114,7 +114,11 @@ export default function AppointmentsPage(): React.ReactElement {
 						</button>
 					))}
 				</div>
+				<label className="sr-only" htmlFor="assistant-appointments-search">
+					Search patient or doctor
+				</label>
 				<input
+					id="assistant-appointments-search"
 					type="text"
 					placeholder="Search patient or doctor"
 					className="form-input max-w-xs"
@@ -135,16 +139,30 @@ export default function AppointmentsPage(): React.ReactElement {
 							<thead className="border-b border-gray-100">
 								<tr>
 									<th
-										className="text-left px-3 py-2 text-xs font-semibold text-gray-400 uppercase cursor-pointer select-none hover:text-brand-accent"
-										onClick={() => handleSort("date")}
+										className="text-left px-3 py-2 text-xs font-semibold text-gray-400 uppercase"
+										aria-sort={sortCol === "date" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
 									>
-										Date & Time{sortIndicator("date")}
+										<button
+											type="button"
+											className="inline-flex items-center gap-1 select-none hover:text-brand-accent focus:outline-none focus-visible:text-brand-accent"
+											onClick={() => handleSort("date")}
+										>
+											<span>Date & Time</span>
+											<span aria-hidden="true">{sortIndicator("date")}</span>
+										</button>
 									</th>
 									<th
-										className="text-left px-3 py-2 text-xs font-semibold text-gray-400 uppercase cursor-pointer select-none hover:text-brand-accent"
-										onClick={() => handleSort("patient")}
+										className="text-left px-3 py-2 text-xs font-semibold text-gray-400 uppercase"
+										aria-sort={sortCol === "patient" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
 									>
-										Patient{sortIndicator("patient")}
+										<button
+											type="button"
+											className="inline-flex items-center gap-1 select-none hover:text-brand-accent focus:outline-none focus-visible:text-brand-accent"
+											onClick={() => handleSort("patient")}
+										>
+											<span>Patient</span>
+											<span aria-hidden="true">{sortIndicator("patient")}</span>
+										</button>
 									</th>
 									<th className="text-left px-3 py-2 text-xs font-semibold text-gray-400 uppercase">Doctor</th>
 									<th className="text-left px-3 py-2 text-xs font-semibold text-gray-400 uppercase w-28">Status</th>
@@ -152,63 +170,18 @@ export default function AppointmentsPage(): React.ReactElement {
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-gray-50">
-								{appointments.map(a => {
-									const d = new Date(a.scheduledAt);
-									return (
-										<tr key={a.id} className="hover:bg-gray-50 transition-colors">
-											<td className="px-3 py-2 text-gray-600">
-												{d.toLocaleDateString("en-NL")}{" "}
-												{d.toLocaleTimeString("en-NL", { hour: "2-digit", minute: "2-digit" })}
-											</td>
-											<td className="px-3 py-2 font-medium text-brand-navy">
-												{a.patient?.user?.firstName} {a.patient?.user?.lastName}
-											</td>
-											<td className="px-3 py-2 text-gray-600">
-												Dr. {a.doctor?.user?.firstName} {a.doctor?.user?.lastName}
-											</td>
-											<td className="px-3 py-2">
-												<span className={STATUS_BADGE[a.status] ?? "badge-gray"}>{a.status}</span>
-											</td>
-											<td className="px-3 py-2">
-												<div className="flex gap-2 items-center relative">
-													<button
-														className="btn-link"
-														onClick={() => {
-															void navigate(`/appointments/${a.id}/edit`);
-														}}
-													>
-														Edit
-													</button>
-													{a.status !== "CANCELLED" && a.status !== "COMPLETED" && (
-														<>
-															<button className="btn-link-danger" onClick={() => setCancelConfirm(a.id)}>
-																Cancel
-															</button>
-															{cancelConfirm === a.id && (
-																<div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10 min-w-[180px]">
-																	<p className="text-sm text-gray-600 mb-2">Cancel this appointment?</p>
-																	<div className="flex gap-2 justify-end">
-																		<button className="btn-ghost text-xs" onClick={() => setCancelConfirm(null)}>
-																			No
-																		</button>
-																		<button
-																			className="btn-primary text-xs"
-																			onClick={() => {
-																				void handleCancel(a.id);
-																			}}
-																		>
-																			Yes
-																		</button>
-																	</div>
-																</div>
-															)}
-														</>
-													)}
-												</div>
-											</td>
-										</tr>
-									);
-								})}
+								{appointments.map(a => (
+									<AppointmentTableRow
+										key={a.id}
+										appointment={a}
+										cancelConfirm={cancelConfirm}
+										onCancelConfirmChange={setCancelConfirm}
+										onCancel={handleCancel}
+										onEdit={id => {
+											void navigate(`/appointments/${id}/edit`);
+										}}
+									/>
+								))}
 							</tbody>
 						</table>
 					</div>
@@ -238,5 +211,112 @@ export default function AppointmentsPage(): React.ReactElement {
 				)}
 			</div>
 		</div>
+	);
+}
+
+function AppointmentTableRow({
+	appointment,
+	cancelConfirm,
+	onCancelConfirmChange,
+	onCancel,
+	onEdit,
+}: {
+	appointment: Appointment;
+	cancelConfirm: string | null;
+	onCancelConfirmChange: React.Dispatch<React.SetStateAction<string | null>>;
+	onCancel: (id: string) => Promise<void>;
+	onEdit: (id: string) => void;
+}): React.ReactElement {
+	const scheduledAt = new Date(appointment.scheduledAt);
+	const patientName = `${appointment.patient?.user?.firstName ?? "Unknown"} ${appointment.patient?.user?.lastName ?? "patient"}`;
+	const doctorName = `Dr. ${appointment.doctor?.user?.firstName ?? "Unknown"} ${appointment.doctor?.user?.lastName ?? "doctor"}`;
+
+	return (
+		<tr className="hover:bg-gray-50 transition-colors">
+			<td className="px-3 py-2 text-gray-600">
+				{scheduledAt.toLocaleDateString("en-NL")}{" "}
+				{scheduledAt.toLocaleTimeString("en-NL", { hour: "2-digit", minute: "2-digit" })}
+			</td>
+			<td className="px-3 py-2 font-medium text-brand-navy">{patientName}</td>
+			<td className="px-3 py-2 text-gray-600">{doctorName}</td>
+			<td className="px-3 py-2">
+				<span className={STATUS_BADGE[appointment.status] ?? "badge-gray"}>{appointment.status}</span>
+			</td>
+			<AppointmentActions
+				appointment={appointment}
+				patientName={patientName}
+				doctorName={doctorName}
+				cancelConfirm={cancelConfirm}
+				onCancelConfirmChange={onCancelConfirmChange}
+				onCancel={onCancel}
+				onEdit={onEdit}
+			/>
+		</tr>
+	);
+}
+
+function AppointmentActions({
+	appointment,
+	patientName,
+	doctorName,
+	cancelConfirm,
+	onCancelConfirmChange,
+	onCancel,
+	onEdit,
+}: {
+	appointment: Appointment;
+	patientName: string;
+	doctorName: string;
+	cancelConfirm: string | null;
+	onCancelConfirmChange: React.Dispatch<React.SetStateAction<string | null>>;
+	onCancel: (id: string) => Promise<void>;
+	onEdit: (id: string) => void;
+}): React.ReactElement {
+	return (
+		<td className="px-3 py-2">
+			<div className="flex gap-2 items-center relative">
+				<button
+					className="btn-link"
+					aria-label={`Edit appointment for ${patientName} with ${doctorName}`}
+					onClick={() => onEdit(appointment.id)}
+				>
+					Edit
+				</button>
+				{appointment.status !== "CANCELLED" && appointment.status !== "COMPLETED" && (
+					<>
+						<button
+							className="btn-link-danger"
+							aria-label={`Cancel appointment for ${patientName} with ${doctorName}`}
+							onClick={() => onCancelConfirmChange(appointment.id)}
+						>
+							Cancel
+						</button>
+						{cancelConfirm === appointment.id && (
+							<div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10 min-w-[180px]">
+								<p className="text-sm text-gray-600 mb-2">Cancel this appointment?</p>
+								<div className="flex gap-2 justify-end">
+									<button
+										className="btn-ghost text-xs"
+										aria-label={`Keep appointment for ${patientName} with ${doctorName}`}
+										onClick={() => onCancelConfirmChange(null)}
+									>
+										No
+									</button>
+									<button
+										className="btn-primary text-xs"
+										aria-label={`Confirm cancel appointment for ${patientName} with ${doctorName}`}
+										onClick={() => {
+											void onCancel(appointment.id);
+										}}
+									>
+										Yes
+									</button>
+								</div>
+							</div>
+						)}
+					</>
+				)}
+			</div>
+		</td>
 	);
 }

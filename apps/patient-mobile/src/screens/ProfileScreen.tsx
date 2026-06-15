@@ -61,7 +61,13 @@ function AvatarSection({
 }): React.JSX.Element {
 	return (
 		<View style={styles.avatarSection}>
-			<TouchableOpacity onPress={onPickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
+			<TouchableOpacity
+				onPress={onPickPhoto}
+				disabled={uploadingPhoto}
+				activeOpacity={0.7}
+				accessibilityRole="button"
+				accessibilityLabel="Change profile photo"
+			>
 				{photoUri ? (
 					<Image source={{ uri: photoUri }} style={styles.avatarImage} />
 				) : (
@@ -123,6 +129,7 @@ function ProfileFormContent({
 				<FormRow label="First name">
 					<TextInput
 						style={styles.input}
+						accessibilityLabel="First name"
 						value={form.firstName}
 						onChangeText={handlers.firstName}
 						autoCapitalize="words"
@@ -131,17 +138,25 @@ function ProfileFormContent({
 				<FormRow label="Last name">
 					<TextInput
 						style={styles.input}
+						accessibilityLabel="Last name"
 						value={form.lastName}
 						onChangeText={handlers.lastName}
 						autoCapitalize="words"
 					/>
 				</FormRow>
 				<FormRow label="Phone number">
-					<TextInput style={styles.input} value={form.phone} onChangeText={handlers.phone} keyboardType="phone-pad" />
+					<TextInput
+						style={styles.input}
+						accessibilityLabel="Phone number"
+						value={form.phone}
+						onChangeText={handlers.phone}
+						keyboardType="phone-pad"
+					/>
 				</FormRow>
 				<FormRow label="Date of birth">
 					<TextInput
 						style={styles.input}
+						accessibilityLabel="Date of birth"
 						value={form.dateOfBirth}
 						onChangeText={handlers.dateOfBirth}
 						placeholder="YYYY-MM-DD"
@@ -149,7 +164,12 @@ function ProfileFormContent({
 					/>
 				</FormRow>
 				<FormRow label="Insurance number" last>
-					<TextInput style={styles.input} value={form.insuranceNumber} onChangeText={handlers.insuranceNumber} />
+					<TextInput
+						style={styles.input}
+						accessibilityLabel="Insurance number"
+						value={form.insuranceNumber}
+						onChangeText={handlers.insuranceNumber}
+					/>
 				</FormRow>
 			</View>
 

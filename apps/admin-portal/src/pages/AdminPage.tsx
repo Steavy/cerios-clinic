@@ -1,5 +1,5 @@
 import type { Doctor, Assistant } from "@clinic/shared-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useId, useState } from "react";
 
 import api from "../api";
 
@@ -371,12 +371,14 @@ export default function AdminPage(): React.ReactElement {
 										<td className="px-4 py-3 text-right">
 											<div className="flex items-center justify-end gap-2">
 												<button
+													aria-label={`Edit ${tab === "doctors" ? "doctor" : "assistant"} ${u.firstName} ${u.lastName}`}
 													onClick={() => (tab === "doctors" ? openEditDoctor(u) : openEditAssistant(u))}
 													className="text-brand-orange text-xs font-medium hover:underline"
 												>
 													Edit
 												</button>
 												<button
+													aria-label={`Delete ${tab === "doctors" ? "doctor" : "assistant"} ${u.firstName} ${u.lastName}`}
 													onClick={() => setConfirmDelete(u)}
 													className="text-red-400 text-xs font-medium hover:underline"
 												>
@@ -413,12 +415,26 @@ function Modal({
 	children: React.ReactNode;
 	onClose: () => void;
 }): React.ReactElement {
+	const titleId = useId();
+
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-			<div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+			<div
+				className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby={titleId}
+			>
 				<div className="flex items-center justify-between mb-5">
-					<h2 className="text-lg font-bold text-brand-navy">{title}</h2>
-					<button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+					<h2 id={titleId} className="text-lg font-bold text-brand-navy">
+						{title}
+					</h2>
+					<button
+						type="button"
+						onClick={onClose}
+						className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+						aria-label="Close"
+					>
 						&times;
 					</button>
 				</div>
@@ -443,10 +459,15 @@ function Field({
 	required?: boolean;
 	disabled?: boolean;
 }): React.ReactElement {
+	const fieldId = useId();
+
 	return (
 		<div>
-			<label className="form-label">{label}</label>
+			<label className="form-label" htmlFor={fieldId}>
+				{label}
+			</label>
 			<input
+				id={fieldId}
 				type={type}
 				value={value}
 				onChange={e => onChange(e.target.value)}

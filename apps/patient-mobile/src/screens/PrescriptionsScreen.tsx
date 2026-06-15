@@ -16,7 +16,14 @@ function PrescriptionCard({ item }: { item: Prescription }): React.JSX.Element {
 	});
 
 	return (
-		<TouchableOpacity style={styles.card} onPress={() => setExpanded(!expanded)} activeOpacity={0.7}>
+		<TouchableOpacity
+			style={styles.card}
+			onPress={() => setExpanded(!expanded)}
+			activeOpacity={0.7}
+			accessibilityRole="button"
+			accessibilityState={{ expanded }}
+			accessibilityLabel={`${expanded ? "Hide" : "Show"} prescription details for ${doctorName}`}
+		>
 			<View style={styles.cardHeader}>
 				<Text style={styles.doctorName}>{doctorName}</Text>
 				<Text style={styles.date}>{date}</Text>
@@ -66,6 +73,7 @@ export default function PrescriptionsScreen(): React.JSX.Element {
 		<View style={styles.container}>
 			<TextInput
 				style={styles.search}
+				accessibilityLabel="Search prescriptions by doctor or medication"
 				placeholder="Search by doctor or medication..."
 				placeholderTextColor="#9CA3AF"
 				value={search}

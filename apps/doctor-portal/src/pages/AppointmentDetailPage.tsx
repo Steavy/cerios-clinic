@@ -111,15 +111,19 @@ export default function AppointmentDetailPage(): React.ReactElement {
 				<h2 className="font-semibold text-brand-navy">Edit appointment</h2>
 
 				<div>
-					<label className="form-label">Status</label>
+					<label className="form-label" htmlFor="doctor-appointment-status">
+						Status
+					</label>
 					{allowedNextStatuses.length === 0 ? (
-						<p className="text-sm text-gray-400 italic">
+						<p id="doctor-appointment-status-help" className="text-sm text-gray-400 italic">
 							This appointment is in a terminal state and cannot be changed.
 						</p>
 					) : (
 						<select
+							id="doctor-appointment-status"
 							value={form.status}
 							onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+							aria-describedby={allowedNextStatuses.length === 0 ? "doctor-appointment-status-help" : undefined}
 							className="form-input"
 						>
 							<option value={appointment.status}>{appointment.status} (current)</option>
@@ -133,8 +137,11 @@ export default function AppointmentDetailPage(): React.ReactElement {
 				</div>
 
 				<div>
-					<label className="form-label">Scheduled at</label>
+					<label className="form-label" htmlFor="doctor-appointment-scheduled-at">
+						Scheduled at
+					</label>
 					<input
+						id="doctor-appointment-scheduled-at"
 						type="datetime-local"
 						value={form.scheduledAt}
 						onChange={e => setForm(f => ({ ...f, scheduledAt: e.target.value }))}
@@ -143,8 +150,11 @@ export default function AppointmentDetailPage(): React.ReactElement {
 				</div>
 
 				<div>
-					<label className="form-label">Notes</label>
+					<label className="form-label" htmlFor="doctor-appointment-notes">
+						Notes
+					</label>
 					<textarea
+						id="doctor-appointment-notes"
 						value={form.notes}
 						onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
 						rows={4}
@@ -308,8 +318,11 @@ function PrescriptionSection({
 				className="space-y-4"
 			>
 				<div>
-					<label className="form-label">Notes (optional)</label>
+					<label className="form-label" htmlFor="prescription-notes">
+						Notes (optional)
+					</label>
 					<textarea
+						id="prescription-notes"
 						value={notes}
 						onChange={e => setNotes(e.target.value)}
 						rows={2}
@@ -319,52 +332,83 @@ function PrescriptionSection({
 				</div>
 
 				{items.map((item, idx) => (
-					<div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
+					<fieldset key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2">
+						<legend className="text-xs font-semibold text-gray-400 px-1">Medication {idx + 1}</legend>
 						<div className="flex items-center justify-between">
-							<span className="text-xs font-semibold text-gray-400">Medication #{idx + 1}</span>
+							<span className="text-xs text-gray-400">Details</span>
 							{items.length > 1 && (
-								<button type="button" onClick={() => removeItem(idx)} className="text-red-400 text-xs hover:underline">
+								<button
+									type="button"
+									onClick={() => removeItem(idx)}
+									className="text-red-400 text-xs hover:underline"
+									aria-label={`Remove medication ${idx + 1}`}
+								>
 									Remove
 								</button>
 							)}
 						</div>
+						<p className="text-xs text-gray-400">Medication name, dosage, frequency and duration are required.</p>
 						<div className="grid grid-cols-2 gap-2">
+							<label className="sr-only" htmlFor={`prescription-medication-name-${idx}`}>
+								Medication name
+							</label>
 							<input
-								placeholder="Medication name *"
+								id={`prescription-medication-name-${idx}`}
+								placeholder="Medication name"
 								value={item.medicationName}
 								onChange={e => updateItem(idx, "medicationName", e.target.value)}
 								className="form-input text-sm"
+								aria-required="true"
 								required
 							/>
+							<label className="sr-only" htmlFor={`prescription-dosage-${idx}`}>
+								Dosage
+							</label>
 							<input
-								placeholder="Dosage *"
+								id={`prescription-dosage-${idx}`}
+								placeholder="Dosage"
 								value={item.dosage}
 								onChange={e => updateItem(idx, "dosage", e.target.value)}
 								className="form-input text-sm"
+								aria-required="true"
 								required
 							/>
+							<label className="sr-only" htmlFor={`prescription-frequency-${idx}`}>
+								Frequency
+							</label>
 							<input
-								placeholder="Frequency *"
+								id={`prescription-frequency-${idx}`}
+								placeholder="Frequency"
 								value={item.frequency}
 								onChange={e => updateItem(idx, "frequency", e.target.value)}
 								className="form-input text-sm"
+								aria-required="true"
 								required
 							/>
+							<label className="sr-only" htmlFor={`prescription-duration-${idx}`}>
+								Duration
+							</label>
 							<input
-								placeholder="Duration *"
+								id={`prescription-duration-${idx}`}
+								placeholder="Duration"
 								value={item.duration}
 								onChange={e => updateItem(idx, "duration", e.target.value)}
 								className="form-input text-sm"
+								aria-required="true"
 								required
 							/>
 						</div>
+						<label className="sr-only" htmlFor={`prescription-instructions-${idx}`}>
+							Instructions (optional)
+						</label>
 						<input
+							id={`prescription-instructions-${idx}`}
 							placeholder="Instructions (optional)"
 							value={item.instructions}
 							onChange={e => updateItem(idx, "instructions", e.target.value)}
 							className="form-input text-sm"
 						/>
-					</div>
+					</fieldset>
 				))}
 
 				<button type="button" onClick={addItem} className="text-brand-orange text-sm font-medium hover:underline">

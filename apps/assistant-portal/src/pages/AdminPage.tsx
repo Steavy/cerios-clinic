@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { type FieldErrors, type UseFormRegister, useForm } from "react-hook-form";
+import { type FieldErrors, type UseFormRegister, type UseFormRegisterReturn, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import api from "../api";
@@ -207,58 +207,67 @@ function UserFormModal({
 	onSubmit: (e: React.BaseSyntheticEvent) => void;
 	onClose: () => void;
 }): React.ReactElement {
+	const dialogTitle = `${isEdit ? "Edit" : "Add"} ${isDoctor ? "doctor" : "assistant"}`;
+
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
 			<div className="absolute inset-0 bg-black/30" />
 			<div
 				className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="user-form-title"
 				onClick={e => e.stopPropagation()}
 			>
-				<h2 className="text-lg font-bold text-brand-navy mb-4">
-					{isEdit ? "Edit" : "Add"} {isDoctor ? "doctor" : "assistant"}
+				<h2 id="user-form-title" className="text-lg font-bold text-brand-navy mb-4">
+					{dialogTitle}
 				</h2>
 				<form onSubmit={onSubmit} className="space-y-3">
-					<div>
-						<label className="form-label">First name</label>
-						<input {...register("firstName", { required: "Required" })} className="form-input w-full" />
-						{errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>}
-					</div>
-					<div>
-						<label className="form-label">Last name</label>
-						<input {...register("lastName", { required: "Required" })} className="form-input w-full" />
-						{errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>}
-					</div>
-					<div>
-						<label className="form-label">Email</label>
-						<input
-							{...register("email", {
-								required: "Required",
-								pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
-							})}
-							disabled={isEdit}
-							className="form-input w-full disabled:opacity-50"
-						/>
-						{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-					</div>
+					<UserFormField
+						label="First name"
+						inputId="user-form-first-name"
+						registration={register("firstName", { required: "Required" })}
+						errorMessage={errors.firstName?.message}
+					/>
+					<UserFormField
+						label="Last name"
+						inputId="user-form-last-name"
+						registration={register("lastName", { required: "Required" })}
+						errorMessage={errors.lastName?.message}
+					/>
+					<UserFormField
+						label="Email"
+						inputId="user-form-email"
+						registration={register("email", {
+							required: "Required",
+							pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
+						})}
+						errorMessage={errors.email?.message}
+						type="email"
+						disabled={isEdit}
+					/>
 					{isDoctor ? (
 						<>
-							<div>
-								<label className="form-label">Specialization</label>
-								<input {...register("specialization", { required: "Required" })} className="form-input w-full" />
-								{errors.specialization && <p className="text-red-500 text-xs mt-1">{errors.specialization.message}</p>}
-							</div>
-							<div>
-								<label className="form-label">License number</label>
-								<input {...register("licenseNumber", { required: "Required" })} className="form-input w-full" />
-								{errors.licenseNumber && <p className="text-red-500 text-xs mt-1">{errors.licenseNumber.message}</p>}
-							</div>
+							<UserFormField
+								label="Specialization"
+								inputId="user-form-specialization"
+								registration={register("specialization", { required: "Required" })}
+								errorMessage={errors.specialization?.message}
+							/>
+							<UserFormField
+								label="License number"
+								inputId="user-form-license-number"
+								registration={register("licenseNumber", { required: "Required" })}
+								errorMessage={errors.licenseNumber?.message}
+							/>
 						</>
 					) : (
-						<div>
-							<label className="form-label">Department</label>
-							<input {...register("department", { required: "Required" })} className="form-input w-full" />
-							{errors.department && <p className="text-red-500 text-xs mt-1">{errors.department.message}</p>}
-						</div>
+						<UserFormField
+							label="Department"
+							inputId="user-form-department"
+							registration={register("department", { required: "Required" })}
+							errorMessage={errors.department?.message}
+						/>
 					)}
 
 					<div className="flex gap-2 justify-end pt-2">
@@ -271,6 +280,44 @@ function UserFormModal({
 					</div>
 				</form>
 			</div>
+		</div>
+	);
+}
+
+function UserFormField({
+	label,
+	inputId,
+	registration,
+	errorMessage,
+	type = "text",
+	disabled,
+}: {
+	label: string;
+	inputId: string;
+	registration: UseFormRegisterReturn;
+	errorMessage?: string;
+	type?: string;
+	disabled?: boolean;
+}): React.ReactElement {
+	return (
+		<div>
+			<label className="form-label" htmlFor={inputId}>
+				{label}
+			</label>
+			<input
+				{...registration}
+				id={inputId}
+				type={type}
+				disabled={disabled}
+				aria-invalid={errorMessage ? true : undefined}
+				aria-describedby={errorMessage ? `${inputId}-error` : undefined}
+				className="form-input w-full disabled:opacity-50"
+			/>
+			{errorMessage && (
+				<p id={`${inputId}-error`} className="text-red-500 text-xs mt-1">
+					{errorMessage}
+				</p>
+			)}
 		</div>
 	);
 }
@@ -320,10 +367,18 @@ function UserTable({
 								</td>
 								<td className="px-3 py-2">
 									<div className="flex gap-2 items-center relative">
-										<button className="btn-link" onClick={() => onEdit(u)}>
+										<button
+											className="btn-link"
+											aria-label={`Edit ${type} ${u.firstName} ${u.lastName}`}
+											onClick={() => onEdit(u)}
+										>
 											Edit
 										</button>
-										<button className="btn-link-danger" onClick={() => onDeleteConfirm(u.id)}>
+										<button
+											className="btn-link-danger"
+											aria-label={`Delete ${type} ${u.firstName} ${u.lastName}`}
+											onClick={() => onDeleteConfirm(u.id)}
+										>
 											Delete
 										</button>
 										{deleteConfirm === u.id && (

@@ -65,16 +65,21 @@ export default function RescheduleModal({ appointmentId, doctorId, onClose, onSu
 	return (
 		<Modal animationType="slide" transparent onRequestClose={onClose}>
 			<View style={styles.overlay}>
-				<View style={styles.sheet}>
+				<View style={styles.sheet} accessibilityViewIsModal accessibilityLabel="Reschedule appointment">
 					<View style={styles.header}>
 						<Text style={styles.title}>Reschedule Appointment</Text>
-						<TouchableOpacity onPress={onClose}>
+						<TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel="Close reschedule modal">
 							<Text style={styles.close}>✕</Text>
 						</TouchableOpacity>
 					</View>
 
 					{/* Date selector */}
-					<TouchableOpacity style={styles.datePicker} onPress={() => setShowPicker(true)}>
+					<TouchableOpacity
+						style={styles.datePicker}
+						onPress={() => setShowPicker(true)}
+						accessibilityRole="button"
+						accessibilityLabel={`Selected date ${formatDate(selectedDate.toISOString())}`}
+					>
 						<Text style={styles.dateLabel}>Selected date</Text>
 						<Text style={styles.dateValue}>{formatDate(selectedDate.toISOString())}</Text>
 					</TouchableOpacity>
@@ -99,6 +104,9 @@ export default function RescheduleModal({ appointmentId, doctorId, onClose, onSu
 								<TouchableOpacity
 									style={[styles.slot, selectedSlot === item && styles.slotSelected]}
 									onPress={() => setSelectedSlot(item)}
+									accessibilityRole="button"
+									accessibilityLabel={`Select time ${formatTime(item)}`}
+									accessibilityState={{ selected: selectedSlot === item }}
 								>
 									<Text style={[styles.slotText, selectedSlot === item && styles.slotTextSelected]}>
 										{formatTime(item)}
@@ -113,6 +121,7 @@ export default function RescheduleModal({ appointmentId, doctorId, onClose, onSu
 						style={[styles.confirmBtn, (!selectedSlot || reschedule.isPending) && styles.confirmBtnDisabled]}
 						onPress={handleConfirm}
 						disabled={!selectedSlot || reschedule.isPending}
+						accessibilityRole="button"
 					>
 						{reschedule.isPending ? (
 							<ActivityIndicator color="#ffffff" />

@@ -114,7 +114,9 @@ export default function CreateAppointmentPage(): React.ReactElement {
 					className="space-y-4"
 				>
 					<div>
-						<label className="form-label">Patient</label>
+						<label className="form-label" htmlFor="appointment-patient">
+							Patient
+						</label>
 						<Controller
 							name="patientId"
 							control={control}
@@ -122,6 +124,11 @@ export default function CreateAppointmentPage(): React.ReactElement {
 							render={({ field }) => (
 								<Select
 									{...field}
+									inputId="appointment-patient"
+									instanceId="appointment-patient"
+									name={field.name}
+									aria-invalid={errors.patientId ? true : undefined}
+									aria-describedby={errors.patientId ? "appointment-patient-error" : undefined}
 									isSearchable
 									isLoading={searching}
 									placeholder="Search by name or email"
@@ -134,11 +141,17 @@ export default function CreateAppointmentPage(): React.ReactElement {
 								/>
 							)}
 						/>
-						{errors.patientId && <p className="text-red-500 text-xs mt-1">{errors.patientId.message}</p>}
+						{errors.patientId && (
+							<p id="appointment-patient-error" className="text-red-500 text-xs mt-1">
+								{errors.patientId.message}
+							</p>
+						)}
 					</div>
 
 					<div>
-						<label className="form-label">Doctor</label>
+						<label className="form-label" htmlFor="appointment-doctor">
+							Doctor
+						</label>
 						<Controller
 							name="doctorId"
 							control={control}
@@ -146,6 +159,11 @@ export default function CreateAppointmentPage(): React.ReactElement {
 							render={({ field }) => (
 								<Select
 									{...field}
+									inputId="appointment-doctor"
+									instanceId="appointment-doctor"
+									name={field.name}
+									aria-invalid={errors.doctorId ? true : undefined}
+									aria-describedby={errors.doctorId ? "appointment-doctor-error" : undefined}
 									isSearchable
 									placeholder="Select doctor"
 									options={doctorOptions}
@@ -153,19 +171,29 @@ export default function CreateAppointmentPage(): React.ReactElement {
 								/>
 							)}
 						/>
-						{errors.doctorId && <p className="text-red-500 text-xs mt-1">{errors.doctorId.message}</p>}
+						{errors.doctorId && (
+							<p id="appointment-doctor-error" className="text-red-500 text-xs mt-1">
+								{errors.doctorId.message}
+							</p>
+						)}
 					</div>
 
 					<div>
-						<label className="form-label">Date & Time</label>
+						<label className="form-label" htmlFor="appointment-scheduled-at">
+							Date & Time
+						</label>
 						<Controller
 							name="scheduledAt"
 							control={control}
 							rules={{ required: "Pick a date and time" }}
 							render={({ field }) => (
 								<DatePicker
+									id="appointment-scheduled-at"
+									name={field.name}
 									selected={field.value}
 									onChange={field.onChange}
+									aria-invalid={errors.scheduledAt ? "true" : undefined}
+									aria-describedby={errors.scheduledAt ? "appointment-scheduled-at-error" : undefined}
 									showTimeSelect
 									dateFormat="dd/MM/yyyy HH:mm"
 									timeFormat="HH:mm"
@@ -175,12 +203,18 @@ export default function CreateAppointmentPage(): React.ReactElement {
 								/>
 							)}
 						/>
-						{errors.scheduledAt && <p className="text-red-500 text-xs mt-1">{errors.scheduledAt.message}</p>}
+						{errors.scheduledAt && (
+							<p id="appointment-scheduled-at-error" className="text-red-500 text-xs mt-1">
+								{errors.scheduledAt.message}
+							</p>
+						)}
 					</div>
 
 					<div>
-						<label className="form-label">Notes (optional)</label>
-						<textarea {...register("notes")} rows={3} className="form-input w-full" />
+						<label className="form-label" htmlFor="appointment-notes">
+							Notes (optional)
+						</label>
+						<textarea id="appointment-notes" {...register("notes")} rows={3} className="form-input w-full" />
 					</div>
 
 					<button type="submit" className="btn-primary w-full" disabled={submitting}>

@@ -47,7 +47,11 @@ export default function AppointmentsPage(): React.ReactElement {
 			<h1 className="text-2xl font-bold text-brand-navy mb-6">My Appointments</h1>
 
 			<div className="mb-6">
+				<label className="sr-only" htmlFor="patient-appointments-search">
+					Search by doctor name
+				</label>
 				<input
+					id="patient-appointments-search"
 					type="text"
 					placeholder="Search by doctor name..."
 					value={search}
