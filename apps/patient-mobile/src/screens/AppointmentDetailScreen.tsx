@@ -230,7 +230,13 @@ function ReviewSection({
 					<Text style={styles.reviewPrompt}>How was your experience?</Text>
 					<View style={styles.starRow}>
 						{[1, 2, 3, 4, 5].map(s => (
-							<TouchableOpacity key={s} onPress={() => onSetRating(s)}>
+							<TouchableOpacity
+								key={s}
+								onPress={() => onSetRating(s)}
+								accessibilityRole="button"
+								accessibilityLabel={`Rate ${s} ${s === 1 ? "star" : "stars"}`}
+								accessibilityState={{ selected: reviewRating === s }}
+							>
 								<Text style={[styles.starInput, s <= reviewRating && styles.starActive]}>
 									{s <= reviewRating ? "★" : "☆"}
 								</Text>
@@ -239,6 +245,7 @@ function ReviewSection({
 					</View>
 					<TextInput
 						style={styles.reviewInput}
+						accessibilityLabel="Review comment"
 						placeholder="Leave a comment (optional)"
 						placeholderTextColor="#9CA3AF"
 						value={reviewComment}

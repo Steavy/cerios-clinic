@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import api from "../api";
 
@@ -18,7 +18,6 @@ interface PatientRow {
 }
 
 export default function PatientsPage(): React.ReactElement {
-	const navigate = useNavigate();
 	const [patients, setPatients] = useState<PatientRow[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
@@ -48,6 +47,9 @@ export default function PatientsPage(): React.ReactElement {
 
 			<div className="card">
 				<form onSubmit={handleSearch} className="flex gap-2 mb-4 max-w-sm">
+					<label className="sr-only" htmlFor="patients-search">
+						Search by name or email
+					</label>
 					<input
 						id="patients-search"
 						type="text"
@@ -77,13 +79,7 @@ export default function PatientsPage(): React.ReactElement {
 							</thead>
 							<tbody className="divide-y divide-gray-50">
 								{patients.map(p => (
-									<tr
-										key={p.id}
-										className="hover:bg-gray-50 transition-colors cursor-pointer"
-										onClick={() => {
-											void navigate(`/patients/${p.userId}`);
-										}}
-									>
+									<tr key={p.id} className="hover:bg-gray-50 transition-colors">
 										<td className="px-3 py-2">
 											<img
 												src={p.photo ?? "/placeholder-avatar.svg"}
@@ -92,20 +88,20 @@ export default function PatientsPage(): React.ReactElement {
 											/>
 										</td>
 										<td className="px-3 py-2 font-medium text-brand-navy">
-											{p.user.firstName} {p.user.lastName}
+											<Link className="hover:underline" to={`/patients/${p.userId}`}>
+												{p.user.firstName} {p.user.lastName}
+											</Link>
 										</td>
 										<td className="px-3 py-2 text-gray-600">{p.user.email}</td>
 										<td className="px-3 py-2 text-gray-500">{p.phone ?? "—"}</td>
 										<td className="px-3 py-2">
-											<button
+											<Link
 												className="btn-link text-brand-accent"
-												onClick={e => {
-													e.stopPropagation();
-													void navigate(`/patients/${p.userId}`);
-												}}
+												to={`/patients/${p.userId}`}
+												aria-label={`View patient ${p.user.firstName} ${p.user.lastName}`}
 											>
 												View
-											</button>
+											</Link>
 										</td>
 									</tr>
 								))}

@@ -111,7 +111,12 @@ export default function ReviewsPage(): React.ReactElement {
 						By Patient
 					</button>
 				</div>
+				<label className="form-label" htmlFor="reviews-filter">
+					{searchType === "doctor" ? "Filter by doctor" : "Filter by patient"}
+				</label>
 				<Select
+					inputId="reviews-filter"
+					instanceId="reviews-filter"
 					isClearable
 					isSearchable
 					placeholder={`Select a ${searchType}...`}

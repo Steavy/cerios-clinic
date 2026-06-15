@@ -246,14 +246,27 @@ function PhotoUploadCard({
 	return (
 		<div className="card">
 			<h2 className="text-base font-semibold text-brand-navy mb-3">Update photo</h2>
-			<input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+			<input
+				ref={fileInputRef}
+				id="patient-photo-input"
+				type="file"
+				accept="image/*"
+				className="hidden"
+				aria-label="Select patient photo"
+				onChange={onFileChange}
+			/>
 			<div className="flex gap-2 items-center">
-				<button className="btn-outline inline-flex items-center gap-2" onClick={() => fileInputRef.current?.click()}>
+				<button
+					type="button"
+					className="btn-outline inline-flex items-center gap-2"
+					aria-controls="patient-photo-input"
+					onClick={() => fileInputRef.current?.click()}
+				>
 					<Upload size={16} />
 					Select image
 				</button>
 				{pendingData && (
-					<button className="btn-primary" disabled={uploading} onClick={onUpload}>
+					<button type="button" className="btn-primary" disabled={uploading} onClick={onUpload}>
 						{uploading ? "Saving..." : "Save photo"}
 					</button>
 				)}

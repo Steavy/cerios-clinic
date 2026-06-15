@@ -108,7 +108,12 @@ export default function PrescriptionsPage(): React.ReactElement {
 						By Doctor
 					</button>
 				</div>
+				<label className="form-label" htmlFor="prescriptions-filter">
+					{searchType === "patient" ? "Filter by patient" : "Filter by doctor"}
+				</label>
 				<Select
+					inputId="prescriptions-filter"
+					instanceId="prescriptions-filter"
 					isClearable
 					isSearchable
 					placeholder={`Select a ${searchType}...`}
@@ -139,21 +144,33 @@ export default function PrescriptionsPage(): React.ReactElement {
 							<tbody className="divide-y divide-gray-50">
 								{prescriptions.map(r => {
 									const expanded = expandedIds.has(r.id);
+									const patientName = r.patient?.user
+										? `${r.patient.user.firstName} ${r.patient.user.lastName}`
+										: "Unknown patient";
+									const doctorName = r.doctor?.user
+										? `Dr. ${r.doctor.user.firstName} ${r.doctor.user.lastName}`
+										: "Unknown doctor";
 									return (
 										<React.Fragment key={r.id}>
-											<tr
-												className="hover:bg-gray-50 transition-colors cursor-pointer"
-												onClick={() => toggleExpand(r.id)}
-											>
+											<tr className="hover:bg-gray-50 transition-colors">
 												<td className="px-3 py-2 text-gray-400">
-													{expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+													<button
+														type="button"
+														onClick={() => toggleExpand(r.id)}
+														className="inline-flex items-center justify-center rounded text-gray-400 hover:text-brand-navy focus:outline-none focus-visible:text-brand-navy"
+														aria-expanded={expanded}
+														aria-controls={`prescription-details-${r.id}`}
+														aria-label={`${expanded ? "Hide" : "Show"} prescription details for ${patientName} from ${doctorName}`}
+													>
+														{expanded ? (
+															<ChevronDown size={16} aria-hidden="true" />
+														) : (
+															<ChevronRight size={16} aria-hidden="true" />
+														)}
+													</button>
 												</td>
-												<td className="px-3 py-2 font-medium text-brand-navy">
-													{r.patient?.user ? `${r.patient.user.firstName} ${r.patient.user.lastName}` : "—"}
-												</td>
-												<td className="px-3 py-2 text-gray-600">
-													{r.doctor?.user ? `Dr. ${r.doctor.user.firstName} ${r.doctor.user.lastName}` : "—"}
-												</td>
+												<td className="px-3 py-2 font-medium text-brand-navy">{r.patient?.user ? patientName : "—"}</td>
+												<td className="px-3 py-2 text-gray-600">{r.doctor?.user ? doctorName : "—"}</td>
 												<td className="px-3 py-2 text-gray-500">
 													{new Date(r.appointment?.scheduledAt ?? r.createdAt).toLocaleDateString("en-NL", {
 														year: "numeric",
@@ -165,7 +182,7 @@ export default function PrescriptionsPage(): React.ReactElement {
 											</tr>
 											{expanded && (
 												<tr>
-													<td colSpan={5} className="bg-gray-50 px-6 py-3">
+													<td id={`prescription-details-${r.id}`} colSpan={5} className="bg-gray-50 px-6 py-3">
 														{r.notes && <p className="text-gray-500 text-xs mb-3">{r.notes}</p>}
 														<table className="w-full text-xs">
 															<thead>

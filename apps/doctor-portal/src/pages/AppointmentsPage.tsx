@@ -47,8 +47,7 @@ export default function AppointmentsPage(): React.ReactElement {
 		}
 	};
 
-	const sortIndicator = (col: "patient" | "date"): string =>
-		sortCol === col ? (sortDir === "asc" ? " ▲" : " ▼") : " ↕";
+	const sortIndicator = (col: "patient" | "date"): string => (sortCol === col ? (sortDir === "asc" ? "▲" : "▼") : "↕");
 
 	const filtered = search
 		? appointments.filter(a => {
@@ -89,7 +88,11 @@ export default function AppointmentsPage(): React.ReactElement {
 			</div>
 
 			<div className="mb-4">
+				<label className="sr-only" htmlFor="doctor-appointments-search">
+					Search patient
+				</label>
 				<input
+					id="doctor-appointments-search"
 					type="text"
 					placeholder="Search patient..."
 					value={search}
@@ -110,16 +113,30 @@ export default function AppointmentsPage(): React.ReactElement {
 						<thead className="bg-gray-50 border-b border-gray-100">
 							<tr>
 								<th
-									className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase cursor-pointer select-none hover:text-brand-orange"
-									onClick={() => handleSort("patient")}
+									className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase"
+									aria-sort={sortCol === "patient" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
 								>
-									Patient{sortIndicator("patient")}
+									<button
+										type="button"
+										className="inline-flex items-center gap-1 select-none hover:text-brand-orange focus:outline-none focus-visible:text-brand-orange"
+										onClick={() => handleSort("patient")}
+									>
+										<span>Patient</span>
+										<span aria-hidden="true">{sortIndicator("patient")}</span>
+									</button>
 								</th>
 								<th
-									className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase cursor-pointer select-none hover:text-brand-orange"
-									onClick={() => handleSort("date")}
+									className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase"
+									aria-sort={sortCol === "date" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
 								>
-									Date & Time{sortIndicator("date")}
+									<button
+										type="button"
+										className="inline-flex items-center gap-1 select-none hover:text-brand-orange focus:outline-none focus-visible:text-brand-orange"
+										onClick={() => handleSort("date")}
+									>
+										<span>Date & Time</span>
+										<span aria-hidden="true">{sortIndicator("date")}</span>
+									</button>
 								</th>
 								<th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase">Status</th>
 								<th className="px-4 py-3"></th>

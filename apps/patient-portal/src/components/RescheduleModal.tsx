@@ -137,7 +137,7 @@ export default function RescheduleModal({
 					<h2 className="text-xl font-bold text-brand-navy">Reschedule appointment</h2>
 					<button
 						onClick={onClose}
-						className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
+						className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 rounded-sm"
 						aria-label="Close"
 					>
 						×
@@ -149,7 +149,7 @@ export default function RescheduleModal({
 					<button
 						onClick={goToPrevDay}
 						disabled={!canGoPrev()}
-						className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+						className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						aria-label="Previous day"
 					>
 						‹
@@ -162,7 +162,7 @@ export default function RescheduleModal({
 					</div>
 					<button
 						onClick={goToNextDay}
-						className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+						className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						aria-label="Next day"
 					>
 						›

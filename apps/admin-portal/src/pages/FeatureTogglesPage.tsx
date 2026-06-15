@@ -185,6 +185,7 @@ export default function FeatureTogglesPage(): React.ReactElement {
 							<div className="flex items-center gap-3">
 								{CONFIG_SCHEMAS[toggle.key] && (
 									<button
+										type="button"
 										onClick={() => openConfig(toggle)}
 										className="text-xs text-gray-400 hover:text-brand-navy transition-colors"
 									>
@@ -192,8 +193,12 @@ export default function FeatureTogglesPage(): React.ReactElement {
 									</button>
 								)}
 								<button
+									type="button"
 									onClick={() => void handleToggle(toggle)}
 									disabled={saving === toggle.key}
+									role="switch"
+									aria-checked={toggle.enabled}
+									aria-label={`${getToggleLabel(toggle.key)} toggle`}
 									className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 ${
 										toggle.enabled ? "bg-brand-orange" : "bg-gray-300"
 									}`}
@@ -219,12 +224,21 @@ export default function FeatureTogglesPage(): React.ReactElement {
 
 			{editToggle && CONFIG_SCHEMAS[editToggle.key] && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-					<div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+					<div
+						className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6"
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="feature-toggle-config-title"
+					>
 						<div className="flex items-center justify-between mb-5">
-							<h2 className="text-lg font-bold text-brand-navy">Configure: {getToggleLabel(editToggle.key)}</h2>
+							<h2 id="feature-toggle-config-title" className="text-lg font-bold text-brand-navy">
+								Configure: {getToggleLabel(editToggle.key)}
+							</h2>
 							<button
+								type="button"
 								onClick={() => setEditToggle(null)}
 								className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+								aria-label="Close"
 							>
 								&times;
 							</button>
@@ -232,7 +246,10 @@ export default function FeatureTogglesPage(): React.ReactElement {
 						<div className="space-y-4">
 							{CONFIG_SCHEMAS[editToggle.key].map(field => (
 								<div key={field.key}>
-									<label className="block text-sm font-medium text-gray-700 mb-1">
+									<label
+										className="block text-sm font-medium text-gray-700 mb-1"
+										htmlFor={`feature-toggle-config-${field.key}`}
+									>
 										{field.label}
 										{field.min !== undefined && field.max !== undefined && (
 											<span className="text-gray-400 font-normal ml-1">
@@ -242,22 +259,34 @@ export default function FeatureTogglesPage(): React.ReactElement {
 									</label>
 									{field.description && <p className="text-xs text-gray-400 mb-1">{field.description}</p>}
 									<input
+										id={`feature-toggle-config-${field.key}`}
 										type="number"
 										min={field.min}
 										max={field.max}
 										value={configValues[field.key] ?? ""}
 										onChange={e => handleFieldChange(field, e.target.value)}
+										aria-invalid={configErrors[field.key] ? true : undefined}
+										aria-describedby={configErrors[field.key] ? `feature-toggle-config-${field.key}-error` : undefined}
 										className={`form-input ${configErrors[field.key] ? "border-red-400 focus:ring-red-400" : ""}`}
 									/>
-									{configErrors[field.key] && <p className="text-red-500 text-xs mt-1">{configErrors[field.key]}</p>}
+									{configErrors[field.key] && (
+										<p id={`feature-toggle-config-${field.key}-error`} className="text-red-500 text-xs mt-1">
+											{configErrors[field.key]}
+										</p>
+									)}
 								</div>
 							))}
 						</div>
 						<div className="flex gap-3 justify-end pt-5">
-							<button onClick={() => setEditToggle(null)} className="btn-ghost">
+							<button type="button" onClick={() => setEditToggle(null)} className="btn-ghost">
 								Cancel
 							</button>
-							<button onClick={() => void saveConfig()} className="btn-primary" disabled={saving === editToggle.key}>
+							<button
+								type="button"
+								onClick={() => void saveConfig()}
+								className="btn-primary"
+								disabled={saving === editToggle.key}
+							>
 								{saving === editToggle.key ? "Saving..." : "Save config"}
 							</button>
 						</div>

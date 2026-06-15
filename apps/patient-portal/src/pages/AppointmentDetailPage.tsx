@@ -231,16 +231,20 @@ function ReviewSection({
 				className="space-y-3"
 			>
 				<div>
-					<label className="block text-sm font-medium text-gray-600 mb-1">Rating</label>
-					<div className="flex gap-1">
+					<label className="block text-sm font-medium text-gray-600 mb-1" id="review-rating-label">
+						Rating
+					</label>
+					<div className="flex gap-1" role="group" aria-labelledby="review-rating-label">
 						{[1, 2, 3, 4, 5].map(star => (
 							<button
 								key={star}
 								type="button"
 								onClick={() => onChangeForm(f => ({ ...f, rating: star }))}
-								className={`text-2xl ${star <= reviewForm.rating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-400 transition-colors`}
+								className={`text-2xl ${star <= reviewForm.rating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 rounded-sm`}
+								aria-label={`Rate ${star} ${star === 1 ? "star" : "stars"}`}
+								aria-pressed={reviewForm.rating === star}
 							>
-								★
+								<span aria-hidden="true">★</span>
 							</button>
 						))}
 					</div>

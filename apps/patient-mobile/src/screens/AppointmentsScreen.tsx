@@ -66,6 +66,7 @@ export default function AppointmentsScreen(): React.JSX.Element {
 		<View style={styles.container}>
 			<TextInput
 				style={styles.search}
+				accessibilityLabel="Search appointments by doctor name"
 				placeholder="Search by doctor name..."
 				placeholderTextColor="#9CA3AF"
 				value={search}
@@ -113,7 +114,12 @@ const AppointmentCard = React.memo(function AppointmentCard({
 }): React.JSX.Element {
 	const doctor = appt.doctor?.user;
 	return (
-		<TouchableOpacity style={styles.card} onPress={onPress}>
+		<TouchableOpacity
+			style={styles.card}
+			onPress={onPress}
+			accessibilityRole="button"
+			accessibilityLabel={`Appointment with Dr. ${doctor?.firstName ?? "Unknown"} ${doctor?.lastName ?? "doctor"} on ${formatDate(appt.scheduledAt)} at ${formatTime(appt.scheduledAt)}`}
+		>
 			<View style={styles.cardBody}>
 				<Text style={styles.cardDoctor}>
 					Dr. {doctor?.firstName} {doctor?.lastName}

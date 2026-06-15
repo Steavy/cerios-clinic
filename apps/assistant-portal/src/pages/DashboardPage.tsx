@@ -71,7 +71,11 @@ export default function DashboardPage(): React.ReactElement {
 
 			<div className="card">
 				<h2 className="text-lg font-semibold text-brand-navy mb-4">Today&apos;s schedule</h2>
+				<label className="sr-only" htmlFor="dashboard-search">
+					Search patient or doctor
+				</label>
 				<input
+					id="dashboard-search"
 					type="text"
 					placeholder="Search patient or doctor"
 					className="form-input max-w-xs mb-4"

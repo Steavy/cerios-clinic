@@ -26,7 +26,13 @@ interface FormValues {
 export default function EditAppointmentPage(): React.ReactElement | null {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
-	const { control, register, handleSubmit, reset } = useForm<FormValues>({
+	const {
+		control,
+		register,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = useForm<FormValues>({
 		defaultValues: { status: "", scheduledAt: null, notes: "" },
 	});
 	const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -112,13 +118,21 @@ export default function EditAppointmentPage(): React.ReactElement | null {
 					className="space-y-4"
 				>
 					<div>
-						<label className="form-label">Status</label>
+						<label className="form-label" htmlFor="appointment-status">
+							Status
+						</label>
 						<Controller
 							name="status"
 							control={control}
 							rules={{ required: true }}
 							render={({ field }) => (
-								<select {...field} disabled={isTerminal} className="form-input w-full">
+								<select
+									{...field}
+									id="appointment-status"
+									disabled={isTerminal}
+									aria-describedby={isTerminal ? "appointment-status-help" : undefined}
+									className="form-input w-full"
+								>
 									<option value={appointment.status}>{appointment.status} (current)</option>
 									{allowedNextStatuses.map(s => (
 										<option key={s} value={s}>
@@ -129,22 +143,28 @@ export default function EditAppointmentPage(): React.ReactElement | null {
 							)}
 						/>
 						{isTerminal && (
-							<p className="text-gray-400 text-xs mt-1">
+							<p id="appointment-status-help" className="text-gray-400 text-xs mt-1">
 								This appointment is in a terminal state and cannot be changed.
 							</p>
 						)}
 					</div>
 
 					<div>
-						<label className="form-label">Date & Time</label>
+						<label className="form-label" htmlFor="appointment-scheduled-at">
+							Date & Time
+						</label>
 						<Controller
 							name="scheduledAt"
 							control={control}
 							rules={{ required: "Pick a date and time" }}
 							render={({ field }) => (
 								<DatePicker
+									id="appointment-scheduled-at"
+									name={field.name}
 									selected={field.value}
 									onChange={field.onChange}
+									aria-invalid={errors.scheduledAt ? "true" : undefined}
+									aria-describedby={errors.scheduledAt ? "appointment-scheduled-at-error" : undefined}
 									showTimeSelect
 									dateFormat="dd/MM/yyyy HH:mm"
 									timeFormat="HH:mm"
@@ -153,11 +173,18 @@ export default function EditAppointmentPage(): React.ReactElement | null {
 								/>
 							)}
 						/>
+						{errors.scheduledAt && (
+							<p id="appointment-scheduled-at-error" className="text-red-500 text-xs mt-1">
+								{errors.scheduledAt.message}
+							</p>
+						)}
 					</div>
 
 					<div>
-						<label className="form-label">Notes</label>
-						<textarea {...register("notes")} rows={3} className="form-input w-full" />
+						<label className="form-label" htmlFor="appointment-notes">
+							Notes
+						</label>
+						<textarea id="appointment-notes" {...register("notes")} rows={3} className="form-input w-full" />
 					</div>
 
 					{!isTerminal && (
