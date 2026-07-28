@@ -1,6 +1,7 @@
 {
 	"realm": "clinic",
 	"enabled": true,
+	"sslRequired": "none",
 	"displayName": "Clinic Portal",
 	"registrationAllowed": false,
 	"registrationEmailAsUsername": true,
@@ -35,8 +36,8 @@
 			"publicClient": true,
 			"standardFlowEnabled": true,
 			"directAccessGrantsEnabled": false,
-			"redirectUris": ["http://localhost:5173/*"],
-			"webOrigins": ["http://localhost:5173"],
+			"redirectUris": ["http://localhost:5173/*", "http://demo-sparta.mooo.com:15173/*"],
+			"webOrigins": ["http://localhost:5173", "http://demo-sparta.mooo.com:15173"],
 			"attributes": {
 				"pkce.code.challenge.method": "S256",
 				"login_theme": "patient-theme"
@@ -125,8 +126,8 @@
 			"publicClient": true,
 			"standardFlowEnabled": true,
 			"directAccessGrantsEnabled": false,
-			"redirectUris": ["http://localhost:5175/*"],
-			"webOrigins": ["http://localhost:5175"],
+			"redirectUris": ["http://localhost:5175/*", "http://demo-sparta.mooo.com:15175/*"],
+			"webOrigins": ["http://localhost:5175", "http://demo-sparta.mooo.com:15175"],
 			"attributes": {
 				"pkce.code.challenge.method": "S256",
 				"login_theme": "assistant-theme"

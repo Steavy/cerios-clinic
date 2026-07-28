@@ -9,7 +9,6 @@ import keycloak from "./keycloak";
 
 void keycloak
 	.init({
-		onLoad: "check-sso",
 		pkceMethod: "S256",
 		checkLoginIframe: false,
 	})
@@ -25,6 +24,7 @@ void keycloak
 			</React.StrictMode>
 		);
 	})
-	.catch(() => {
+	.catch((err: unknown) => {
+		console.error("[keycloak] init failed", err);
 		createRoot(document.getElementById("root")!).render(<AuthServiceUnavailableScreen />);
 	});
