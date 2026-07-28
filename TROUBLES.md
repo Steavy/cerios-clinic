@@ -270,6 +270,11 @@ This is set in `clinic-realm.json`:
 
 ---
 
+## Related repository
+
+Playwright smoke tests for this deployment are at:
+[https://github.com/Steavy/playwright-sparta/tree/feature/GitHub-actions](https://github.com/Steavy/playwright-sparta/tree/feature/GitHub-actions)
+
 ## Summary of all changed files
 
 | File | Change |
