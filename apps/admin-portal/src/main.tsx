@@ -1,6 +1,6 @@
 import "./index.css";
 
-import { RoleMismatchScreen } from "@clinic/portal-common";
+import { AuthServiceUnavailableScreen, RoleMismatchScreen } from "@clinic/portal-common";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
@@ -9,7 +9,6 @@ import keycloak from "./keycloak";
 
 void keycloak
 	.init({
-		onLoad: "check-sso",
 		pkceMethod: "S256",
 		checkLoginIframe: false,
 	})
@@ -24,4 +23,7 @@ void keycloak
 				<App />
 			</React.StrictMode>
 		);
+	})
+	.catch(() => {
+		createRoot(document.getElementById("root")!).render(<AuthServiceUnavailableScreen />);
 	});
