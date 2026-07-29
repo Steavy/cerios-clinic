@@ -9,6 +9,7 @@ import keycloak from "./keycloak";
 
 void keycloak
 	.init({
+		onLoad: "check-sso",
 		pkceMethod: "S256",
 		checkLoginIframe: false,
 	})
