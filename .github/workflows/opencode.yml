@@ -24,11 +24,21 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run OpenCode
+   #   - name: Run OpenCode
+  #      uses: anomalyco/opencode/github@latest
+   #     env:
+    #      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+   #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+   #     with:
+    #      model: anthropic/claude-sonnet-4-20250514
+     #     use_github_token: true
+
+
+      - name: Run opencode
         uses: anomalyco/opencode/github@latest
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: anthropic/claude-sonnet-4-20250514
+          model: opencode/big-pickle
           use_github_token: true
