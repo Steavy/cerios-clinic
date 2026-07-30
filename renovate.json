@@ -1,6 +1,6 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["config:recommended", ":separateMajorMinor", "group:allNonMajor"],
+	"extends": ["config:recommended", ":separateMajorReleases", "group:allNonMajor"],
 	"onboarding": false,
 	"requireConfig": "optional",
 	"rangeStrategy": "bump",
