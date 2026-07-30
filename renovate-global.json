@@ -1,8 +1,7 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["config:recommended", ":separateMajorReleases", "group:allNonMajor"],
+	"extends": ["config:recommended", ":separateMajorReleases", "group:allNonMajor", ":disableDependencyDashboard"],
 	"onboarding": false,
-	"dependencyDashboard": false,
 	"requireConfig": "optional",
 	"rangeStrategy": "bump",
 	"schedule": ["before 6am on the first day of the month"],
