@@ -31,8 +31,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
-      - name: Type-check
-        run: pnpm typecheck:check
+      - name: Format check
+        run: pnpm format:check
 
-      - name: Run unit tests
-        run: pnpm test
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm typecheck
