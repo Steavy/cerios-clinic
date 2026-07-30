@@ -97,4 +97,19 @@ describe("createApi", () => {
 
 		expect(isTokenExpired).toHaveBeenCalledWith(60);
 	});
+
+	it("calls login when token refresh fails", async () => {
+		const login = vi.fn();
+		const keycloak = {
+			token: "tok",
+			isTokenExpired: () => true,
+			updateToken: () => Promise.reject(new Error("auth error")),
+			login,
+		} as never;
+
+		createApi({ baseUrl: "http://api.dev", keycloak });
+		await lastHandler()({ headers: {} });
+
+		expect(login).toHaveBeenCalledOnce();
+	});
 });

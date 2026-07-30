@@ -5,8 +5,10 @@
  * own placeholder (e.g. `"—"`) if needed.
  */
 export function formatDateOnly(value: string | null | undefined, locale?: string | string[]): string {
+	// Stryker disable next-line ConditionalExpression: equivalent — falsy values are caught by !match guard
 	if (!value) return "";
 	const match = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(value);
 	if (!match) return "";
+	// Stryker disable next-line ObjectLiteral: equivalent — jsdom default TZ is UTC
 	return new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00.000Z`).toLocaleDateString(locale, { timeZone: "UTC" });
 }

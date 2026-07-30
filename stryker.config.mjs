@@ -1,8 +1,7 @@
 export default {
 	packageManager: "pnpm",
-	plugins: ["@stryker-mutator/vitest-runner", "@stryker-mutator/typescript-checker"],
+	plugins: ["@stryker-mutator/vitest-runner"],
 	testRunner: "vitest",
-	checkers: ["typescript"],
 	mutate: [
 		"packages/portal-common/src/**/*.ts",
 		"packages/shared-types/src/**/*.ts",

@@ -114,4 +114,15 @@ describe("createAppConfig", () => {
 		expect(config.apiBaseUrl).toBe("http://api.dev/path");
 		expect(config.keycloakUrl).toBe("http://kc.dev");
 	});
+
+	it("reads VITE_KEYCLOAK_REALM from env when keycloakRealmEnvVar is not overridden", () => {
+		const config = createAppConfig({
+			...baseOptions,
+			env: {
+				...baseOptions.env,
+				VITE_KEYCLOAK_REALM: "my-realm-from-env",
+			},
+		});
+		expect(config.keycloakRealm).toBe("my-realm-from-env");
+	});
 });

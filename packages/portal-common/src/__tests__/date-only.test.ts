@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { formatDateOnly } from "../date-only";
 
@@ -29,6 +29,14 @@ describe("formatDateOnly", () => {
 		expect(formatDateOnly("not-a-date")).toBe("");
 	});
 
+	it("returns empty string when text precedes the date (anchored regex)", () => {
+		expect(formatDateOnly("abc2025-12-25")).toBe("");
+	});
+
+	it("returns empty string when text follows the date", () => {
+		expect(formatDateOnly("2025-12-25abc")).toBe("");
+	});
+
 	it("returns Invalid Date string for partially valid input (month 13)", () => {
 		expect(formatDateOnly("2025-13-01")).toBe("Invalid Date");
 	});
@@ -46,5 +54,16 @@ describe("formatDateOnly", () => {
 	it("uses UTC anchoring so timezone never shifts the day", () => {
 		const result = formatDateOnly("2025-01-01");
 		expect(result).toBe("1/1/2025");
+	});
+
+	it("applies timeZone UTC regardless of process TZ", () => {
+		const originalTZ = process.env.TZ;
+		process.env.TZ = "America/New_York";
+		try {
+			const result = formatDateOnly("2025-01-01");
+			expect(result).toBe("1/1/2025");
+		} finally {
+			process.env.TZ = originalTZ;
+		}
 	});
 });
