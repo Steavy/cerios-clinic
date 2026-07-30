@@ -32,7 +32,7 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Type-check
-        run: pnpm typecheck
+        run: pnpm typecheck:check
 
       - name: Run unit tests
         run: pnpm test
