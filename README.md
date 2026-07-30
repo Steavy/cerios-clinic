@@ -290,6 +290,37 @@ clinic-monorepo/
 
 ---
 
+## Testing
+
+### Unit Tests (Vitest)
+
+| Script                 | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `pnpm test`            | Run all unit tests once                     |
+| `pnpm test:watch`      | Run unit tests in watch mode                |
+
+### Mutation Testing (Stryker)
+
+Mutation testing checks how well your tests detect code changes by automatically introducing small faults ("mutants") and seeing if any test fails.
+
+| Script                         | Description                                                   |
+| ------------------------------ | ------------------------------------------------------------- |
+| `pnpm test:stryker`            | Run mutation testing and save the HTML report                 |
+| `pnpm test:stryker:open`       | Run mutation testing and open the report directly in your browser |
+
+The HTML report is saved to `reports/mutation/mutation.html`. You can also open it manually:
+
+```bash
+# macOS
+open reports/mutation/mutation.html
+# Linux
+xdg-open reports/mutation/mutation.html
+# Windows
+start reports/mutation/mutation.html
+```
+
+---
+
 ## Patient Mobile App (Android)
 
 For building and running the React Native Android app, see **[MOBILE.md](MOBILE.md)**.

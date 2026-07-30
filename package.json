@@ -35,6 +35,7 @@
 		"predev": "node -e \"const k=require('kill-port');Promise.allSettled([k(3001),k(3002),k(3003),k(5173),k(5174),k(5175)]).then(()=>process.exit(0))\"",
 		"test": "vitest run",
 		"test:stryker": "stryker run",
+		"test:stryker:open": "stryker run && open-cli reports/mutation/mutation.html",
 		"test:watch": "vitest",
 		"typecheck": "pnpm --filter \"./packages/*\" build && pnpm --filter \"./apps/*\" typecheck",
 		"update-all-packages": "pnpm npm-check-updates -u -w --packageManager pnpm --reject class-validator,tailwindcss && pnpm install"
@@ -54,6 +55,7 @@
 		"jsdom": "^26.0.0",
 		"kill-port": "^2.0.1",
 		"npm-check-updates": "^20.0.0",
+		"open-cli": "^9.0.0",
 		"oxfmt": "^0.44.0",
 		"oxlint": "^1.59.0",
 		"oxlint-tsgolint": "^0.20.0",
