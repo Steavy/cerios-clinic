@@ -1,0 +1,32 @@
+{
+	"name": "@clinic/patient-portal",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "dotenv -e ../../.env -- tsc && dotenv -e ../../.env -- vite build",
+		"dev": "dotenv -e ../../.env -- vite",
+		"preview": "dotenv -e ../../.env -- vite preview",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@clinic/portal-common": "workspace:*",
+		"axios": "catalog:",
+		"keycloak-js": "catalog:",
+		"lucide-react": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"react-router-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@clinic/shared-types": "workspace:*",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"autoprefixer": "catalog:",
+		"postcss": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:"
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"name": "@clinic/api-admin",
+	"version": "0.0.0",
+	"scripts": {
+		"build": "tsc",
+		"dev": "dotenv -e ../../.env -- ts-node-dev --respawn --transpile-only src/main.ts",
+		"start": "node dist/main.js",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@clinic/api-common": "workspace:*",
+		"@clinic/database": "workspace:*",
+		"@clinic/shared-types": "workspace:*",
+		"@nestjs/common": "catalog:",
+		"@nestjs/core": "catalog:",
+		"@nestjs/passport": "catalog:",
+		"@nestjs/platform-express": "catalog:",
+		"@nestjs/swagger": "catalog:",
+		"@nestjs/throttler": "catalog:",
+		"axios": "catalog:",
+		"class-transformer": "catalog:",
+		"class-validator": "catalog:",
+		"jwks-rsa": "catalog:",
+		"passport": "catalog:",
+		"passport-jwt": "catalog:",
+		"reflect-metadata": "catalog:",
+		"rxjs": "catalog:"
+	},
+	"devDependencies": {
+		"@types/express": "catalog:",
+		"@types/node": "catalog:",
+		"@types/passport-jwt": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	}
+}

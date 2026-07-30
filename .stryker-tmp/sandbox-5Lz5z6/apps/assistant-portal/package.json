@@ -1,0 +1,42 @@
+{
+	"name": "@clinic/assistant-portal",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "dotenv -e ../../.env -- tsc && dotenv -e ../../.env -- vite build",
+		"dev": "dotenv -e ../../.env -- vite",
+		"preview": "dotenv -e ../../.env -- vite preview",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@clinic/portal-common": "workspace:*",
+		"@tanstack/react-table": "^8.21.3",
+		"axios": "catalog:",
+		"class-variance-authority": "catalog:",
+		"clsx": "catalog:",
+		"keycloak-js": "catalog:",
+		"lucide-react": "catalog:",
+		"react": "catalog:",
+		"react-datepicker": "^9.1.0",
+		"react-dom": "catalog:",
+		"react-hook-form": "^7.72.1",
+		"react-hot-toast": "^2.6.0",
+		"react-router-dom": "catalog:",
+		"react-select": "^5.10.2",
+		"tailwind-merge": "catalog:"
+	},
+	"devDependencies": {
+		"@clinic/shared-types": "workspace:*",
+		"@types/react": "catalog:",
+		"@types/react-datepicker": "^7.0.0",
+		"@types/react-dom": "catalog:",
+		"@types/react-select": "^5.0.1",
+		"@vitejs/plugin-react": "catalog:",
+		"autoprefixer": "catalog:",
+		"postcss": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:"
+	}
+}
