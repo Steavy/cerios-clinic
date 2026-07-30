@@ -1,4 +1,4 @@
-name: OpenCode
+name: opencode
 
 on:
   issue_comment:
@@ -6,21 +6,30 @@ on:
   pull_request_review_comment:
     types: [created]
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  id-token: write
-
 jobs:
   opencode:
     if: |
       contains(github.event.comment.body, '/oc') ||
       contains(github.event.comment.body, '/opencode')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git auth
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
