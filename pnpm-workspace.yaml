@@ -64,8 +64,8 @@ catalog:
   dotenv: ^17.4.1
 
 allowBuilds:
-  '@nestjs/core': true
-  '@prisma/engines': true
-  '@scarf/scarf': true
+  "@nestjs/core": true
+  "@prisma/engines": true
+  "@scarf/scarf": true
   esbuild: true
   prisma: true
