@@ -16,7 +16,7 @@ jobs:
       - name: Self-hosted Renovate
         uses: renovatebot/github-action@v46.2.0
         with:
-          configurationFile: renovate.json
+          configurationFile: renovate-global.json
           token: ${{ secrets.RENOVATE_TOKEN }}
         env:
           LOG_LEVEL: "info"
