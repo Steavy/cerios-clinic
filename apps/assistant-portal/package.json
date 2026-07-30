@@ -29,9 +29,7 @@
 	"devDependencies": {
 		"@clinic/shared-types": "workspace:*",
 		"@types/react": "catalog:",
-		"@types/react-datepicker": "^7.0.0",
 		"@types/react-dom": "catalog:",
-		"@types/react-select": "^5.0.1",
 		"@vitejs/plugin-react": "catalog:",
 		"autoprefixer": "catalog:",
 		"postcss": "catalog:",
