@@ -275,7 +275,19 @@ clinic-monorepo/
 ├── packages/
 │   ├── database/         # Prisma schema, migrations, seed script
 │   ├── api-common/       # Shared NestJS utilities (auth, mail, etc.)
+│   ├── portal-common/    # Shared React components, utils, API layer
+│   │   └── src/
+│   │       └── __tests__/ # Unit tests (Vitest)
+│   │           ├── api.test.ts
+│   │           ├── config.test.ts
+│   │           ├── date-only.test.ts
+│   │           ├── keycloak.test.ts
+│   │           ├── portal-footer.test.tsx
+│   │           └── role-mismatch-screen.test.tsx
 │   └── shared-types/     # TypeScript types shared across apps
+│       └── src/
+│           └── __tests__/
+│               └── transitions.test.ts
 ├── infra/
 │   ├── docker-compose.yml
 │   ├── docker/           # Dockerfiles for containerised deployment
@@ -283,9 +295,46 @@ clinic-monorepo/
 │   │   └── clinic-realm.json
 │   └── postgres/
 │       └── init.sql
+├── .github/
+│   └── workflows/
+│       └── unit-ci.yml   # CI workflow for unit tests
 ├── .env                  # Environment variables
 ├── .env.example
+├── vitest.config.ts      # Vitest configuration
+├── vitest.setup.ts       # Vitest setup (jest-dom matchers)
+├── stryker.config.mjs    # Stryker mutation testing config
 └── package.json          # Root scripts
+```
+
+---
+
+## Testing
+
+### Unit Tests (Vitest)
+
+| Script            | Description                  |
+| ----------------- | ---------------------------- |
+| `pnpm test`       | Run all unit tests once      |
+| `pnpm test:watch` | Run unit tests in watch mode |
+
+### Mutation Testing (Stryker)
+
+Mutation testing checks how well your tests detect code changes by automatically introducing small faults ("mutants") and seeing if any test fails.
+
+| Script                   | Description                                                       |
+| ------------------------ | ----------------------------------------------------------------- |
+| `pnpm test:stryker`      | Run mutation testing and save the HTML report                     |
+| `pnpm test:stryker:open` | Run mutation testing and open the report directly in your browser |
+
+The HTML report is saved to `reports/mutation/mutation.html`. You can also open it manually:
+
+```bash
+# macOS
+open reports/mutation/mutation.html
+# Linux
+xdg-open reports/mutation/mutation.html
+# Windows
+start reports/mutation/mutation.html
 ```
 
 ---

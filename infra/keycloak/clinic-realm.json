@@ -36,7 +36,11 @@
 			"publicClient": true,
 			"standardFlowEnabled": true,
 			"directAccessGrantsEnabled": false,
-			"redirectUris": ["http://localhost:5173/*", "http://techlab5.mooo.com:5173/*", "http://demo-sparta.mooo.com:5173/*"],
+			"redirectUris": [
+				"http://localhost:5173/*",
+				"http://techlab5.mooo.com:5173/*",
+				"http://demo-sparta.mooo.com:5173/*"
+			],
 			"webOrigins": ["http://localhost:5173", "http://techlab5.mooo.com:5173", "http://demo-sparta.mooo.com:5173"],
 			"attributes": {
 				"pkce.code.challenge.method": "S256",
@@ -66,7 +70,11 @@
 			"publicClient": true,
 			"standardFlowEnabled": true,
 			"directAccessGrantsEnabled": false,
-			"redirectUris": ["http://localhost:5176/*", "http://techlab5.mooo.com:5176/*", "http://demo-sparta.mooo.com:5176/*"],
+			"redirectUris": [
+				"http://localhost:5176/*",
+				"http://techlab5.mooo.com:5176/*",
+				"http://demo-sparta.mooo.com:5176/*"
+			],
 			"webOrigins": ["http://localhost:5176", "http://techlab5.mooo.com:5176", "http://demo-sparta.mooo.com:5176"],
 			"attributes": {
 				"pkce.code.challenge.method": "S256",
@@ -96,7 +104,11 @@
 			"publicClient": true,
 			"standardFlowEnabled": true,
 			"directAccessGrantsEnabled": false,
-			"redirectUris": ["http://localhost:5174/*", "http://techlab5.mooo.com:5174/*", "http://demo-sparta.mooo.com:5174/*"],
+			"redirectUris": [
+				"http://localhost:5174/*",
+				"http://techlab5.mooo.com:5174/*",
+				"http://demo-sparta.mooo.com:5174/*"
+			],
 			"webOrigins": ["http://localhost:5174", "http://techlab5.mooo.com:5174", "http://demo-sparta.mooo.com:5174"],
 			"attributes": {
 				"pkce.code.challenge.method": "S256",
@@ -126,7 +138,11 @@
 			"publicClient": true,
 			"standardFlowEnabled": true,
 			"directAccessGrantsEnabled": false,
-			"redirectUris": ["http://localhost:5175/*", "http://techlab5.mooo.com:5175/*", "http://demo-sparta.mooo.com:5175/*"],
+			"redirectUris": [
+				"http://localhost:5175/*",
+				"http://techlab5.mooo.com:5175/*",
+				"http://demo-sparta.mooo.com:5175/*"
+			],
 			"webOrigins": ["http://localhost:5175", "http://techlab5.mooo.com:5175", "http://demo-sparta.mooo.com:5175"],
 			"attributes": {
 				"pkce.code.challenge.method": "S256",
