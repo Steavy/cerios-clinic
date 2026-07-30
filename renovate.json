@@ -1,6 +1,8 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"extends": ["config:recommended", ":separateMajorMinor", "group:allNonMajor"],
+	"onboarding": false,
+	"requireConfig": "optional",
 	"rangeStrategy": "bump",
 	"schedule": ["before 6am on the first day of the month"],
 	"timezone": "Europe/Amsterdam",
