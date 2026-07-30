@@ -2,6 +2,9 @@ packages:
   - "apps/*"
   - "packages/*"
 
+shamefullyHoist: true
+verifyDepsBeforeRun: false
+
 # Single source of truth for versions shared across apps/packages.
 # Mobile (patient-mobile) is intentionally excluded for deps that diverge
 # due to React Native toolchain constraints (react, typescript, @types/react).
@@ -59,3 +62,7 @@ catalog:
 
   # --- Misc ---
   dotenv: ^17.4.1
+
+allowBuilds:
+  '@nestjs/core': true
+  prisma: true

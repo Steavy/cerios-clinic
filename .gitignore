@@ -17,6 +17,12 @@ node_modules/.prisma/
 .DS_Store
 Thumbs.db
 
+# Stryker temp files
+.stryker-tmp/
+
+# Stryker reports
+reports/
+
 # Logs
 *.log
 npm-debug.log*
