@@ -1,5 +1,5 @@
 import type { Appointment } from "@clinic/shared-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import api from "../api";
@@ -30,14 +30,23 @@ export default function AppointmentsPage(): React.ReactElement {
 	const [sortCol, setSortCol] = useState<SortColumn>("date");
 	const [sortDir, setSortDir] = useState<SortDirection>("asc");
 	const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
+	const loadAbortController = useRef<AbortController | null>(null);
 
 	useEffect(() => {
 		const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
 		return (): void => clearTimeout(t);
 	}, [search]);
 
+	useEffect(() => {
+		return (): void => loadAbortController.current?.abort();
+	}, []);
+
 	const load = useCallback(
 		(pageIndex: number, searchTerm: string, nextStatusFilter: string, col: SortColumn, dir: SortDirection) => {
+			loadAbortController.current?.abort();
+			const controller = new AbortController();
+			loadAbortController.current = controller;
+
 			setLoading(true);
 			const params: Record<string, string | number> = {
 				limit: PAGE_SIZE,
@@ -48,13 +57,18 @@ export default function AppointmentsPage(): React.ReactElement {
 			if (searchTerm) params.search = searchTerm;
 			if (nextStatusFilter !== "ALL") params.status = nextStatusFilter;
 			void api
-				.get<{ data: Appointment[]; total: number }>("/appointments", { params })
+				.get<{ data: Appointment[]; total: number }>("/appointments", { params, signal: controller.signal })
 				.then(r => {
+					if (controller.signal.aborted) return;
 					setAppointments(r.data.data);
 					setTotal(r.data.total);
 				})
 				.catch(() => {})
-				.finally(() => setLoading(false));
+				.finally(() => {
+					if (!controller.signal.aborted) {
+						setLoading(false);
+					}
+				});
 		},
 		[]
 	);
