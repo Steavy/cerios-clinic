@@ -1,0 +1,23 @@
+name: Trigger Smoke Test
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  dispatch:
+    name: Dispatch smoke test in playwright-sparta
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger "Setup local & Smoke Test" in playwright-sparta
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'Steavy',
+              repo: 'playwright-sparta',
+              workflow_id: 'smoke-test-ci.yml',
+              ref: 'main',
+            })
