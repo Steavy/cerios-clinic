@@ -22,8 +22,13 @@ else
 fi
 
 git -C "$REPO_DIR" fetch --all --prune
+START_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
 git -C "$REPO_DIR" reset --hard "origin/$TARGET"
 echo "Deployed commit: $(git -C "$REPO_DIR" rev-parse --short HEAD)"
+if [ "$(git -C "$REPO_DIR" rev-parse HEAD)" != "$START_SHA" ]; then
+  echo "Deploy script changed on disk, re-executing new version"
+  exec bash "$0" "$@"
+fi
 
 if [ -f "$OLD_COMPOSE" ]; then
   echo "Tearing down old stack ($OLD_COMPOSE)"
