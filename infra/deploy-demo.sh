@@ -75,4 +75,30 @@ if [ "${#failed[@]}" -gt 0 ]; then
   echo "Unhealthy services: ${failed[*]}"
   exit 1
 fi
+
+echo "Fixing Keycloak realms (sslRequired=none so HTTP works on the demo host)"
+for i in $(seq 1 30); do
+  TOKEN=$(curl -sf -X POST "http://localhost:8180/realms/master/protocol/openid-connect/token" \
+    -d "client_id=admin-cli" \
+    -d "username=admin" \
+    -d "password=admin_secret" \
+    -d "grant_type=password" 2>/dev/null | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+  [ -n "$TOKEN" ] && break
+  echo "Attempt $i/30 - waiting 5s..."
+  sleep 5
+done
+if [ -z "$TOKEN" ]; then
+  echo "FAIL Could not obtain Keycloak admin token"
+  exit 1
+fi
+echo "Keycloak admin token acquired"
+
+for realm in master clinic; do
+  code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    "http://localhost:8180/admin/realms/$realm" \
+    -d '{"sslRequired": "none"}')
+  echo "Realm $realm sslRequired -> none (HTTP:$code)"
+done
+
 echo "Demo stack is healthy"
