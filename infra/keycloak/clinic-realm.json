@@ -46,7 +46,7 @@
 				"pkce.code.challenge.method": "S256",
 				"login_theme": "patient-theme"
 			},
-			"defaultClientScopes": ["openid", "profile", "email", "roles"],
+			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
 			"protocolMappers": [
 				{
 					"name": "patient-portal-audience",
@@ -80,7 +80,7 @@
 				"pkce.code.challenge.method": "S256",
 				"login_theme": "admin-theme"
 			},
-			"defaultClientScopes": ["openid", "profile", "email", "roles"],
+			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
 			"protocolMappers": [
 				{
 					"name": "admin-portal-audience",
@@ -114,7 +114,7 @@
 				"pkce.code.challenge.method": "S256",
 				"login_theme": "doctor-theme"
 			},
-			"defaultClientScopes": ["openid", "profile", "email", "roles"],
+			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
 			"protocolMappers": [
 				{
 					"name": "doctor-portal-audience",
@@ -148,7 +148,7 @@
 				"pkce.code.challenge.method": "S256",
 				"login_theme": "assistant-theme"
 			},
-			"defaultClientScopes": ["openid", "profile", "email", "roles"],
+			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
 			"protocolMappers": [
 				{
 					"name": "assistant-portal-audience",
@@ -177,7 +177,7 @@
 			"attributes": {
 				"pkce.code.challenge.method": "S256"
 			},
-			"defaultClientScopes": ["openid", "profile", "email", "roles"],
+			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
 			"protocolMappers": [
 				{
 					"name": "patient-mobile-audience",
@@ -216,7 +216,7 @@
 			"standardFlowEnabled": false,
 			"directAccessGrantsEnabled": true,
 			"secret": "api_service_secret_change_in_prod",
-			"defaultClientScopes": ["openid", "profile", "email", "roles"]
+			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"]
 		}
 	],
 	"users": [
