@@ -1,6 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+	--color-brand-navy: #1e1b4b;
+	--color-brand-orange: #7c3aed;
+	--color-brand-orange-hover: #6d28d9;
+	--color-brand-bg: #f5f3ff;
+}
 
 @layer base {
 	body {

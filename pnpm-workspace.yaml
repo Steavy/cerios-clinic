@@ -2,6 +2,9 @@ packages:
   - "apps/*"
   - "packages/*"
 
+shamefullyHoist: true
+verifyDepsBeforeRun: false
+
 # Single source of truth for versions shared across apps/packages.
 # Mobile (patient-mobile) is intentionally excluded for deps that diverge
 # due to React Native toolchain constraints (react, typescript, @types/react).
@@ -25,9 +28,10 @@ catalog:
   # --- Frontend build / dev ---
   vite: ^8.0.7
   "@vitejs/plugin-react": ^6.0.1
-  tailwindcss: ^3.4.17
+  "@tailwindcss/postcss": ^4.3.3
   autoprefixer: ^10.4.27
   postcss: ^8.5.9
+  tailwindcss: ^4.3.3
   "@types/react": ^19.2.14
   "@types/react-dom": ^19.2.3
 
@@ -59,3 +63,10 @@ catalog:
 
   # --- Misc ---
   dotenv: ^17.4.1
+
+allowBuilds:
+  "@nestjs/core": true
+  "@prisma/engines": true
+  "@scarf/scarf": true
+  esbuild: true
+  prisma: true

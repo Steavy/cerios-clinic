@@ -18,7 +18,7 @@
 		"compression": "^1.8.1",
 		"helmet": "^8.0.0",
 		"jwks-rsa": "catalog:",
-		"nodemailer": "^8.0.5",
+		"nodemailer": "^9.0.0",
 		"passport-jwt": "catalog:",
 		"rxjs": "catalog:"
 	},

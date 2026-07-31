@@ -1,4 +1,4 @@
-import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, { type DateTimePickerChangeEvent } from "@react-native-community/datetimepicker";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -30,9 +30,8 @@ export default function RescheduleModal({ appointmentId, doctorId, onClose, onSu
 	}, [dateStr]);
 
 	const handleDateChange = useCallback(
-		(_event: DateTimePickerEvent, date?: Date) => {
+		(_event: DateTimePickerChangeEvent, date: Date) => {
 			setShowPicker(false);
-			if (!date) return;
 			// Ensure weekday and not before tomorrow
 			let chosen = date;
 			while (!isWeekday(chosen) || chosen < tomorrow) {
@@ -85,7 +84,13 @@ export default function RescheduleModal({ appointmentId, doctorId, onClose, onSu
 					</TouchableOpacity>
 
 					{showPicker && (
-						<DateTimePicker value={selectedDate} mode="date" minimumDate={tomorrow} onChange={handleDateChange} />
+						<DateTimePicker
+							value={selectedDate}
+							mode="date"
+							minimumDate={tomorrow}
+							onValueChange={handleDateChange}
+							onDismiss={() => setShowPicker(false)}
+						/>
 					)}
 
 					{/* Slot list */}
