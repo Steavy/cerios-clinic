@@ -10,7 +10,7 @@ RUN pnpm config set store-dir /pnpm/store
 FROM base AS deps
 
 # Copy only the files pnpm needs to resolve the workspace
-COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/shared-types/package.json packages/shared-types/
 COPY packages/database/package.json     packages/database/
 COPY packages/api-common/package.json   packages/api-common/
