@@ -6,7 +6,7 @@ WORKDIR /app
 # ── Stage 2: install dependencies ─────────────────────────
 FROM base AS deps
 
-COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/shared-types/package.json packages/shared-types/
 COPY packages/database/package.json     packages/database/
 COPY packages/api-common/package.json   packages/api-common/
