@@ -27,10 +27,11 @@ echo "Deployed commit: $(git -C "$REPO_DIR" rev-parse --short HEAD)"
 
 if [ -f "$OLD_COMPOSE" ]; then
   echo "Tearing down old stack ($OLD_COMPOSE)"
-  docker compose -f "$OLD_COMPOSE" down
+  docker compose -f "$OLD_COMPOSE" --profile apps down --remove-orphans
 else
   echo "No old stack compose found, skipping teardown"
 fi
+docker rm -f $(docker ps -aq --filter name=clinic-) 2>/dev/null || true
 
 echo "Starting demo stack (build)"
 docker compose -f "$REPO_DIR/docker-compose.demo.yml" up -d --build
