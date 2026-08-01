@@ -8,7 +8,6 @@ This is a full-stack clinic management application. This guide gets you up and r
 
 ---
 
-
 ## What Is This Project?
 
 | Service              | URL                       | Description                                                                         |
