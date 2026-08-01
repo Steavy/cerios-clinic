@@ -5,7 +5,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
 
 permissions:
   contents: read
@@ -32,6 +31,7 @@ jobs:
           - image: api-admin
             dockerfile: infra/docker/Dockerfile.api
             build-args: APP_NAME=api-admin
+
           # Frontend portals
           - image: patient-portal
             dockerfile: infra/docker/Dockerfile.frontend
@@ -45,10 +45,12 @@ jobs:
           - image: admin-portal
             dockerfile: infra/docker/Dockerfile.frontend
             build-args: APP_NAME=admin-portal
+
           # Database init
           - image: db-init
             dockerfile: infra/docker/Dockerfile.db-init
             build-args: ""
+
           # Infrastructure (baked-in config for clone-free usage)
           - image: keycloak
             dockerfile: infra/docker/Dockerfile.keycloak
@@ -60,6 +62,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Set lowercase repo name
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -78,7 +83,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ${{ env.IMAGE_PREFIX }}/${{ matrix.image }}
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=
