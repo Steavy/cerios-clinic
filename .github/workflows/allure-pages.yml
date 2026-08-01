@@ -3,6 +3,8 @@ name: Deploy Allure Report to Pages
 on:
   push:
     branches: [report/allure]
+  create:
+    branches: [report/allure]
   workflow_dispatch:
 
 permissions:
