@@ -1,5 +1,5 @@
 # ── Stage 1: base ──────────────────────────────────────────
-FROM node:24-alpine AS base
+FROM node:24.18.1-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
 

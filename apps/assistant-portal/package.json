@@ -20,7 +20,7 @@
 		"react": "catalog:",
 		"react-datepicker": "^9.1.0",
 		"react-dom": "catalog:",
-		"react-hook-form": "^7.72.1",
+		"react-hook-form": "^7.84.0",
 		"react-hot-toast": "^2.6.0",
 		"react-router-dom": "catalog:",
 		"react-select": "^5.10.2",

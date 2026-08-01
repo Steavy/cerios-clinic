@@ -16,9 +16,9 @@
 		"@clinic/database": "workspace:*",
 		"@prisma/adapter-pg": "catalog:",
 		"compression": "^1.8.1",
-		"helmet": "^8.0.0",
+		"helmet": "^8.3.0",
 		"jwks-rsa": "catalog:",
-		"nodemailer": "^9.0.0",
+		"nodemailer": "^9.0.3",
 		"passport-jwt": "catalog:",
 		"rxjs": "catalog:"
 	},
@@ -29,15 +29,15 @@
 		"@nestjs/platform-express": "catalog:",
 		"@nestjs/swagger": "catalog:",
 		"@types/compression": "^1.8.1",
-		"@types/nodemailer": "^8.0.0",
+		"@types/nodemailer": "^8.0.1",
 		"@types/passport-jwt": "catalog:",
 		"typescript": "catalog:"
 	},
 	"peerDependencies": {
-		"@nestjs/common": "^11.0.0",
-		"@nestjs/core": "^11.0.0",
-		"@nestjs/passport": "^11.0.0",
-		"@nestjs/platform-express": "^11.0.0",
-		"@nestjs/swagger": "^11.0.0"
+		"@nestjs/common": "^11.1.28",
+		"@nestjs/core": "^11.1.28",
+		"@nestjs/passport": "^11.0.5",
+		"@nestjs/platform-express": "^11.1.28",
+		"@nestjs/swagger": "^11.4.6"
 	}
 }
