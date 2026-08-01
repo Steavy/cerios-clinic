@@ -10,43 +10,43 @@ verifyDepsBeforeRun: false
 # due to React Native toolchain constraints (react, typescript, @types/react).
 catalog:
   # --- Shared ---
-  typescript: ^6.0.2
-  "@types/node": ^25.5.2
-  tsx: ^4.21.0
+  typescript: ^6.0.3
+  "@types/node": ^25.9.5
+  tsx: ^4.23.1
 
   # --- Frontend runtime ---
-  react: ^19.2.5
-  react-dom: ^19.2.5
-  react-router-dom: ^7.14.0
-  keycloak-js: ^26.2.3
-  axios: ^1.15.0
-  lucide-react: ^1.7.0
+  react: ^19.2.8
+  react-dom: ^19.2.8
+  react-router-dom: ^7.18.2
+  keycloak-js: ^26.2.4
+  axios: ^1.19.0
+  lucide-react: ^1.28.0
   clsx: ^2.1.1
-  tailwind-merge: ^3.5.0
+  tailwind-merge: ^3.6.0
   class-variance-authority: ^0.7.1
 
   # --- Frontend build / dev ---
-  vite: ^8.0.7
-  "@vitejs/plugin-react": ^6.0.1
+  vite: ^8.2.0
+  "@vitejs/plugin-react": ^6.0.5
   "@tailwindcss/postcss": ^4.3.3
-  autoprefixer: ^10.4.27
-  postcss: ^8.5.9
+  autoprefixer: ^10.5.4
+  postcss: ^8.5.25
   tailwindcss: ^4.3.3
-  "@types/react": ^19.2.14
-  "@types/react-dom": ^19.2.3
+  "@types/react": ^19.2.18
+  "@types/react-dom": ^19.2.4
 
   # --- Backend runtime ---
-  "@nestjs/common": ^11.1.18
-  "@nestjs/core": ^11.1.18
+  "@nestjs/common": ^11.1.28
+  "@nestjs/core": ^11.1.28
   "@nestjs/passport": ^11.0.5
-  "@nestjs/platform-express": ^11.1.18
-  "@nestjs/swagger": ^11.2.6
-  "@nestjs/throttler": ^6.4.0
-  class-validator: ^0.14.2
+  "@nestjs/platform-express": ^11.1.28
+  "@nestjs/swagger": ^11.4.6
+  "@nestjs/throttler": ^6.5.0
+  class-validator: ^0.15.1
   class-transformer: ^0.5.1
   passport: ^0.7.0
   passport-jwt: ^4.0.1
-  jwks-rsa: ^4.0.1
+  jwks-rsa: ^4.1.0
   reflect-metadata: ^0.2.2
   rxjs: ^7.8.2
 
@@ -55,14 +55,14 @@ catalog:
   "@types/passport-jwt": ^4.0.1
 
   # --- Prisma / DB ---
-  "@prisma/adapter-pg": ^7.7.0
-  "@prisma/client": ^7.7.0
-  prisma: ^7.7.0
-  pg: ^8.20.0
+  "@prisma/adapter-pg": ^7.9.1
+  "@prisma/client": ^7.9.1
+  prisma: ^7.9.1
+  pg: ^8.22.0
   "@types/pg": ^8.20.0
 
   # --- Misc ---
-  dotenv: ^17.4.1
+  dotenv: ^17.4.2
 
 allowBuilds:
   "@nestjs/core": true

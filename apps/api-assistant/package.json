@@ -28,7 +28,7 @@
 	},
 	"devDependencies": {
 		"@types/express": "catalog:",
-		"@types/multer": "^2.1.0",
+		"@types/multer": "^2.2.0",
 		"@types/node": "catalog:",
 		"@types/passport-jwt": "catalog:",
 		"tsx": "catalog:",
