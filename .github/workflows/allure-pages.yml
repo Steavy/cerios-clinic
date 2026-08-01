@@ -1,10 +1,8 @@
 name: Deploy Allure Report to Pages
 
 on:
-  push:
-    branches: [report/allure]
-  create:
-    branches: [report/allure]
+  repository_dispatch:
+    types: [allure-report]
   workflow_dispatch:
 
 permissions:
