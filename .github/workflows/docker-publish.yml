@@ -44,9 +44,10 @@ jobs:
           - image: assistant-portal
             dockerfile: infra/docker/Dockerfile.frontend
             build-args: APP_NAME=assistant-portal
-          - image: admin-portal
-            dockerfile: infra/docker/Dockerfile.frontend
-            build-args: APP_NAME=admin-portal
+        # ToDo: Deze moet nog gefixed worden, want blijft hangen tijdens de build.
+        #  - image: admin-portal
+        #    dockerfile: infra/docker/Dockerfile.frontend
+        #    build-args: APP_NAME=admin-portal
 
           # Database init
           - image: db-init
