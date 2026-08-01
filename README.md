@@ -364,6 +364,8 @@ Playwright smoke tests for this application run in [playwright-sparta](https://g
 1. **Publish** — the `Publish Allure Report` workflow in `playwright-sparta` downloads the report artifact and force-pushes it as a single commit to the `report/allure` branch of this repository (using a fine-grained PAT with Contents: read & write, stored as the `CLINIC_REPORT_TOKEN` secret in `playwright-sparta`).
 2. **Deploy** — the `allure-pages.yml` workflow in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys the `report/allure` branch to GitHub Pages.
 
+Each smoke run carries the previous report's `history/` forward, so the published report shows the **History** tab and a growing **Trend** chart (data for the last 20 runs).
+
 **Public report:** https://steavy.github.io/cerios-clinic/
 
 > Manually re-deploy the current report any time via **Actions → Deploy Allure Report to Pages → Run workflow**. GitHub Pages must be enabled for this repository with source **GitHub Actions**.
