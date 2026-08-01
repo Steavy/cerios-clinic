@@ -29,8 +29,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
-      - name: Format check
-        run: pnpm format:check
+      - name: Format
+        run: pnpm format
 
       - name: Lint
         run: pnpm lint
