@@ -4,6 +4,7 @@
 	"onboarding": false,
 	"requireConfig": "optional",
 	"rangeStrategy": "bump",
+	"minimumReleaseAge": "1 day",
 	"schedule": ["before 6am on the first day of the month"],
 	"timezone": "Europe/Amsterdam",
 	"labels": ["dependencies"],
