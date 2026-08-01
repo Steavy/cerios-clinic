@@ -135,7 +135,7 @@ export function useUploadProfilePhoto(): UseMutationResult<
 	return useMutation({
 		mutationFn: ({ uri, type, fileName }: { uri: string; type: string; fileName: string }) => {
 			const form = new FormData();
-			form.append("photo", { uri, type, name: fileName } as unknown as Blob);
+			form.append("photo", { uri, type, name: fileName });
 			return api.patch<{ data: { photo: string } }>("/profile/photo", form, {
 				headers: { "Content-Type": "multipart/form-data" },
 			});

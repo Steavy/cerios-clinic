@@ -476,7 +476,7 @@ export class AppointmentsController {
 		]);
 
 		const byStatus = { SCHEDULED: 0, CONFIRMED: 0, COMPLETED: 0, CANCELLED: 0 } as Record<AppointmentStatus, number>;
-		for (const row of all) byStatus[row.status as AppointmentStatus] = row._count.id;
+		for (const row of all) byStatus[row.status] = row._count.id;
 
 		return {
 			data: {
@@ -796,7 +796,7 @@ export class AppointmentsController {
 		});
 		if (!appointment) throw new NotFoundException("Appointment not found");
 
-		const allowed = ALLOWED_TRANSITIONS[appointment.status as AppointmentStatus];
+		const allowed = ALLOWED_TRANSITIONS[appointment.status];
 		if (!allowed.includes("CANCELLED")) {
 			throw new BadRequestException(`Cannot cancel an appointment with status ${appointment.status}`);
 		}

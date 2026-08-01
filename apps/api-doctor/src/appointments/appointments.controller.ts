@@ -233,7 +233,7 @@ export class AppointmentsController {
 		]);
 
 		const byStatus = { SCHEDULED: 0, CONFIRMED: 0, COMPLETED: 0, CANCELLED: 0 } as Record<AppointmentStatus, number>;
-		for (const row of all) byStatus[row.status as AppointmentStatus] = row._count.id;
+		for (const row of all) byStatus[row.status] = row._count.id;
 
 		return {
 			data: {

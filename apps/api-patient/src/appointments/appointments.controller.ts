@@ -310,7 +310,7 @@ export class AppointmentsController {
 		if (appointment.patientId !== dbUser.patient.id) throw new ForbiddenException("Access denied");
 
 		const cancellable: AppointmentStatus[] = ["SCHEDULED", "CONFIRMED"];
-		if (!cancellable.includes(appointment.status as AppointmentStatus)) {
+		if (!cancellable.includes(appointment.status)) {
 			throw new BadRequestException(`Cannot cancel appointment with status ${appointment.status}`);
 		}
 
@@ -400,7 +400,7 @@ export class AppointmentsController {
 		if (appointment.patientId !== dbUser.patient.id) throw new ForbiddenException("Access denied");
 
 		const reschedulable: AppointmentStatus[] = ["SCHEDULED", "CONFIRMED"];
-		if (!reschedulable.includes(appointment.status as AppointmentStatus)) {
+		if (!reschedulable.includes(appointment.status)) {
 			throw new BadRequestException(`Cannot reschedule appointment with status ${appointment.status}`);
 		}
 

@@ -61,7 +61,7 @@ export function createJwtStrategy(options: JwtStrategyOptions): new () => Strate
 		}
 	}
 
-	return JwtStrategy as unknown as new () => Strategy;
+	return JwtStrategy;
 }
 
 export interface AuthModuleOptions extends JwtStrategyOptions {}
