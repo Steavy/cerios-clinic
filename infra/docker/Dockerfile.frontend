@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1.26
 # ── Stage 1: base ──────────────────────────────────────────
-FROM node:24.18.1-alpine AS base
+# Toolchain stages are pinned to the native build platform: the portal
+# build output is architecture-independent, and this avoids emulated
+# arm64 pnpm installs, which intermittently crash under QEMU (SIGILL).
+FROM --platform=$BUILDPLATFORM node:24.18.1-alpine AS base
 RUN corepack enable && corepack prepare pnpm@11.18.0 --activate
 WORKDIR /app
 ENV PNPM_HOME=/pnpm
