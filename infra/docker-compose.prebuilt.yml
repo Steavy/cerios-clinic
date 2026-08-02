@@ -14,7 +14,7 @@
 
 services:
   postgres:
-    image: ghcr.io/ceriostesting/cerios-clinic/postgres:latest
+    image: ghcr.io/steavy/cerios-clinic/postgres:latest
     container_name: clinic-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-clinic}
@@ -31,7 +31,7 @@ services:
       retries: 5
 
   keycloak:
-    image: ghcr.io/ceriostesting/cerios-clinic/keycloak:latest
+    image: ghcr.io/steavy/cerios-clinic/keycloak:latest
     container_name: clinic-keycloak
     command: start-dev --import-realm
     environment:
@@ -82,7 +82,7 @@ services:
   db-init:
     profiles: [apps]
     container_name: clinic-db-init
-    image: ghcr.io/ceriostesting/cerios-clinic/db-init:latest
+    image: ghcr.io/steavy/cerios-clinic/db-init:latest
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-clinic}:${POSTGRES_PASSWORD:-clinic_secret}@postgres:5432/${POSTGRES_DB:-clinic_db}"
       KEYCLOAK_URL: "http://keycloak:8080"
@@ -101,7 +101,7 @@ services:
   api-patient:
     profiles: [apps]
     container_name: clinic-api-patient
-    image: ghcr.io/ceriostesting/cerios-clinic/api-patient:latest
+    image: ghcr.io/steavy/cerios-clinic/api-patient:latest
     ports:
       - "3001:3001"
     environment:
@@ -132,7 +132,7 @@ services:
   api-doctor:
     profiles: [apps]
     container_name: clinic-api-doctor
-    image: ghcr.io/ceriostesting/cerios-clinic/api-doctor:latest
+    image: ghcr.io/steavy/cerios-clinic/api-doctor:latest
     ports:
       - "3002:3002"
     environment:
@@ -162,7 +162,7 @@ services:
   api-assistant:
     profiles: [apps]
     container_name: clinic-api-assistant
-    image: ghcr.io/ceriostesting/cerios-clinic/api-assistant:latest
+    image: ghcr.io/steavy/cerios-clinic/api-assistant:latest
     ports:
       - "3003:3003"
     environment:
@@ -192,7 +192,7 @@ services:
   api-admin:
     profiles: [apps]
     container_name: clinic-api-admin
-    image: ghcr.io/ceriostesting/cerios-clinic/api-admin:latest
+    image: ghcr.io/steavy/cerios-clinic/api-admin:latest
     ports:
       - "3004:3004"
     environment:
@@ -222,7 +222,7 @@ services:
   patient-portal:
     profiles: [apps]
     container_name: clinic-patient-portal
-    image: ghcr.io/ceriostesting/cerios-clinic/patient-portal:latest
+    image: ghcr.io/steavy/cerios-clinic/patient-portal:latest
     ports:
       - "5173:80"
     depends_on:
@@ -232,7 +232,7 @@ services:
   doctor-portal:
     profiles: [apps]
     container_name: clinic-doctor-portal
-    image: ghcr.io/ceriostesting/cerios-clinic/doctor-portal:latest
+    image: ghcr.io/steavy/cerios-clinic/doctor-portal:latest
     ports:
       - "5174:80"
     depends_on:
@@ -242,7 +242,7 @@ services:
   assistant-portal:
     profiles: [apps]
     container_name: clinic-assistant-portal
-    image: ghcr.io/ceriostesting/cerios-clinic/assistant-portal:latest
+    image: ghcr.io/steavy/cerios-clinic/assistant-portal:latest
     ports:
       - "5175:80"
     depends_on:
@@ -252,7 +252,7 @@ services:
   admin-portal:
     profiles: [apps]
     container_name: clinic-admin-portal
-    image: ghcr.io/ceriostesting/cerios-clinic/admin-portal:latest
+    image: ghcr.io/steavy/cerios-clinic/admin-portal:latest
     ports:
       - "5176:80"
     depends_on:
