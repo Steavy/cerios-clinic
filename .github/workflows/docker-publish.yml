@@ -121,3 +121,29 @@ jobs:
               ref: 'main',
               inputs: { 'image-tag': context.sha },
             })
+
+  notify-opencode-on-failure:
+    name: Notify opencode on build failure
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: failure() && !cancelled()
+    steps:
+      - name: Dispatch failure bridge in playwright-sparta
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'Steavy',
+              repo: 'playwright-sparta',
+              workflow_id: 'handle-opencode-failure.yml',
+              ref: 'main',
+              inputs: {
+                repo: `${context.repo.owner}/${context.repo.repo}`,
+                'run-id': String(context.runId),
+                'workflow-name': context.workflow,
+                'run-url': `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                'head-sha': context.sha,
+                'head-branch': context.ref.replace('refs/heads/', ''),
+              },
+            })
