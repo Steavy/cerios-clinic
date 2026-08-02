@@ -1,12 +1,14 @@
 # Demo deployment for demo-sparta.mooo.com
-# Built and started from source by infra/deploy-demo.sh (triggered by the
-# deploy-demo workflow in playwright-sparta after the smoke tests pass).
-# Ports match the live demo stack: portals 5173-5176, APIs 13001/3002-3004,
-# keycloak 8180, postgres 5432, mailpit 1025/8025.
+# Started from published ghcr.io/steavy/cerios-clinic images by
+# infra/deploy-demo.sh (triggered by the deploy-demo workflow in
+# playwright-sparta after the smoke tests pass). The portal images use the
+# `demo` tag (built with demo-sparta.mooo.com URLs baked in); the rest use
+# `latest`. Ports match the live demo stack: portals 5173-5176, APIs
+# 3001/3002-3004, keycloak 8180, postgres 5432, mailpit 1025/8025.
 
 services:
   postgres:
-    image: postgres:17-alpine
+    image: ghcr.io/steavy/cerios-clinic/postgres:latest
     container_name: clinic-postgres
     environment:
       POSTGRES_USER: clinic
@@ -16,7 +18,6 @@ services:
       - "5432:5432"
     volumes:
       - clinic_postgres_data:/var/lib/postgresql/data
-      - ./infra/postgres:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U clinic -d clinic_db"]
       interval: 10s
@@ -24,7 +25,7 @@ services:
       retries: 5
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.7.0
+    image: ghcr.io/steavy/cerios-clinic/keycloak:latest
     container_name: clinic-keycloak
     command: start-dev --import-realm
     environment:
@@ -43,9 +44,6 @@ services:
       KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
     ports:
       - "8180:8080"
-    volumes:
-      - ./infra/keycloak:/opt/keycloak/data/import
-      - ./infra/keycloak/themes:/opt/keycloak/themes
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,9 +71,7 @@ services:
 
   db-init:
     container_name: clinic-db-init
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.db-init
+    image: ghcr.io/steavy/cerios-clinic/db-init:latest
     environment:
       DATABASE_URL: "postgresql://clinic:clinic_secret@postgres:5432/clinic_db"
       KEYCLOAK_URL: "http://keycloak:8080"
@@ -93,13 +89,9 @@ services:
 
   api-patient:
     container_name: clinic-api-patient
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.api
-      args:
-        APP_NAME: api-patient
+    image: ghcr.io/steavy/cerios-clinic/api-patient:latest
     ports:
-      - "13001:3001"
+      - "3001:3001"
     environment:
       PORT: "3001"
       NODE_ENV: production
@@ -127,11 +119,7 @@ services:
 
   api-doctor:
     container_name: clinic-api-doctor
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.api
-      args:
-        APP_NAME: api-doctor
+    image: ghcr.io/steavy/cerios-clinic/api-doctor:latest
     ports:
       - "3002:3002"
     environment:
@@ -160,11 +148,7 @@ services:
 
   api-assistant:
     container_name: clinic-api-assistant
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.api
-      args:
-        APP_NAME: api-assistant
+    image: ghcr.io/steavy/cerios-clinic/api-assistant:latest
     ports:
       - "3003:3003"
     environment:
@@ -193,11 +177,7 @@ services:
 
   api-admin:
     container_name: clinic-api-admin
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.api
-      args:
-        APP_NAME: api-admin
+    image: ghcr.io/steavy/cerios-clinic/api-admin:latest
     ports:
       - "3004:3004"
     environment:
@@ -226,15 +206,7 @@ services:
 
   patient-portal:
     container_name: clinic-patient-portal
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.frontend
-      args:
-        APP_NAME: patient-portal
-        VITE_PATIENT_API_BASE_URL: "http://demo-sparta.mooo.com:13001/api"
-        VITE_KEYCLOAK_URL: "http://demo-sparta.mooo.com:8180"
-        VITE_KEYCLOAK_REALM: clinic
-        VITE_PATIENT_KEYCLOAK_CLIENT_ID: patient-portal-client
+    image: ghcr.io/steavy/cerios-clinic/patient-portal:demo
     ports:
       - "5173:80"
     depends_on:
@@ -243,15 +215,7 @@ services:
 
   doctor-portal:
     container_name: clinic-doctor-portal
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.frontend
-      args:
-        APP_NAME: doctor-portal
-        VITE_DOCTOR_API_BASE_URL: "http://demo-sparta.mooo.com:3002/api"
-        VITE_KEYCLOAK_URL: "http://demo-sparta.mooo.com:8180"
-        VITE_KEYCLOAK_REALM: clinic
-        VITE_DOCTOR_KEYCLOAK_CLIENT_ID: doctor-portal-client
+    image: ghcr.io/steavy/cerios-clinic/doctor-portal:demo
     ports:
       - "5174:80"
     depends_on:
@@ -260,15 +224,7 @@ services:
 
   assistant-portal:
     container_name: clinic-assistant-portal
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.frontend
-      args:
-        APP_NAME: assistant-portal
-        VITE_ASSISTANT_API_BASE_URL: "http://demo-sparta.mooo.com:3003/api"
-        VITE_KEYCLOAK_URL: "http://demo-sparta.mooo.com:8180"
-        VITE_KEYCLOAK_REALM: clinic
-        VITE_ASSISTANT_KEYCLOAK_CLIENT_ID: assistant-portal-client
+    image: ghcr.io/steavy/cerios-clinic/assistant-portal:demo
     ports:
       - "5175:80"
     depends_on:
@@ -277,15 +233,7 @@ services:
 
   admin-portal:
     container_name: clinic-admin-portal
-    build:
-      context: ./
-      dockerfile: infra/docker/Dockerfile.frontend
-      args:
-        APP_NAME: admin-portal
-        VITE_ADMIN_API_BASE_URL: "http://demo-sparta.mooo.com:3004/api"
-        VITE_KEYCLOAK_URL: "http://demo-sparta.mooo.com:8180"
-        VITE_KEYCLOAK_REALM: clinic
-        VITE_ADMIN_KEYCLOAK_CLIENT_ID: admin-portal-client
+    image: ghcr.io/steavy/cerios-clinic/admin-portal:demo
     ports:
       - "5176:80"
     depends_on:

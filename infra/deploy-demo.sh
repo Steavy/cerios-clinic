@@ -38,13 +38,13 @@ else
 fi
 docker rm -f $(docker ps -aq --filter name=clinic-) 2>/dev/null || true
 
-echo "Starting demo stack (build)"
-docker compose -f "$REPO_DIR/docker-compose.demo.yml" up -d --build
+echo "Starting demo stack (pulling published images)"
+docker compose -f "$REPO_DIR/docker-compose.demo.yml" up -d --pull always
 
 echo "Waiting for services to become healthy (max ${MAX_WAIT}s)"
 endpoints=(
   "keycloak|http://localhost:8180/realms/clinic"
-  "api-patient|http://localhost:13001/api/health"
+  "api-patient|http://localhost:3001/api/health"
   "api-doctor|http://localhost:3002/api/health"
   "api-assistant|http://localhost:3003/api/health"
   "api-admin|http://localhost:3004/api/health"
