@@ -200,6 +200,20 @@ if [ "$(git -C "$REPO_DIR" rev-parse HEAD)" != "$START_SHA" ]; then
   exec bash "$0" "$@"
 fi
 
+# 2b. Skip the rollout when cerios-clinic main has not changed since the last
+#     successful deploy. Every forced restart of the full stack is churn, and
+#     the smoke-test -> Deploy Demo cascade can fire a run every few minutes;
+#     a no-op keeps the gate trivially green without touching running pods.
+MARKER_FILE="${MARKER_FILE:-/var/tmp/cerios-clinic-last-deployed.sha}"
+TARGET_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
+if [ -f "$MARKER_FILE" ] && [ "$(cat "$MARKER_FILE")" = "$TARGET_SHA" ]; then
+  echo "No changes since last deploy ($(git -C "$REPO_DIR" rev-parse --short HEAD)); skipping rollout"
+  healthcheck_endpoints
+  kubectl -n "$NS" get pods -o wide
+  echo "Demo stack is healthy on minikube cluster $MINIKUBE_PROFILE (no deploy needed)"
+  exit 0
+fi
+
 # 3. Tear down the old docker-compose stack (frees the host ports for minikube)
 if [ -f /root/cerios-clinic/docker-compose.yml ]; then
   echo "Tearing down legacy stack (/root/cerios-clinic/docker-compose.yml)"
@@ -296,5 +310,6 @@ healthcheck_endpoints
 
 kubectl -n "$NS" get pods -o wide
 
+echo "$TARGET_SHA" > "$MARKER_FILE"
 echo "Demo stack is healthy on minikube cluster $MINIKUBE_PROFILE"
 echo "Rollback: docker compose -f $compose_yml up -d --pull always"
