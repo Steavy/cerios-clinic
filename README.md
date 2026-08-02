@@ -359,7 +359,7 @@ For obtaining API tokens and testing protected endpoints from scripts, Postman, 
 
 ## Allure Test Report
 
-Playwright smoke tests for this application run in [playwright-sparta](https://github.com/Steavy/playwright-sparta). After every smoke run — success **or** failure — the Allure report is published automatically to GitHub Pages:
+Playwright smoke tests for this application run in [playwright-sparta](https://github.com/Steavy/playwright-sparta). After every smoke run — success **or** failure — the Allure report is published automatically to GitHub Pages. A nightly **Full Regression Suite** (all web Playwright projects) publishes its report through the same chain, so the History tab and Trend chart keep growing day after day:
 
 1. **Publish** — the `Publish Allure Report` workflow in `playwright-sparta` downloads the report artifact and force-pushes it as a single commit to the `report/allure` branch of this repository (using a fine-grained PAT with Contents: read & write, stored as the `CLINIC_REPORT_TOKEN` secret in `playwright-sparta`).
 2. **Deploy** — the `allure-pages.yml` workflow in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys the `report/allure` branch to GitHub Pages.
