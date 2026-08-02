@@ -28,6 +28,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/api-patient:latest
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 128Mi
             limits:
               memory: 512Mi
           env:
@@ -119,6 +121,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/api-doctor:latest
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 128Mi
             limits:
               memory: 512Mi
           env:
@@ -208,6 +212,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/api-assistant:latest
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 128Mi
             limits:
               memory: 512Mi
           env:
@@ -297,6 +303,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/api-admin:latest
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 128Mi
             limits:
               memory: 512Mi
           env:

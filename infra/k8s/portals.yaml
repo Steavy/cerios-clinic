@@ -28,6 +28,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/patient-portal:demo
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 64Mi
             limits:
               memory: 256Mi
           ports:
@@ -90,6 +92,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/doctor-portal:demo
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 64Mi
             limits:
               memory: 256Mi
           ports:
@@ -152,6 +156,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/assistant-portal:demo
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 64Mi
             limits:
               memory: 256Mi
           ports:
@@ -214,6 +220,8 @@ spec:
           image: ghcr.io/steavy/cerios-clinic/admin-portal:demo
           imagePullPolicy: Always
           resources:
+            requests:
+              memory: 64Mi
             limits:
               memory: 256Mi
           ports:
