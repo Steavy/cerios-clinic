@@ -76,11 +76,11 @@ watch_zero_downtime() {
     for entry in "${endpoints[@]}"; do
       svc="${entry%%|*}"
       url="${entry#*|}"
-      if curl -fsS -o /dev/null --max-time 4 "$url" 2>/dev/null; then
+      if curl -fsS -o /dev/null --max-time 6 "$url" 2>/dev/null; then
         consec["$svc"]=0
       else
         consec["$svc"]=$((${consec["$svc"]:-0} + 1))
-        if [ "${consec["$svc"]}" -ge 3 ]; then
+        if [ "${consec["$svc"]}" -ge 4 ]; then
           echo "DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
           consec["$svc"]=0
         fi

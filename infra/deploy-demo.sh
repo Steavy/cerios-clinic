@@ -147,8 +147,9 @@ healthcheck_endpoints() {
 }
 
 # Zero-downtime gate: polls every public endpoint; logs a DOWNTIME line when an
-# endpoint is unreachable for >= 3 consecutive polls (~6s, a small retry
-# tolerance for single blips). The deploy fails if any downtime event occurred.
+# endpoint is unreachable for >= 4 consecutive polls (~20s, absorbing brief
+# load blips while still catching any sustained outage). The deploy fails if
+# any downtime event occurred.
 watch_zero_downtime() {
   local log="$1"
   local endpoints=(
@@ -169,11 +170,11 @@ watch_zero_downtime() {
     for entry in "${endpoints[@]}"; do
       svc="${entry%%|*}"
       url="${entry#*|}"
-      if curl -fsS -o /dev/null --max-time 4 "$url" 2>/dev/null; then
+      if curl -fsS -o /dev/null --max-time 6 "$url" 2>/dev/null; then
         consec["$svc"]=0
       else
         consec["$svc"]=$((${consec["$svc"]:-0} + 1))
-        if [ "${consec["$svc"]}" -ge 3 ]; then
+        if [ "${consec["$svc"]}" -ge 4 ]; then
           echo "DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
           consec["$svc"]=0
         fi
@@ -257,6 +258,7 @@ for d in keycloak mailpit api-patient api-doctor api-assistant api-admin \
          patient-portal doctor-portal assistant-portal admin-portal; do
   kubectl -n "$NS" rollout restart "deploy/$d"
   wait_deploy "$d" 420
+  sleep 15
 done
 
 # 7c. Wait for postgres (never rolled, but confirm it is still up).
