@@ -209,11 +209,13 @@ for d in postgres keycloak mailpit api-patient api-doctor api-assistant api-admi
 done
 
 # 8. Run migrations + seed (idempotent), then the Keycloak realm fix
-kubectl -n "$NS" delete job db-init --ignore-not-found
+#    --wait=true so a concurrent run (e.g. manual + CI) never hits
+#    "AlreadyExists" when re-applying the job.
+kubectl -n "$NS" delete job db-init --ignore-not-found --wait=true
 kubectl apply -f "$K8S_DIR/db-init.yaml"
 wait_job db-init
 
-kubectl -n "$NS" delete job keycloak-fix --ignore-not-found
+kubectl -n "$NS" delete job keycloak-fix --ignore-not-found --wait=true
 kubectl apply -f "$K8S_DIR/keycloak-fix.yaml"
 wait_job keycloak-fix
 
