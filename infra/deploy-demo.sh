@@ -149,7 +149,8 @@ healthcheck_endpoints() {
 # Zero-downtime gate: polls every public endpoint; logs a DOWNTIME line when an
 # endpoint is unreachable for >= 4 consecutive polls (~20s, absorbing brief
 # load blips while still catching any sustained outage). The deploy fails if
-# any downtime event occurred.
+# any downtime event occurred. Each event carries a UTC timestamp and the host
+# load so the causing rollout step can be correlated.
 watch_zero_downtime() {
   local log="$1"
   local endpoints=(
@@ -175,7 +176,7 @@ watch_zero_downtime() {
       else
         consec["$svc"]=$((${consec["$svc"]:-0} + 1))
         if [ "${consec["$svc"]}" -ge 4 ]; then
-          echo "DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
+          echo "[$(date -u +%H:%M:%S) load=$(awk '{print $1}' /proc/loadavg)] DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
           consec["$svc"]=0
         fi
       fi
@@ -271,6 +272,8 @@ watcher_active=0
 if [ -s "$WATCHER_LOG" ]; then
   echo "FAIL: zero-downtime violated during deploy:"
   cat "$WATCHER_LOG"
+  echo "--- pod state at failure time (host load: $(awk '{print $1}' /proc/loadavg)):"
+  kubectl -n "$NS" get pods -o custom-columns='NAME:.metadata.name,READY:.status.conditions[?(@.type=="Ready")].status,RESTARTS:.status.containerStatuses[0].restartCount,RS:.metadata.ownerReferences[0].name' 2>/dev/null | head -25
   rm -f "$WATCHER_LOG"
   exit 1
 fi
