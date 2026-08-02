@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deploys the demo stack to the kind cluster on the demo host (91.99.134.58).
+# Deploys the demo stack to the minikube cluster on the demo host (91.99.134.58).
 # Triggered by the deploy-demo workflow in playwright-sparta after smoke tests
 # pass. Uses published ghcr.io/steavy/cerios-clinic images (portals: `demo`,
 # rest: `latest`). Rollback: `docker compose -f docker-compose.demo.yml
@@ -11,8 +11,8 @@ TARGET="${1:-main}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKUP_DIR="${BACKUP_DIR:-/root/backups}"
-CLUSTER_NAME="${CLUSTER_NAME:-clawshop-cluster}"
-CLUSTER_KUBE_NAME="kind-$CLUSTER_NAME"
+MINIKUBE_PROFILE="${MINIKUBE_PROFILE:-clinic}"
+CLUSTER_KUBE_NAME="$MINIKUBE_PROFILE"
 NS="${NS:-clinic}"
 PUBLIC_APISERVER="https://91.99.134.58:6443"
 K8S_DIR="$REPO_DIR/infra/k8s"
@@ -97,14 +97,13 @@ restore_backup() {
 }
 
 ensure_cluster() {
-  local node="${CLUSTER_NAME}-control-plane"
-  if docker inspect "$node" >/dev/null 2>&1 && docker port "$node" 2>/dev/null | grep -q "0.0.0.0:3001"; then
-    echo "kind cluster $CLUSTER_NAME present with demo port mappings"
+  if docker inspect "$MINIKUBE_PROFILE" >/dev/null 2>&1 && docker port "$MINIKUBE_PROFILE" 2>/dev/null | grep -q "0.0.0.0:3001"; then
+    echo "minikube cluster $MINIKUBE_PROFILE present with demo port mappings"
     return 0
   fi
-  echo "kind cluster $CLUSTER_NAME missing or without demo port mappings; recreating"
-  kind delete cluster --name "$CLUSTER_NAME" 2>/dev/null || true
-  kind create cluster --name "$CLUSTER_NAME" --config "$K8S_DIR/kind-config.yaml" --wait 120s
+  echo "minikube cluster $MINIKUBE_PROFILE missing or without demo port mappings; recreating"
+  minikube delete --profile "$MINIKUBE_PROFILE" 2>/dev/null || true
+  bash "$K8S_DIR/minikube-start.sh"
   kubectl config set-cluster "$CLUSTER_KUBE_NAME" --server="$PUBLIC_APISERVER"
   kubectl config use-context "$CLUSTER_KUBE_NAME"
 }
@@ -162,7 +161,7 @@ if [ "$(git -C "$REPO_DIR" rev-parse HEAD)" != "$START_SHA" ]; then
   exec bash "$0" "$@"
 fi
 
-# 3. Tear down the old docker-compose stack (frees the host ports for kind)
+# 3. Tear down the old docker-compose stack (frees the host ports for minikube)
 if [ -f /root/cerios-clinic/docker-compose.yml ]; then
   echo "Tearing down legacy stack (/root/cerios-clinic/docker-compose.yml)"
   docker compose -f /root/cerios-clinic/docker-compose.yml --profile apps down --remove-orphans || true
@@ -173,7 +172,7 @@ if docker compose -f "$compose_yml" ps -q >/dev/null 2>&1 && [ -n "$(docker comp
 fi
 docker rm -f "$(docker ps -aq --filter name=clinic- 2>/dev/null)" 2>/dev/null || true
 
-# 4. Ensure the kind cluster exists with the demo port mappings
+# 4. Ensure the minikube cluster exists with the demo port mappings
 ensure_cluster
 
 # 5. Apply postgres first and wait until ready (fresh PVC is empty)
@@ -223,5 +222,5 @@ healthcheck_endpoints
 
 kubectl -n "$NS" get pods -o wide
 
-echo "Demo stack is healthy on kind cluster $CLUSTER_NAME"
+echo "Demo stack is healthy on minikube cluster $MINIKUBE_PROFILE"
 echo "Rollback: docker compose -f $compose_yml up -d --pull always"

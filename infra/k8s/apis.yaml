@@ -1,5 +1,5 @@
 # The four API services. External exposure via NodePort services matching the
-# kind extraPortMappings (host:3001-3004 -> node:30001-30004). Probes hit the
+# minikube --ports (host:3001-3004 -> node:30001-30004). Probes hit the
 # same /api/health endpoint the deploy script and workflow verify.
 apiVersion: apps/v1
 kind: Deployment

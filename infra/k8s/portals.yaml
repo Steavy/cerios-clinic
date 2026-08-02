@@ -1,6 +1,6 @@
 # The four portals (nginx static, demo tag with demo-sparta.mooo.com URLs
-# baked in). External exposure via NodePort services matching the kind
-# extraPortMappings (host:5173-5176 -> node:30005-30008).
+# baked in). External exposure via NodePort services matching the minikube
+# --ports (host:5173-5176 -> node:30005-30008).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
