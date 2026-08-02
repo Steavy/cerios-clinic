@@ -37,10 +37,13 @@ spec:
         - name: postgres
           image: ghcr.io/steavy/cerios-clinic/postgres:latest
           imagePullPolicy: Always
+          args: ["-c", "max_connections=250"]
           resources:
             requests:
+              cpu: 500m
               memory: 256Mi
             limits:
+              cpu: "2"
               memory: 2Gi
           env:
             - name: POSTGRES_USER
