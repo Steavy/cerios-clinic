@@ -37,6 +37,9 @@ spec:
         - name: postgres
           image: ghcr.io/steavy/cerios-clinic/postgres:latest
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 2Gi
           env:
             - name: POSTGRES_USER
               value: clinic
@@ -52,16 +55,18 @@ spec:
               mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "clinic", "-d", "clinic_db"]
+              command: ["pg_isready", "-t", "5", "-U", "clinic", "-d", "clinic_db"]
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 12
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "clinic", "-d", "clinic_db"]
+              command: ["pg_isready", "-t", "5", "-U", "clinic", "-d", "clinic_db"]
             initialDelaySeconds: 15
             periodSeconds: 10
-            failureThreshold: 6
+            timeoutSeconds: 10
+            failureThreshold: 20
       volumes:
         - name: data
           persistentVolumeClaim:
