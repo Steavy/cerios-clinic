@@ -201,7 +201,8 @@ kubectl apply -f "$K8S_DIR/keycloak.yaml"
 kubectl apply -f "$K8S_DIR/mailpit.yaml"
 kubectl apply -f "$K8S_DIR/apis.yaml"
 kubectl apply -f "$K8S_DIR/portals.yaml"
-kubectl -n "$NS" rollout restart deployment --all
+kubectl -n "$NS" rollout restart deploy postgres keycloak mailpit api-patient api-doctor \
+  api-assistant api-admin patient-portal doctor-portal assistant-portal admin-portal
 
 for d in postgres keycloak mailpit api-patient api-doctor api-assistant api-admin \
          patient-portal doctor-portal assistant-portal admin-portal; do
