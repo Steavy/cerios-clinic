@@ -88,7 +88,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=
+            type=sha,prefix=,format=long
 
       - name: Build and push
         uses: docker/build-push-action@v7
