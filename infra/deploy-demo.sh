@@ -146,6 +146,43 @@ healthcheck_endpoints() {
   fi
 }
 
+# Zero-downtime gate: polls every public endpoint; logs a DOWNTIME line when an
+# endpoint is unreachable for >= 3 consecutive polls (~6s, a small retry
+# tolerance for single blips). The deploy fails if any downtime event occurred.
+watch_zero_downtime() {
+  local log="$1"
+  local endpoints=(
+    "keycloak|http://localhost:8180/realms/clinic"
+    "api-patient|http://localhost:3001/api/health"
+    "api-doctor|http://localhost:3002/api/health"
+    "api-assistant|http://localhost:3003/api/health"
+    "api-admin|http://localhost:3004/api/health"
+    "patient-portal|http://localhost:5173/"
+    "doctor-portal|http://localhost:5174/"
+    "assistant-portal|http://localhost:5175/"
+    "admin-portal|http://localhost:5176/"
+    "mailpit|http://localhost:8025/"
+  )
+  local entry svc url
+  declare -A consec=()
+  while :; do
+    for entry in "${endpoints[@]}"; do
+      svc="${entry%%|*}"
+      url="${entry#*|}"
+      if curl -fsS -o /dev/null --max-time 4 "$url" 2>/dev/null; then
+        consec["$svc"]=0
+      else
+        consec["$svc"]=$((${consec["$svc"]:-0} + 1))
+        if [ "${consec["$svc"]}" -ge 3 ]; then
+          echo "DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
+          consec["$svc"]=0
+        fi
+      fi
+    done
+    sleep 2
+  done
+}
+
 # 1. DB backups (compose stack first, then k8s state)
 dump_compose_pg
 dump_k8s_pg
@@ -194,19 +231,49 @@ else
   fi
 fi
 
-# 7. Apply the rest of the stack and restart everything so the newest
-#    published images are pulled (floating :latest / :demo tags)
+# 7. Zero-downtime deploy of the app stack. Every app is a 2-replica
+#    deployment with RollingUpdate maxUnavailable:0/maxSurge:1, so a rolling
+#    restart never drops below one serving replica.
+WATCHER_LOG="$(mktemp)"
+watch_zero_downtime "$WATCHER_LOG" &
+WATCHER_PID=$!
+watcher_active=1
+trap 'if [ "${watcher_active:-0}" -eq 1 ]; then kill "$WATCHER_PID" 2>/dev/null || true; wait "$WATCHER_PID" 2>/dev/null || true; fi' EXIT
+
+# 7a. Apply manifests (idempotent).
 kubectl apply -f "$K8S_DIR/keycloak.yaml"
 kubectl apply -f "$K8S_DIR/mailpit.yaml"
 kubectl apply -f "$K8S_DIR/apis.yaml"
 kubectl apply -f "$K8S_DIR/portals.yaml"
-kubectl -n "$NS" rollout restart deploy postgres keycloak mailpit api-patient api-doctor \
-  api-assistant api-admin patient-portal doctor-portal assistant-portal admin-portal
 
-for d in postgres keycloak mailpit api-patient api-doctor api-assistant api-admin \
+# 7b. Rolling restart the app deployments one at a time (each rollout fully
+#     completes before the next starts). Restarting all apps at once swamps
+#     the small demo host (concurrent image pulls + Keycloak JVM startups
+#     pushed load >30 and the endpoints started timing out). Postgres is
+#     excluded: it is a single Recreate pod, restarting it would briefly take
+#     the endpoints down. Its schema changes come from db-init below, which
+#     runs against the live database.
+for d in keycloak mailpit api-patient api-doctor api-assistant api-admin \
          patient-portal doctor-portal assistant-portal admin-portal; do
-  wait_deploy "$d"
+  kubectl -n "$NS" rollout restart "deploy/$d"
+  wait_deploy "$d" 420
 done
+
+# 7c. Wait for postgres (never rolled, but confirm it is still up).
+wait_deploy postgres 60
+
+# 7d. Stop the watcher and fail the deploy if any downtime was observed.
+kill "$WATCHER_PID" 2>/dev/null || true
+wait "$WATCHER_PID" 2>/dev/null || true
+watcher_active=0
+if [ -s "$WATCHER_LOG" ]; then
+  echo "FAIL: zero-downtime violated during deploy:"
+  cat "$WATCHER_LOG"
+  rm -f "$WATCHER_LOG"
+  exit 1
+fi
+rm -f "$WATCHER_LOG"
+echo "Zero-downtime gate: no downtime detected during deploy"
 
 # 8. Run migrations + seed (idempotent), then the Keycloak realm fix
 #    --wait=true so a concurrent run (e.g. manual + CI) never hits

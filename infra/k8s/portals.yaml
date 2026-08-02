@@ -9,7 +9,12 @@ metadata:
   labels:
     app: patient-portal
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: patient-portal
@@ -22,6 +27,9 @@ spec:
         - name: patient-portal
           image: ghcr.io/steavy/cerios-clinic/patient-portal:demo
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 256Mi
           ports:
             - name: http
               containerPort: 80
@@ -63,7 +71,12 @@ metadata:
   labels:
     app: doctor-portal
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: doctor-portal
@@ -76,6 +89,9 @@ spec:
         - name: doctor-portal
           image: ghcr.io/steavy/cerios-clinic/doctor-portal:demo
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 256Mi
           ports:
             - name: http
               containerPort: 80
@@ -117,7 +133,12 @@ metadata:
   labels:
     app: assistant-portal
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: assistant-portal
@@ -130,6 +151,9 @@ spec:
         - name: assistant-portal
           image: ghcr.io/steavy/cerios-clinic/assistant-portal:demo
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 256Mi
           ports:
             - name: http
               containerPort: 80
@@ -171,7 +195,12 @@ metadata:
   labels:
     app: admin-portal
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: admin-portal
@@ -184,6 +213,9 @@ spec:
         - name: admin-portal
           image: ghcr.io/steavy/cerios-clinic/admin-portal:demo
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 256Mi
           ports:
             - name: http
               containerPort: 80

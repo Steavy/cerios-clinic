@@ -8,7 +8,12 @@ metadata:
   labels:
     app: mailpit
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: mailpit
@@ -21,6 +26,9 @@ spec:
         - name: mailpit
           image: axllent/mailpit:latest
           imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 512Mi
           env:
             - name: MP_MAX_MESSAGES
               value: "500"
