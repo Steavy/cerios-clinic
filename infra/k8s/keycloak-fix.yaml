@@ -1,0 +1,45 @@
+# Idempotent Keycloak fix: ensure sslRequired=none for master + clinic realms
+# so HTTP works on the demo host (realm import only happens on a fresh DB).
+# Run by infra/deploy-demo.sh after keycloak is ready.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-fix
+  namespace: clinic
+spec:
+  backoffLimit: 5
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: keycloak-fix
+          image: curlimages/curl:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              BASE="http://keycloak:8080"
+              TOKEN=""
+              for i in $(seq 1 30); do
+                TOKEN=$(curl -sf -X POST "$BASE/realms/master/protocol/openid-connect/token" \
+                  -d client_id=admin-cli -d username=admin -d password=admin_secret \
+                  -d grant_type=password 2>/dev/null | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+                if [ -n "$TOKEN" ]; then break; fi
+                echo "Waiting for Keycloak admin login ($i/30)..."
+                sleep 5
+              done
+              if [ -z "$TOKEN" ]; then
+                echo "FAIL: could not obtain Keycloak admin token"
+                exit 1
+              fi
+              for realm in master clinic; do
+                code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+                  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+                  "$BASE/admin/realms/$realm" -d '{"sslRequired": "none"}')
+                echo "Realm $realm sslRequired -> none (HTTP:$code)"
+                if [ "$code" != "204" ]; then
+                  echo "FAIL: unexpected HTTP $code for realm $realm"
+                  exit 1
+                fi
+              done
+              echo "Keycloak realms fixed (sslRequired=none)"

@@ -1,26 +1,158 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Deploys the demo stack to the kind cluster on the demo host (91.99.134.58).
+# Triggered by the deploy-demo workflow in playwright-sparta after smoke tests
+# pass. Uses published ghcr.io/steavy/cerios-clinic images (portals: `demo`,
+# rest: `latest`). Rollback: `docker compose -f docker-compose.demo.yml
+# up -d --pull always`.
+
 TARGET="${1:-main}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKUP_DIR="${BACKUP_DIR:-/root/backups}"
-OLD_COMPOSE=/root/cerios-clinic/docker-compose.yml
+CLUSTER_NAME="${CLUSTER_NAME:-clawshop-cluster}"
+CLUSTER_KUBE_NAME="kind-$CLUSTER_NAME"
+NS="${NS:-clinic}"
+PUBLIC_APISERVER="https://91.99.134.58:6443"
+K8S_DIR="$REPO_DIR/infra/k8s"
 MAX_WAIT="${MAX_WAIT:-300}"
 
 mkdir -p "$BACKUP_DIR"
 ts="$(date +%Y%m%d-%H%M%S)"
+compose_yml="$REPO_DIR/docker-compose.demo.yml"
 
-if docker inspect clinic-postgres >/dev/null 2>&1; then
-  if docker exec clinic-postgres pg_dump -U clinic -d clinic_db -F c > "$BACKUP_DIR/clinic-db-$ts.dump"; then
-    echo "DB backup: $BACKUP_DIR/clinic-db-$ts.dump"
+dump_compose_pg() {
+  if docker inspect clinic-postgres >/dev/null 2>&1; then
+    if docker exec clinic-postgres pg_dump -U clinic -d clinic_db -F c > "$BACKUP_DIR/clinic-db-$ts.dump"; then
+      echo "DB backup (compose): $BACKUP_DIR/clinic-db-$ts.dump"
+    else
+      echo "WARN: compose DB backup failed, continuing anyway"
+    fi
   else
-    echo "WARN: DB backup failed, continuing anyway"
+    echo "No running clinic-postgres container, skipping compose DB backup"
   fi
-else
-  echo "No running clinic-postgres container, skipping DB backup"
-fi
+}
 
+db_has_data() {
+  local count
+  count="$(kubectl -n "$NS" exec deploy/postgres -- psql -U clinic -d clinic_db -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" 2>/dev/null | tr -d '[:space:]')"
+  [ -n "$count" ] && [ "$count" != "0" ]
+}
+
+dump_k8s_pg() {
+  if kubectl -n "$NS" get deploy/postgres >/dev/null 2>&1 && db_has_data; then
+    if kubectl -n "$NS" exec deploy/postgres -- pg_dump -U clinic -d clinic_db -F c > "$BACKUP_DIR/clinic-db-$ts.dump"; then
+      echo "DB backup (k8s): $BACKUP_DIR/clinic-db-$ts.dump"
+    else
+      echo "WARN: k8s DB backup failed, continuing anyway"
+    fi
+  fi
+}
+
+wait_deploy() {
+  kubectl -n "$NS" rollout status "deploy/$1" --timeout="${2:-300}s"
+}
+
+wait_job() {
+  local name="$1" timeout="${2:-900}"
+  local deadline=$((SECONDS + timeout))
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    local state
+    state="$(kubectl -n "$NS" get job "$name" -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
+    if [ "$state" = "True" ]; then
+      echo "Job $name completed"
+      return 0
+    fi
+    state="$(kubectl -n "$NS" get job "$name" -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
+    if [ "$state" = "True" ]; then
+      echo "Job $name FAILED"
+      kubectl -n "$NS" logs "job/$name" --tail=50 2>/dev/null || true
+      return 1
+    fi
+    sleep 5
+  done
+  echo "Job $name timed out after ${timeout}s"
+  kubectl -n "$NS" logs "job/$name" --tail=50 2>/dev/null || true
+  return 1
+}
+
+restore_backup() {
+  local dump="$1"
+  echo "Restoring $dump into k8s postgres"
+  # Drop the empty keycloak schema created by init.sql so the restore is clean.
+  kubectl -n "$NS" exec deploy/postgres -- psql -U clinic -d clinic_db -c \
+    "DROP SCHEMA IF EXISTS keycloak CASCADE;" >/dev/null
+  if ! kubectl -n "$NS" exec -i deploy/postgres -- pg_restore -U clinic -d clinic_db < "$dump"; then
+    echo "FAIL: pg_restore failed"
+    return 1
+  fi
+  local users
+  users="$(kubectl -n "$NS" exec deploy/postgres -- psql -U clinic -d clinic_db -tAc "SELECT count(*) FROM users" 2>/dev/null | tr -d '[:space:]')"
+  if [ -z "$users" ] || [ "$users" = "0" ]; then
+    echo "FAIL: restore did not populate the users table"
+    return 1
+  fi
+  echo "Restore verified (users=$users)"
+}
+
+ensure_cluster() {
+  local node="${CLUSTER_NAME}-control-plane"
+  if docker inspect "$node" >/dev/null 2>&1 && docker port "$node" 2>/dev/null | grep -q "0.0.0.0:3001"; then
+    echo "kind cluster $CLUSTER_NAME present with demo port mappings"
+    return 0
+  fi
+  echo "kind cluster $CLUSTER_NAME missing or without demo port mappings; recreating"
+  kind delete cluster --name "$CLUSTER_NAME" 2>/dev/null || true
+  kind create cluster --name "$CLUSTER_NAME" --config "$K8S_DIR/kind-config.yaml" --wait 120s
+  kubectl config set-cluster "$CLUSTER_KUBE_NAME" --server="$PUBLIC_APISERVER"
+  kubectl config use-context "$CLUSTER_KUBE_NAME"
+}
+
+healthcheck_endpoints() {
+  local endpoints=(
+    "keycloak|http://localhost:8180/realms/clinic"
+    "api-patient|http://localhost:3001/api/health"
+    "api-doctor|http://localhost:3002/api/health"
+    "api-assistant|http://localhost:3003/api/health"
+    "api-admin|http://localhost:3004/api/health"
+    "patient-portal|http://localhost:5173/"
+    "doctor-portal|http://localhost:5174/"
+    "assistant-portal|http://localhost:5175/"
+    "admin-portal|http://localhost:5176/"
+    "mailpit|http://localhost:8025/"
+  )
+  local failed=() entry svc url ok deadline
+  for entry in "${endpoints[@]}"; do
+    svc="${entry%%|*}"
+    url="${entry#*|}"
+    deadline=$((SECONDS + MAX_WAIT))
+    ok=0
+    while [ "$SECONDS" -lt "$deadline" ]; do
+      if curl -fsS -o /dev/null "$url" 2>/dev/null; then
+        echo "OK  $svc ($url)"
+        ok=1
+        break
+      fi
+      sleep 5
+    done
+    if [ "$ok" -eq 0 ]; then
+      echo "FAIL $svc ($url)"
+      failed+=("$svc")
+    fi
+  done
+  if [ "${#failed[@]}" -gt 0 ]; then
+    echo "Unhealthy services: ${failed[*]}"
+    return 1
+  fi
+}
+
+# 1. DB backups (compose stack first, then k8s state)
+dump_compose_pg
+dump_k8s_pg
+fresh_backup="$BACKUP_DIR/clinic-db-$ts.dump"
+
+# 2. Update repo to target branch (re-exec if the script changed on disk)
 git -C "$REPO_DIR" fetch --all --prune
 START_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
 git -C "$REPO_DIR" reset --hard "origin/$TARGET"
@@ -30,80 +162,65 @@ if [ "$(git -C "$REPO_DIR" rev-parse HEAD)" != "$START_SHA" ]; then
   exec bash "$0" "$@"
 fi
 
-if [ -f "$OLD_COMPOSE" ]; then
-  echo "Tearing down old stack ($OLD_COMPOSE)"
-  docker compose -f "$OLD_COMPOSE" --profile apps down --remove-orphans
+# 3. Tear down the old docker-compose stack (frees the host ports for kind)
+if [ -f /root/cerios-clinic/docker-compose.yml ]; then
+  echo "Tearing down legacy stack (/root/cerios-clinic/docker-compose.yml)"
+  docker compose -f /root/cerios-clinic/docker-compose.yml --profile apps down --remove-orphans || true
+fi
+if docker compose -f "$compose_yml" ps -q >/dev/null 2>&1 && [ -n "$(docker compose -f "$compose_yml" ps -q 2>/dev/null)" ]; then
+  echo "Tearing down docker-compose demo stack"
+  docker compose -f "$compose_yml" --profile apps down --remove-orphans
+fi
+docker rm -f "$(docker ps -aq --filter name=clinic- 2>/dev/null)" 2>/dev/null || true
+
+# 4. Ensure the kind cluster exists with the demo port mappings
+ensure_cluster
+
+# 5. Apply postgres first and wait until ready (fresh PVC is empty)
+kubectl apply -f "$K8S_DIR/namespace.yaml"
+kubectl apply -f "$K8S_DIR/postgres.yaml"
+wait_deploy postgres
+
+# 6. Restore the clinic DB dump into an empty PVC
+if db_has_data; then
+  echo "Postgres already has data, skipping restore"
 else
-  echo "No old stack compose found, skipping teardown"
-fi
-docker rm -f $(docker ps -aq --filter name=clinic-) 2>/dev/null || true
-
-echo "Starting demo stack (pulling published images)"
-docker compose -f "$REPO_DIR/docker-compose.demo.yml" up -d --pull always
-
-echo "Waiting for services to become healthy (max ${MAX_WAIT}s)"
-endpoints=(
-  "keycloak|http://localhost:8180/realms/clinic"
-  "api-patient|http://localhost:3001/api/health"
-  "api-doctor|http://localhost:3002/api/health"
-  "api-assistant|http://localhost:3003/api/health"
-  "api-admin|http://localhost:3004/api/health"
-  "patient-portal|http://localhost:5173/"
-  "doctor-portal|http://localhost:5174/"
-  "assistant-portal|http://localhost:5175/"
-  "admin-portal|http://localhost:5176/"
-)
-
-failed=()
-for entry in "${endpoints[@]}"; do
-  svc="${entry%%|*}"
-  url="${entry#*|}"
-  deadline=$((SECONDS + MAX_WAIT))
-  ok=0
-  while [ "$SECONDS" -lt "$deadline" ]; do
-    if curl -fsS -o /dev/null "$url" 2>/dev/null; then
-      echo "OK  $svc ($url)"
-      ok=1
-      break
-    fi
-    sleep 5
-  done
-  if [ "$ok" -eq 0 ]; then
-    echo "FAIL $svc ($url)"
-    failed+=("$svc")
+  newest="$(ls -t "$BACKUP_DIR"/clinic-db-*.dump 2>/dev/null | head -1 || true)"
+  dump_to_use="$fresh_backup"
+  [ -f "$dump_to_use" ] || dump_to_use="$newest"
+  if [ -n "${dump_to_use:-}" ] && [ -f "$dump_to_use" ]; then
+    restore_backup "$dump_to_use"
+  else
+    echo "No DB dump found; leaving postgres empty (db-init job will seed it)"
   fi
-done
-
-docker compose -f "$REPO_DIR/docker-compose.demo.yml" ps
-
-if [ "${#failed[@]}" -gt 0 ]; then
-  echo "Unhealthy services: ${failed[*]}"
-  exit 1
 fi
 
-echo "Fixing Keycloak realms (sslRequired=none so HTTP works on the demo host)"
-for i in $(seq 1 30); do
-  TOKEN=$(curl -sf -X POST "http://localhost:8180/realms/master/protocol/openid-connect/token" \
-    -d "client_id=admin-cli" \
-    -d "username=admin" \
-    -d "password=admin_secret" \
-    -d "grant_type=password" 2>/dev/null | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
-  [ -n "$TOKEN" ] && break
-  echo "Attempt $i/30 - waiting 5s..."
-  sleep 5
-done
-if [ -z "$TOKEN" ]; then
-  echo "FAIL Could not obtain Keycloak admin token"
-  exit 1
-fi
-echo "Keycloak admin token acquired"
+# 7. Apply the rest of the stack and restart everything so the newest
+#    published images are pulled (floating :latest / :demo tags)
+kubectl apply -f "$K8S_DIR/keycloak.yaml"
+kubectl apply -f "$K8S_DIR/mailpit.yaml"
+kubectl apply -f "$K8S_DIR/apis.yaml"
+kubectl apply -f "$K8S_DIR/portals.yaml"
+kubectl -n "$NS" rollout restart deployment --all
 
-for realm in master clinic; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT -H "Authorization: Bearer $TOKEN" \
-    -H "Content-Type: application/json" \
-    "http://localhost:8180/admin/realms/$realm" \
-    -d '{"sslRequired": "none"}')
-  echo "Realm $realm sslRequired -> none (HTTP:$code)"
+for d in postgres keycloak mailpit api-patient api-doctor api-assistant api-admin \
+         patient-portal doctor-portal assistant-portal admin-portal; do
+  wait_deploy "$d"
 done
 
-echo "Demo stack is healthy"
+# 8. Run migrations + seed (idempotent), then the Keycloak realm fix
+kubectl -n "$NS" delete job db-init --ignore-not-found
+kubectl apply -f "$K8S_DIR/db-init.yaml"
+wait_job db-init
+
+kubectl -n "$NS" delete job keycloak-fix --ignore-not-found
+kubectl apply -f "$K8S_DIR/keycloak-fix.yaml"
+wait_job keycloak-fix
+
+# 9. Verify the public endpoints
+healthcheck_endpoints
+
+kubectl -n "$NS" get pods -o wide
+
+echo "Demo stack is healthy on kind cluster $CLUSTER_NAME"
+echo "Rollback: docker compose -f $compose_yml up -d --pull always"

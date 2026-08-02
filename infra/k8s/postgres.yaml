@@ -1,0 +1,81 @@
+# Postgres for the demo stack. Single replica with a local-path PVC.
+# Data is preserved across redeploys; infra/deploy-demo.sh restores the
+# clinic DB dump into an empty PVC (first deploy) and otherwise reuses it.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clinic-postgres-data
+  namespace: clinic
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: clinic
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: ghcr.io/steavy/cerios-clinic/postgres:latest
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_USER
+              value: clinic
+            - name: POSTGRES_PASSWORD
+              value: clinic_secret
+            - name: POSTGRES_DB
+              value: clinic_db
+          ports:
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "clinic", "-d", "clinic_db"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "clinic", "-d", "clinic_db"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: clinic-postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: clinic
+spec:
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

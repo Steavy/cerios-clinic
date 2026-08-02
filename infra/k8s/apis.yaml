@@ -1,0 +1,328 @@
+# The four API services. External exposure via NodePort services matching the
+# kind extraPortMappings (host:3001-3004 -> node:30001-30004). Probes hit the
+# same /api/health endpoint the deploy script and workflow verify.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-patient
+  namespace: clinic
+  labels:
+    app: api-patient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-patient
+  template:
+    metadata:
+      labels:
+        app: api-patient
+    spec:
+      containers:
+        - name: api-patient
+          image: ghcr.io/steavy/cerios-clinic/api-patient:latest
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "3001"
+            - name: NODE_ENV
+              value: production
+            - name: ENABLE_SWAGGER
+              value: "true"
+            - name: DATABASE_URL
+              value: postgresql://clinic:clinic_secret@postgres:5432/clinic_db
+            - name: KEYCLOAK_URL
+              value: http://keycloak:8080
+            - name: KEYCLOAK_PUBLIC_URL
+              value: http://demo-sparta.mooo.com:8180
+            - name: KEYCLOAK_REALM
+              value: clinic
+            - name: KEYCLOAK_PATIENT_CLIENT_ID
+              value: patient-portal-client
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: api-service-client
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              value: api_service_secret_change_in_prod
+            - name: API_PATIENT_CORS_ORIGINS
+              value: http://localhost:5173,http://techlab5.mooo.com:5173,http://demo-sparta.mooo.com:5173
+            - name: PATIENT_PORTAL_URL
+              value: http://demo-sparta.mooo.com:5173
+            - name: SMTP_HOST
+              value: mailpit
+            - name: SMTP_PORT
+              value: "1025"
+          ports:
+            - name: http
+              containerPort: 3001
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-patient
+  namespace: clinic
+spec:
+  type: NodePort
+  selector:
+    app: api-patient
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+      nodePort: 30001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-doctor
+  namespace: clinic
+  labels:
+    app: api-doctor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-doctor
+  template:
+    metadata:
+      labels:
+        app: api-doctor
+    spec:
+      containers:
+        - name: api-doctor
+          image: ghcr.io/steavy/cerios-clinic/api-doctor:latest
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "3002"
+            - name: NODE_ENV
+              value: production
+            - name: ENABLE_SWAGGER
+              value: "true"
+            - name: DATABASE_URL
+              value: postgresql://clinic:clinic_secret@postgres:5432/clinic_db
+            - name: KEYCLOAK_URL
+              value: http://keycloak:8080
+            - name: KEYCLOAK_PUBLIC_URL
+              value: http://demo-sparta.mooo.com:8180
+            - name: KEYCLOAK_REALM
+              value: clinic
+            - name: KEYCLOAK_DOCTOR_CLIENT_ID
+              value: doctor-portal-client
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: api-service-client
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              value: api_service_secret_change_in_prod
+            - name: API_DOCTOR_CORS_ORIGINS
+              value: http://localhost:5174,http://techlab5.mooo.com:5174,http://demo-sparta.mooo.com:5174
+            - name: SMTP_HOST
+              value: mailpit
+            - name: SMTP_PORT
+              value: "1025"
+          ports:
+            - name: http
+              containerPort: 3002
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-doctor
+  namespace: clinic
+spec:
+  type: NodePort
+  selector:
+    app: api-doctor
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+      nodePort: 30002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-assistant
+  namespace: clinic
+  labels:
+    app: api-assistant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-assistant
+  template:
+    metadata:
+      labels:
+        app: api-assistant
+    spec:
+      containers:
+        - name: api-assistant
+          image: ghcr.io/steavy/cerios-clinic/api-assistant:latest
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "3003"
+            - name: NODE_ENV
+              value: production
+            - name: ENABLE_SWAGGER
+              value: "true"
+            - name: DATABASE_URL
+              value: postgresql://clinic:clinic_secret@postgres:5432/clinic_db
+            - name: KEYCLOAK_URL
+              value: http://keycloak:8080
+            - name: KEYCLOAK_PUBLIC_URL
+              value: http://demo-sparta.mooo.com:8180
+            - name: KEYCLOAK_REALM
+              value: clinic
+            - name: KEYCLOAK_ASSISTANT_CLIENT_ID
+              value: assistant-portal-client
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: api-service-client
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              value: api_service_secret_change_in_prod
+            - name: API_ASSISTANT_CORS_ORIGINS
+              value: http://localhost:5175,http://techlab5.mooo.com:5175,http://demo-sparta.mooo.com:5175
+            - name: SMTP_HOST
+              value: mailpit
+            - name: SMTP_PORT
+              value: "1025"
+          ports:
+            - name: http
+              containerPort: 3003
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-assistant
+  namespace: clinic
+spec:
+  type: NodePort
+  selector:
+    app: api-assistant
+  ports:
+    - name: http
+      port: 3003
+      targetPort: 3003
+      nodePort: 30003
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-admin
+  namespace: clinic
+  labels:
+    app: api-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-admin
+  template:
+    metadata:
+      labels:
+        app: api-admin
+    spec:
+      containers:
+        - name: api-admin
+          image: ghcr.io/steavy/cerios-clinic/api-admin:latest
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "3004"
+            - name: NODE_ENV
+              value: production
+            - name: ENABLE_SWAGGER
+              value: "true"
+            - name: DATABASE_URL
+              value: postgresql://clinic:clinic_secret@postgres:5432/clinic_db
+            - name: KEYCLOAK_URL
+              value: http://keycloak:8080
+            - name: KEYCLOAK_PUBLIC_URL
+              value: http://demo-sparta.mooo.com:8180
+            - name: KEYCLOAK_REALM
+              value: clinic
+            - name: KEYCLOAK_ADMIN_PORTAL_CLIENT_ID
+              value: admin-portal-client
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: api-service-client
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              value: api_service_secret_change_in_prod
+            - name: API_ADMIN_CORS_ORIGINS
+              value: http://localhost:5176,http://techlab5.mooo.com:5176,http://demo-sparta.mooo.com:5176
+            - name: SMTP_HOST
+              value: mailpit
+            - name: SMTP_PORT
+              value: "1025"
+          ports:
+            - name: http
+              containerPort: 3004
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-admin
+  namespace: clinic
+spec:
+  type: NodePort
+  selector:
+    app: api-admin
+  ports:
+    - name: http
+      port: 3004
+      targetPort: 3004
+      nodePort: 30004

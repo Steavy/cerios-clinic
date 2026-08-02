@@ -1,0 +1,33 @@
+# DB migrations + seed. Idempotent (migrate:deploy only applies unapplied
+# migrations; seed checks for existing Keycloak users before creating).
+# Run by infra/deploy-demo.sh after postgres and keycloak are ready.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+  namespace: clinic
+spec:
+  backoffLimit: 5
+  activeDeadlineSeconds: 900
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-init
+          image: ghcr.io/steavy/cerios-clinic/db-init:latest
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_URL
+              value: postgresql://clinic:clinic_secret@postgres:5432/clinic_db
+            - name: KEYCLOAK_URL
+              value: http://keycloak:8080
+            - name: KEYCLOAK_REALM
+              value: clinic
+            - name: KEYCLOAK_ADMIN_USER
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin_secret
+            - name: SEED_STAFF_PASSWORD
+              value: "Clinic1234!"
+            - name: SEED_PATIENT_PASSWORD
+              value: "Patient1234!"
