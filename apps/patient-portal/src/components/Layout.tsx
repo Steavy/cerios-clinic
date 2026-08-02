@@ -159,7 +159,7 @@ export default function Layout(): React.ReactElement {
 				<Outlet />
 			</main>
 
-			<PortalFooter portalName="Patient Portal" showLogo={showFooterLogo} />
+			<PortalFooter portalName="Patient Portal v2" showLogo={showFooterLogo} />
 		</div>
 	);
 }
