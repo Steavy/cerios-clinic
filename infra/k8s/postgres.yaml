@@ -55,6 +55,13 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+          startupProbe:
+            exec:
+              command: ["pg_isready", "-t", "5", "-U", "clinic", "-d", "clinic_db"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 30
           readinessProbe:
             exec:
               command: ["pg_isready", "-t", "5", "-U", "clinic", "-d", "clinic_db"]

@@ -43,12 +43,21 @@ spec:
               containerPort: 1025
             - name: http
               containerPort: 8025
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 5
             failureThreshold: 6
 ---
 # Internal ClusterIP service used as SMTP_HOST by the APIs.
