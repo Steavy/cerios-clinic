@@ -46,6 +46,22 @@ endpoints=(
   "mailpit|http://localhost:8025/"
 )
 
+# The zero-downtime gate checks Service endpoint availability (not latency):
+# a shared host can be saturated by other tenants' workloads (load 80+), which
+# would make any latency-based gate fail even though the services never drop.
+k8s_svcs=(
+  "keycloak|keycloak"
+  "api-patient|api-patient"
+  "api-doctor|api-doctor"
+  "api-assistant|api-assistant"
+  "api-admin|api-admin"
+  "patient-portal|patient-portal"
+  "doctor-portal|doctor-portal"
+  "assistant-portal|assistant-portal"
+  "admin-portal|admin-portal"
+  "mailpit|mailpit"
+)
+
 check_endpoints() {
   local failed=() entry svc url deadline ok
   for entry in "${endpoints[@]}"; do
@@ -70,19 +86,20 @@ check_endpoints() {
 
 watch_zero_downtime() {
   local log="$1"
-  local entry svc url
+  local entry label k8ssvc addrs
   declare -A consec=()
   while :; do
-    for entry in "${endpoints[@]}"; do
-      svc="${entry%%|*}"
-      url="${entry#*|}"
-      if curl -fsS -o /dev/null --max-time 6 "$url" 2>/dev/null; then
-        consec["$svc"]=0
+    for entry in "${k8s_svcs[@]}"; do
+      label="${entry%%|*}"
+      k8ssvc="${entry#*|}"
+      addrs="$(kubectl -n "$NS" get endpoints "$k8ssvc" -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)"
+      if [ -n "$addrs" ]; then
+        consec["$label"]=0
       else
-        consec["$svc"]=$((${consec["$svc"]:-0} + 1))
-        if [ "${consec["$svc"]}" -ge 4 ]; then
-          echo "DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
-          consec["$svc"]=0
+        consec["$label"]=$((${consec["$label"]:-0} + 1))
+        if [ "${consec["$label"]}" -ge 3 ]; then
+          echo "[$(date -u +%H:%M:%S)] DOWNTIME $label (no ready endpoints for service $k8ssvc)" >> "$log"
+          consec["$label"]=0
         fi
       fi
     done

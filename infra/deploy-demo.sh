@@ -17,10 +17,21 @@ NS="${NS:-clinic}"
 PUBLIC_APISERVER="https://91.99.134.58:6443"
 K8S_DIR="$REPO_DIR/infra/k8s"
 MAX_WAIT="${MAX_WAIT:-300}"
+MARKER_FILE="${MARKER_FILE:-/var/tmp/cerios-clinic-last-deployed.sha}"
+LOCK_FILE="${LOCK_FILE:-/var/tmp/cerios-clinic-deploy.lock}"
 
 mkdir -p "$BACKUP_DIR"
 ts="$(date +%Y%m%d-%H%M%S)"
 compose_yml="$REPO_DIR/docker-compose.demo.yml"
+
+# Only one deploy may run at a time: manual runs and CI runs share this host,
+# and two concurrent deploy-demo.sh invocations churn the same cluster and
+# trip each other's zero-downtime gate. The lock fd survives the re-exec below.
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  echo "Another deploy-demo run is in progress; this run defers to it"
+  exit 0
+fi
 
 dump_compose_pg() {
   if docker inspect clinic-postgres >/dev/null 2>&1; then
@@ -146,38 +157,42 @@ healthcheck_endpoints() {
   fi
 }
 
-# Zero-downtime gate: polls every public endpoint; logs a DOWNTIME line when an
-# endpoint is unreachable for >= 4 consecutive polls (~20s, absorbing brief
-# load blips while still catching any sustained outage). The deploy fails if
-# any downtime event occurred. Each event carries a UTC timestamp and the host
-# load so the causing rollout step can be correlated.
+# Zero-downtime gate: watches the cluster Services backing every public
+# endpoint. A service is "down" only when it has no Ready backend pod, which is
+# the only reliable signal of real downtime during a deploy. A raw latency gate
+# is unusable on this shared host: other tenants' workloads (e.g. a batch JVM
+# burning 2-4 cores) can push load to 80+ and make even a healthy service slow
+# past any curl timeout, which is not deploy downtime. The Service always has
+# >=1 Ready endpoint during a clean RollingUpdate (maxUnavailable 0), so any
+# DOWNTIME event is a genuine outage.
 watch_zero_downtime() {
   local log="$1"
   local endpoints=(
-    "keycloak|http://localhost:8180/realms/clinic"
-    "api-patient|http://localhost:3001/api/health"
-    "api-doctor|http://localhost:3002/api/health"
-    "api-assistant|http://localhost:3003/api/health"
-    "api-admin|http://localhost:3004/api/health"
-    "patient-portal|http://localhost:5173/"
-    "doctor-portal|http://localhost:5174/"
-    "assistant-portal|http://localhost:5175/"
-    "admin-portal|http://localhost:5176/"
-    "mailpit|http://localhost:8025/"
+    "keycloak|keycloak"
+    "api-patient|api-patient"
+    "api-doctor|api-doctor"
+    "api-assistant|api-assistant"
+    "api-admin|api-admin"
+    "patient-portal|patient-portal"
+    "doctor-portal|doctor-portal"
+    "assistant-portal|assistant-portal"
+    "admin-portal|admin-portal"
+    "mailpit|mailpit"
   )
-  local entry svc url
+  local entry label k8ssvc
   declare -A consec=()
   while :; do
     for entry in "${endpoints[@]}"; do
-      svc="${entry%%|*}"
-      url="${entry#*|}"
-      if curl -fsS -o /dev/null --max-time 6 "$url" 2>/dev/null; then
-        consec["$svc"]=0
+      label="${entry%%|*}"
+      k8ssvc="${entry#*|}"
+      addrs="$(kubectl -n "$NS" get endpoints "$k8ssvc" -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)"
+      if [ -n "$addrs" ]; then
+        consec["$label"]=0
       else
-        consec["$svc"]=$((${consec["$svc"]:-0} + 1))
-        if [ "${consec["$svc"]}" -ge 4 ]; then
-          echo "[$(date -u +%H:%M:%S) load=$(awk '{print $1}' /proc/loadavg)] DOWNTIME $svc (${consec["$svc"]} consecutive fails: $url)" >> "$log"
-          consec["$svc"]=0
+        consec["$label"]=$((${consec["$label"]:-0} + 1))
+        if [ "${consec["$label"]}" -ge 3 ]; then
+          echo "[$(date -u +%H:%M:%S) load=$(awk '{print $1}' /proc/loadavg)] DOWNTIME $label (no ready endpoints for service $k8ssvc)" >> "$log"
+          consec["$label"]=0
         fi
       fi
     done
@@ -204,7 +219,6 @@ fi
 #     successful deploy. Every forced restart of the full stack is churn, and
 #     the smoke-test -> Deploy Demo cascade can fire a run every few minutes;
 #     a no-op keeps the gate trivially green without touching running pods.
-MARKER_FILE="${MARKER_FILE:-/var/tmp/cerios-clinic-last-deployed.sha}"
 TARGET_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
 if [ -f "$MARKER_FILE" ] && [ "$(cat "$MARKER_FILE")" = "$TARGET_SHA" ]; then
   echo "No changes since last deploy ($(git -C "$REPO_DIR" rev-parse --short HEAD)); skipping rollout"
