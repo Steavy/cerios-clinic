@@ -1,0 +1,173 @@
+name: Build Mobile APK & Publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/patient-mobile/**"
+      - "infra/docker/Dockerfile.mobile"
+      - ".nvmrc"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Generate mobile .env (emulator profile)
+        run: node apps/patient-mobile/setup-env.mjs emulator
+
+      - name: Install local node_modules for React Native Gradle plugin
+        run: npm --prefix apps/patient-mobile install
+
+      - name: Build release APK
+        working-directory: apps/patient-mobile/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Verify APK output
+        run: |
+          ls -lh apps/patient-mobile/android/app/build/outputs/apk/release/
+          test -f apps/patient-mobile/android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: patient-mobile-apk
+          path: apps/patient-mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+  publish-image:
+    name: Publish patient-mobile image
+    runs-on: ubuntu-latest
+    needs: build-apk
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download APK
+        uses: actions/download-artifact@v7
+        with:
+          name: patient-mobile-apk
+          path: apk
+
+      - name: Set lowercase repository name
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/patient-mobile
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=,format=long
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: infra/docker/Dockerfile.mobile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=patient-mobile
+          cache-to: type=gha,mode=max,scope=patient-mobile
+
+  dispatch-mobile-tests:
+    name: Dispatch "Mobile App Tests"
+    runs-on: ubuntu-latest
+    needs: publish-image
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Dispatch to playwright-sparta with built image SHA
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "Steavy",
+              repo: "playwright-sparta",
+              workflow_id: "mobile-test-ci.yml",
+              ref: "main",
+              inputs: { "image-tag": context.sha },
+            });
+
+  notify-opencode-on-failure:
+    name: Notify opencode on mobile build failure
+    runs-on: ubuntu-latest
+    needs: publish-image
+    if: failure() && !cancelled()
+
+    steps:
+      - name: Dispatch failure bridge to playwright-sparta
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "Steavy",
+              repo: "playwright-sparta",
+              workflow_id: "handle-opencode-failure.yml",
+              ref: "main",
+              inputs: {
+                repo: `${context.repo.owner}/${context.repo.repo}`,
+                "run-id": String(context.runId),
+                "workflow-name": context.workflow,
+                "run-url": `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                "head-sha": context.sha,
+                "head-branch": context.ref.replace("refs/heads/", ""),
+              },
+            });
