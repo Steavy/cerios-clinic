@@ -1,0 +1,7 @@
+# Carrier image for the patient-mobile release APK.
+# The mobile test pipeline (playwright-sparta "Mobile App Tests") pulls this
+# image and extracts /apk/app-release.apk to install on an emulator.
+# Build expects the APK in <repo-root>/apk/app-release.apk (download-artifact).
+FROM alpine:3.20
+
+COPY apk/app-release.apk /apk/app-release.apk

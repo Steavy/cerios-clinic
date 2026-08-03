@@ -84,6 +84,10 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        // AndroidManifest.xml references ${usesCleartextTraffic}; network_security_config.xml
+        // is the source of truth at runtime (base-config permits cleartext). Resolve the
+        // placeholder so the manifest merger succeeds for both variants.
+        manifestPlaceholders = [usesCleartextTraffic: "true"]
     }
     signingConfigs {
         debug {
