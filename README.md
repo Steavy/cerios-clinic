@@ -297,7 +297,10 @@ clinic-monorepo/
 │       └── init.sql
 ├── .github/
 │   └── workflows/
-│       └── unit-ci.yml   # CI workflow for unit tests
+│       ├── unit-ci.yml       # CI workflow for unit tests
+│       ├── stryker-pages.yml # Stryker mutation tests + publish to report/stryker
+│       ├── allure-pages.yml  # Combined Allure + Stryker deploy to GitHub Pages
+│       └── mobile-build.yml  # Build & publish patient-mobile APK/image
 ├── .env                  # Environment variables
 ├── .env.example
 ├── vitest.config.ts      # Vitest configuration
@@ -337,6 +340,22 @@ xdg-open reports/mutation/mutation.html
 start reports/mutation/mutation.html
 ```
 
+### Mutation Report in CI (GitHub Pages)
+
+The **Stryker Mutation Report** workflow (`.github/workflows/stryker-pages.yml`) runs the same `pnpm test:stryker` command in CI and publishes the HTML report to the `report/stryker` branch of this repository. A combined GitHub Pages deploy then serves it at:
+
+**Public report:** https://steavy.github.io/cerios-clinic/strykerreport/
+
+The workflow is triggered by:
+
+| Trigger                                      | Description                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| `workflow_dispatch`                          | Manual — **Actions → Stryker Mutation Report → Run workflow**       |
+| `repository_dispatch` (`stryker-report`)     | Programmatic (e.g. from another workflow or a webhook)              |
+| `schedule` (`0 2 * * 0`)                     | Weekly, every Sunday at 02:00 UTC                                   |
+
+The `mutation` job runs the mutation tests (mutating `packages/portal-common` and `packages/shared-types`), the `publish` job force-pushes `reports/mutation/mutation.html` as `index.html` to `report/stryker` and then triggers the GitHub Pages deploy.
+
 ---
 
 ## Patient Mobile App (Android)
@@ -362,10 +381,12 @@ For obtaining API tokens and testing protected endpoints from scripts, Postman, 
 Playwright smoke tests for this application run in [playwright-sparta](https://github.com/Steavy/playwright-sparta). After every smoke run — success **or** failure — the Allure report is published automatically to GitHub Pages. A nightly **Full Regression Suite** (all web Playwright projects) publishes its report through the same chain, so the History tab and Trend chart keep growing day after day:
 
 1. **Publish** — the `Publish Allure Report` workflow in `playwright-sparta` downloads the report artifact and force-pushes it as a single commit to the `report/allure` branch of this repository (using a fine-grained PAT with Contents: read & write, stored as the `CLINIC_REPORT_TOKEN` secret in `playwright-sparta`).
-2. **Deploy** — the `allure-pages.yml` workflow in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys the `report/allure` branch to GitHub Pages.
+2. **Deploy** — the `Deploy Reports to Pages` workflow (`allure-pages.yml`) in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys a combined site to GitHub Pages: the `report/allure` branch at the site root **and** the `report/stryker` branch (the Stryker mutation report, see above) under `/strykerreport/`. Both reports live in a single GitHub Pages deployment.
 
 Each smoke run carries the previous report's `history/` forward, so the published report shows the **History** tab and a growing **Trend** chart (data for the last 20 runs).
 
-**Public report:** https://steavy.github.io/cerios-clinic/
+**Public reports:**
+- Allure (test results): https://steavy.github.io/cerios-clinic/
+- Stryker (mutation testing): https://steavy.github.io/cerios-clinic/strykerreport/
 
-> Manually re-deploy the current report any time via **Actions → Deploy Allure Report to Pages → Run workflow**. GitHub Pages must be enabled for this repository with source **GitHub Actions**.
+> Manually re-deploy the current reports any time via **Actions → Deploy Reports to Pages → Run workflow**. GitHub Pages must be enabled for this repository with source **GitHub Actions**.
