@@ -1,4 +1,4 @@
-name: Deploy Allure Report to Pages
+name: Deploy Reports to Pages
 
 on:
   repository_dispatch:
@@ -21,10 +21,31 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout report branch
-        uses: actions/checkout@v6
+      - name: Checkout Allure report branch
+        uses: actions/checkout@v7
         with:
           ref: report/allure
+          path: allure
+
+      - name: Checkout Stryker report branch
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          ref: report/stryker
+          path: stryker
+
+      - name: Assemble combined site (Allure at /, Stryker at /strykerreport/)
+        run: |
+          mkdir -p combined
+          cp -a allure/. combined/
+          if [ -d stryker ] && [ -n "$(ls -A stryker)" ]; then
+            mkdir -p combined/strykerreport
+            cp -a stryker/. combined/strykerreport/
+            echo "strykerreport added"
+          else
+            echo "no strykerreport yet (report/stryker not populated)"
+          fi
+          ls -la combined/ | head
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
@@ -32,7 +53,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: .
+          path: combined
 
       - name: Deploy to GitHub Pages
         id: deployment
