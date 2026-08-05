@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deploys the demo stack to the minikube cluster on the demo host (91.99.134.58).
+# Deploys the demo stack to the minikube cluster on the demo host.
 # Triggered by the deploy-demo workflow in playwright-sparta after smoke tests
 # pass. Uses published ghcr.io/steavy/cerios-clinic images (portals: `demo`,
 # rest: `latest`). Rollback: `docker compose -f docker-compose.demo.yml
@@ -14,11 +14,24 @@ BACKUP_DIR="${BACKUP_DIR:-/root/backups}"
 MINIKUBE_PROFILE="${MINIKUBE_PROFILE:-clinic}"
 CLUSTER_KUBE_NAME="$MINIKUBE_PROFILE"
 NS="${NS:-clinic}"
-PUBLIC_APISERVER="https://91.99.134.58:6443"
 K8S_DIR="$REPO_DIR/infra/k8s"
 MAX_WAIT="${MAX_WAIT:-300}"
 MARKER_FILE="${MARKER_FILE:-/var/tmp/cerios-clinic-last-deployed.sha}"
 LOCK_FILE="${LOCK_FILE:-/var/tmp/cerios-clinic-deploy.lock}"
+
+# The demo host IP is deliberately not committed to this public repo: it is
+# supplied via $CERIOS_DEMO_HOST_IP (the Deploy Demo workflow injects it from
+# the private DEMO_HOST_IP secret) or, for manual runs on the host, read from
+# the root-only file /root/.cerios-demo-host-ip.
+DEMO_HOST_IP="${CERIOS_DEMO_HOST_IP:-}"
+if [ -z "$DEMO_HOST_IP" ] && [ -s /root/.cerios-demo-host-ip ]; then
+  DEMO_HOST_IP="$(tr -d '[:space:]' < /root/.cerios-demo-host-ip)"
+fi
+if [ -z "$DEMO_HOST_IP" ]; then
+  echo "ERROR: demo host IP unknown. Set CERIOS_DEMO_HOST_IP or create /root/.cerios-demo-host-ip." >&2
+  exit 1
+fi
+PUBLIC_APISERVER="https://$DEMO_HOST_IP:6443"
 
 mkdir -p "$BACKUP_DIR"
 ts="$(date +%Y%m%d-%H%M%S)"
@@ -120,7 +133,7 @@ ensure_cluster() {
   fi
   echo "minikube cluster $MINIKUBE_PROFILE missing, unreachable, or without demo port mappings; recreating"
   minikube delete --profile "$MINIKUBE_PROFILE" 2>/dev/null || true
-  bash "$K8S_DIR/minikube-start.sh"
+  CERIOS_DEMO_HOST_IP="$DEMO_HOST_IP" bash "$K8S_DIR/minikube-start.sh"
   kubectl config set-cluster "$CLUSTER_KUBE_NAME" --server="$PUBLIC_APISERVER"
   kubectl config use-context "$CLUSTER_KUBE_NAME"
 }

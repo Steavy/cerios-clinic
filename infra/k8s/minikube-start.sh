@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Creates/starts the minikube demo cluster on the demo host (91.99.134.58).
+# Creates/starts the minikube demo cluster on the demo host.
 # Invoked by deploy-demo.sh (ensure_cluster) when the cluster is missing or its
 # demo port mappings are gone. All flags were validated on this host with the
 # clinic-test profile before the kind -> minikube cutover.
@@ -25,6 +25,18 @@ set -euo pipefail
 
 PROFILE="${MINIKUBE_PROFILE:-clinic}"
 
+# The demo host IP (used as apiserver cert SAN via --apiserver-ips) is not
+# committed to this public repo: $CERIOS_DEMO_HOST_IP (injected by CI from the
+# private DEMO_HOST_IP secret) or the root-only file /root/.cerios-demo-host-ip.
+DEMO_HOST_IP="${CERIOS_DEMO_HOST_IP:-}"
+if [ -z "$DEMO_HOST_IP" ] && [ -s /root/.cerios-demo-host-ip ]; then
+  DEMO_HOST_IP="$(tr -d '[:space:]' < /root/.cerios-demo-host-ip)"
+fi
+if [ -z "$DEMO_HOST_IP" ]; then
+  echo "ERROR: demo host IP unknown. Set CERIOS_DEMO_HOST_IP or create /root/.cerios-demo-host-ip." >&2
+  exit 1
+fi
+
 minikube start \
   --profile "$PROFILE" \
   --driver=docker \
@@ -33,7 +45,7 @@ minikube start \
   --memory=4096 \
   --cpus=4 \
   --listen-address=0.0.0.0 \
-  --apiserver-ips=91.99.134.58 \
+  --apiserver-ips="$DEMO_HOST_IP" \
   --apiserver-port=8443 \
   --ports=6443:8443 \
   --ports=3001:30001 \
