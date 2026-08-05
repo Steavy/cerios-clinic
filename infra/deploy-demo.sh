@@ -223,6 +223,13 @@ watch_zero_downtime() {
   )
   local entry label k8ssvc
   declare -A consec=()
+  # Tracks whether a service has EVER had ready endpoints during this watch.
+  # On a cold first deploy the namespace/services are brand new, so every
+  # endpoint starts empty simply because pods are still pulling images and
+  # booting -- that is normal startup, not downtime. Only count "no ready
+  # endpoints" against a service once it has actually been up at least once,
+  # so we still catch a real regression during the rolling restarts below.
+  declare -A seen_ready=()
   while :; do
     for entry in "${endpoints[@]}"; do
       label="${entry%%|*}"
@@ -230,7 +237,8 @@ watch_zero_downtime() {
       addrs="$(kubectl -n "$NS" get endpoints "$k8ssvc" -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)"
       if [ -n "$addrs" ]; then
         consec["$label"]=0
-      else
+        seen_ready["$label"]=1
+      elif [ "${seen_ready["$label"]:-0}" = "1" ]; then
         consec["$label"]=$((${consec["$label"]:-0} + 1))
         if [ "${consec["$label"]}" -ge 3 ]; then
           echo "[$(date -u +%H:%M:%S) load=$(awk '{print $1}' /proc/loadavg)] DOWNTIME $label (no ready endpoints for service $k8ssvc)" >> "$log"
