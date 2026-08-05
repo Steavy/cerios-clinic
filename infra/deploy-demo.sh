@@ -125,6 +125,41 @@ ensure_cluster() {
   kubectl config use-context "$CLUSTER_KUBE_NAME"
 }
 
+# Chaos Mesh is a cluster addon the post-deploy smoke-chaos-test gate depends on
+# (podchaos.chaos-mesh.org CRD). The CRDs live inside the cluster, so a cluster
+# recreate wipes them and the gate fails fast until someone reinstalls Chaos
+# Mesh by hand (see run 30979509221). Provisioning therefore reinstalls it
+# idempotently whenever the CRD is missing. Helm is the only supported install
+# path (chart 2.8.x; the old all-in-one manifest URLs are dead), so helm is
+# bootstrapped on first use if absent. minikube v1.36 defaults to the docker
+# runtime, which matches the chart defaults; containerd gets explicit flags.
+install_chaos_mesh() {
+  if kubectl get crd podchaos.chaos-mesh.org >/dev/null 2>&1; then
+    echo "Chaos Mesh already installed (CRD podchaos.chaos-mesh.org present)"
+    return 0
+  fi
+  echo "Chaos Mesh CRD missing; installing via helm (chart 2.8.3)"
+  if ! command -v helm >/dev/null 2>&1; then
+    echo "helm not found; bootstrapping helm 3.17.2"
+    curl -fsSL "https://get.helm.sh/helm-v3.17.2-linux-amd64.tar.gz" -o /tmp/helm-v3.17.2-linux-amd64.tar.gz
+    tar -xzf /tmp/helm-v3.17.2-linux-amd64.tar.gz -C /tmp
+    mv /tmp/linux-amd64/helm /usr/local/bin/helm
+    rm -rf /tmp/linux-amd64 /tmp/helm-v3.17.2-linux-amd64.tar.gz
+  fi
+  helm repo add chaos-mesh https://charts.chaos-mesh.org >/dev/null 2>&1 || true
+  helm repo update chaos-mesh >/dev/null 2>&1 || true
+  kubectl create namespace chaos-mesh --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+  local runtime extra=()
+  runtime="$(kubectl get node -o jsonpath='{.status.nodeInfo.containerRuntimeVersion}')"
+  case "$runtime" in
+    containerd://*) extra=(--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock) ;;
+  esac
+  helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh -n chaos-mesh --version 2.8.3 "${extra[@]}"
+  kubectl -n chaos-mesh rollout status deploy/chaos-controller-manager --timeout=420s >/dev/null
+  kubectl -n chaos-mesh rollout status ds/chaos-daemon --timeout=300s >/dev/null
+  echo "Chaos Mesh installed and chaos-controller-manager ready"
+}
+
 healthcheck_endpoints() {
   local endpoints=(
     "keycloak|http://localhost:8180/realms/clinic"
@@ -247,6 +282,10 @@ docker rm -f "$(docker ps -aq --filter name=clinic- 2>/dev/null)" 2>/dev/null ||
 
 # 4. Ensure the minikube cluster exists with the demo port mappings
 ensure_cluster
+
+# 4b. Keep Chaos Mesh available for the post-deploy smoke-chaos-test gate:
+#     a cluster recreate wipes the CRDs, so reinstall when missing.
+install_chaos_mesh
 
 # 5. Apply postgres first and wait until ready (fresh PVC is empty)
 kubectl apply -f "$K8S_DIR/namespace.yaml"
