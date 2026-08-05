@@ -52,6 +52,7 @@ jobs:
           docker run --rm \
             --volume "$PWD:/src" \
             --workdir /src \
+            --env HOME=/tmp \
             --user "$(id -u):$(id -g)" \
             semgrep/semgrep:latest \
             semgrep scan --config auto --sarif --output /src/semgrep.sarif /src
