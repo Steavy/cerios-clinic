@@ -34,7 +34,14 @@ jobs:
           ref: report/stryker
           path: stryker
 
-      - name: Assemble combined site (Allure at /, Stryker at /strykerreport/)
+      - name: Checkout Mobile Allure report branch
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          ref: report/allure-mobile
+          path: mobile-allure
+
+      - name: Assemble combined site (Allure at /, Stryker at /strykerreport/, Mobile at /mobile/)
         run: |
           mkdir -p combined
           cp -a allure/. combined/
@@ -44,6 +51,13 @@ jobs:
             echo "strykerreport added"
           else
             echo "no strykerreport yet (report/stryker not populated)"
+          fi
+          if [ -d mobile-allure ] && [ -n "$(ls -A mobile-allure)" ]; then
+            mkdir -p combined/mobile
+            cp -a mobile-allure/. combined/mobile/
+            echo "mobile report added"
+          else
+            echo "no mobile report yet (report/allure-mobile not populated)"
           fi
           ls -la combined/ | head
 

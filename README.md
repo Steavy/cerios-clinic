@@ -461,15 +461,16 @@ For obtaining API tokens and testing protected endpoints from scripts, Postman, 
 
 ## Allure Test Report
 
-Playwright smoke tests for this application run in [playwright-sparta](https://github.com/Steavy/playwright-sparta). After every smoke run — success **or** failure — the Allure report is published automatically to GitHub Pages. A nightly **Full Regression Suite** (all web Playwright projects) publishes its report through the same chain, so the History tab and Trend chart keep growing day after day:
+Playwright smoke tests for this application run in [playwright-sparta](https://github.com/Steavy/playwright-sparta). After every smoke run — success **or** failure — the Allure report is published automatically to GitHub Pages. A nightly **Full Regression Suite** (all web Playwright projects) publishes its report through the same chain, so the History tab and Trend chart keep growing day after day. **Mobile App Tests** runs publish their own report under `/mobile/` (web and mobile reports live side by side, so one never overwrites the other):
 
-1. **Publish** — the `Publish Allure Report` workflow in `playwright-sparta` downloads the report artifact and force-pushes it as a single commit to the `report/allure` branch of this repository (using a fine-grained PAT with Contents: read & write, stored as the `CLINIC_REPORT_TOKEN` secret in `playwright-sparta`).
-2. **Deploy** — the `Deploy Reports to Pages` workflow (`allure-pages.yml`) in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys a combined site to GitHub Pages: the `report/allure` branch at the site root **and** the `report/stryker` branch (the Stryker mutation report, see above) under `/strykerreport/`. Both reports live in a single GitHub Pages deployment.
+1. **Publish** — the `Publish Allure Report` workflow in `playwright-sparta` downloads the report artifact and force-pushes it as a single commit to the `report/allure` branch (web smoke/regression) or the `report/allure-mobile` branch (mobile app tests) of this repository (using a fine-grained PAT with Contents: read & write, stored as the `CLINIC_REPORT_TOKEN` secret in `playwright-sparta`).
+2. **Deploy** — the `Deploy Reports to Pages` workflow (`allure-pages.yml`) in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys a combined site to GitHub Pages: the `report/allure` branch at the site root, the `report/stryker` branch (the Stryker mutation report, see above) under `/strykerreport/`, and the `report/allure-mobile` branch under `/mobile/`. All reports live in a single GitHub Pages deployment.
 
-Each smoke run carries the previous report's `history/` forward, so the published report shows the **History** tab and a growing **Trend** chart (data for the last 20 runs).
+Each run carries the previous report's `history/` forward, so the published report shows the **History** tab and a growing **Trend** chart (data for the last 20 runs).
 
 **Public reports:**
-- Allure (test results): https://steavy.github.io/cerios-clinic/
+- Allure web (test results): https://steavy.github.io/cerios-clinic/
+- Allure mobile (patient app tests): https://steavy.github.io/cerios-clinic/mobile/
 - Stryker (mutation testing): https://steavy.github.io/cerios-clinic/strykerreport/
 
 > Manually re-deploy the current reports any time via **Actions → Deploy Reports to Pages → Run workflow**. GitHub Pages must be enabled for this repository with source **GitHub Actions**.
