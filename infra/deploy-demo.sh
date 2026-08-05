@@ -112,11 +112,13 @@ restore_backup() {
 }
 
 ensure_cluster() {
-  if docker inspect "$MINIKUBE_PROFILE" >/dev/null 2>&1 && docker port "$MINIKUBE_PROFILE" 2>/dev/null | grep -q "0.0.0.0:3001"; then
+  if docker inspect "$MINIKUBE_PROFILE" >/dev/null 2>&1 \
+     && docker port "$MINIKUBE_PROFILE" 2>/dev/null | grep -q "0.0.0.0:3001" \
+     && curl -sk --max-time 10 -o /dev/null -w '%{http_code}' "https://127.0.0.1:6443/healthz" 2>/dev/null | grep -q '^200$'; then
     echo "minikube cluster $MINIKUBE_PROFILE present with demo port mappings"
     return 0
   fi
-  echo "minikube cluster $MINIKUBE_PROFILE missing or without demo port mappings; recreating"
+  echo "minikube cluster $MINIKUBE_PROFILE missing, unreachable, or without demo port mappings; recreating"
   minikube delete --profile "$MINIKUBE_PROFILE" 2>/dev/null || true
   bash "$K8S_DIR/minikube-start.sh"
   kubectl config set-cluster "$CLUSTER_KUBE_NAME" --server="$PUBLIC_APISERVER"
