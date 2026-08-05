@@ -48,7 +48,14 @@ jobs:
           ref: report/zap
           path: zap
 
-      - name: Assemble combined site (Allure at /, Stryker at /strykerreport/, Mobile at /mobile/, DAST at /dast/)
+      - name: Checkout SAST report branch
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          ref: report/sast
+          path: sast
+
+      - name: Assemble combined site (Allure at /, Stryker at /strykerreport/, Mobile at /mobile/, DAST at /dast/, SAST at /sast/)
         run: |
           mkdir -p combined
           cp -a allure/. combined/
@@ -72,6 +79,13 @@ jobs:
             echo "dast report added"
           else
             echo "no dast report yet (report/zap not populated)"
+          fi
+          if [ -d sast ] && [ -n "$(ls -A sast)" ]; then
+            mkdir -p combined/sast
+            cp -a sast/. combined/sast/
+            echo "sast report added"
+          else
+            echo "no sast report yet (report/sast not populated)"
           fi
           ls -la combined/ | head
 
