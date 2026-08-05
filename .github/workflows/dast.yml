@@ -235,12 +235,13 @@ jobs:
             sleep 10
           done
 
+      - name: Prepare ZAP report directory
+        run: mkdir -p zap && chmod -R a+rwX zap
+
       - name: Scan api-patient (OpenAPI)
         continue-on-error: true
         run: |
           docker run --rm --network host \
-            --user "$(id -u):$(id -g)" \
-            --env HOME=/tmp \
             --volume "$PWD/zap:/zap/wrk" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-api-scan.py -t "http://localhost:3001/api/docs-json" -f openapi \
@@ -250,8 +251,6 @@ jobs:
         continue-on-error: true
         run: |
           docker run --rm --network host \
-            --user "$(id -u):$(id -g)" \
-            --env HOME=/tmp \
             --volume "$PWD/zap:/zap/wrk" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-api-scan.py -t "http://localhost:3002/api/docs-json" -f openapi \
@@ -261,8 +260,6 @@ jobs:
         continue-on-error: true
         run: |
           docker run --rm --network host \
-            --user "$(id -u):$(id -g)" \
-            --env HOME=/tmp \
             --volume "$PWD/zap:/zap/wrk" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-api-scan.py -t "http://localhost:3003/api/docs-json" -f openapi \
@@ -272,8 +269,6 @@ jobs:
         continue-on-error: true
         run: |
           docker run --rm --network host \
-            --user "$(id -u):$(id -g)" \
-            --env HOME=/tmp \
             --volume "$PWD/zap:/zap/wrk" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-api-scan.py -t "http://localhost:3004/api/docs-json" -f openapi \
@@ -283,8 +278,6 @@ jobs:
         continue-on-error: true
         run: |
           docker run --rm --network host \
-            --user "$(id -u):$(id -g)" \
-            --env HOME=/tmp \
             --volume "$PWD/zap:/zap/wrk" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-full-scan.py -t "http://localhost:8180" \
