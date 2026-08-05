@@ -54,7 +54,7 @@ jobs:
             --workdir /src \
             --user "$(id -u):$(id -g)" \
             semgrep/semgrep:latest \
-            scan --config auto --sarif --output /src/semgrep.sarif /src
+            semgrep scan --config auto --sarif --output /src/semgrep.sarif /src
 
       - name: Upload Semgrep SARIF to code scanning
         uses: github/codeql-action/upload-sarif@v3
