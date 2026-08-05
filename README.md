@@ -230,7 +230,7 @@ The project also runs as a **live public demo** on a Kubernetes cluster:
 
 **Demo:** http://demo-sparta.mooo.com
 
-The demo stack runs on a single-node **minikube** cluster (docker driver, Kubernetes v1.29.2, 4 vCPU / 4 GB) on the demo host (`91.99.134.58`). Everything runs in the `clinic` namespace and is declared as plain Kubernetes manifests in [`infra/k8s/`](infra/k8s/), applied by [`infra/deploy-demo.sh`](infra/deploy-demo.sh).
+The demo stack runs entirely in the `clinic` namespace and is declared as plain Kubernetes manifests in [`infra/k8s/`](infra/k8s/), applied by [`infra/deploy-demo.sh`](infra/deploy-demo.sh).
 
 ### Kubernetes manifests
 
@@ -240,23 +240,11 @@ The demo stack runs on a single-node **minikube** cluster (docker driver, Kubern
 | `postgres.yaml`     | PostgreSQL (StatefulSet + PersistentVolumeClaim)                                  |
 | `db-init.yaml`      | One-shot `db-init` Job: runs migrations and seeds test data                       |
 | `keycloak.yaml`     | Keycloak (authentication / user management)                                       |
-| `keycloak-fix.yaml` | Idempotent Job that sets `sslRequired=none` so HTTP works on the demo host        |
+| `keycloak-fix.yaml` | Idempotent Job that sets `sslRequired=none` so HTTP works on the demo             |
 | `mailpit.yaml`      | Mailpit (email catcher)                                                           |
 | `apis.yaml`         | The four NestJS API Deployments (2 replicas each)                                 |
 | `portals.yaml`      | The four React portal Deployments (2 replicas each)                               |
-| `minikube-start.sh` | Creates/starts the minikube cluster with the demo port mappings                   |
-
-### Port mapping (host → NodePort)
-
-The minikube docker driver maps host ports to container node ports, so the demo host exposes the same ports as the Docker setup:
-
-| Host port | NodePort | Service                |
-| --------- | -------- | ---------------------- |
-| `6443`    | `8443`   | Kubernetes API server  |
-| `3001`–`3004` | `30001`–`30004` | Patient/Doctor/Assistant/Admin APIs |
-| `5173`–`5176` | `30005`–`30008` | Patient/Doctor/Assistant/Admin portals |
-| `8180`    | `30009`  | Keycloak               |
-| `8025`    | `30010`  | Mailpit                |
+| `minikube-start.sh` | Creates/starts the local cluster the demo runs on                                |
 
 ### Public URLs
 
@@ -272,15 +260,15 @@ The minikube docker driver maps host ports to container node ports, so the demo 
 
 ### Deployment
 
-The **Deploy Demo** workflow in [playwright-sparta](https://github.com/Steavy/playwright-sparta) deploys the demo automatically after every successful smoke-test run on `main`, or manually via **Actions → Deploy Demo → Run workflow** (with an optional `CLINIC_BRANCH` input to deploy a branch other than `main`). It SSHes to the demo host and runs `deploy-demo.sh`, which:
+The **Deploy Demo** workflow in [playwright-sparta](https://github.com/Steavy/playwright-sparta) deploys the demo automatically after every successful smoke-test run on `main`, or manually via **Actions → Deploy Demo → Run workflow** (with an optional `CLINIC_BRANCH` input to deploy a branch other than `main`). It runs `deploy-demo.sh`, which:
 
-1. Takes a deploy lock (only one deploy at a time) and dumps Postgres to `/root/backups` on the host.
-2. Ensures the minikube cluster exists with the demo port mappings, recreating it if needed.
+1. Takes a deploy lock (only one deploy at a time) and backs up the database.
+2. Ensures the cluster exists, recreating it if needed.
 3. Installs Chaos Mesh (see below) if its CRDs are missing.
 4. Applies the manifests with **published images** from `ghcr.io/steavy/cerios-clinic` (portals: `demo` tag, everything else: `latest`).
-5. Rolls out updates with `maxUnavailable: 0` (zero downtime) and verifies all 10 public endpoints.
+5. Rolls out updates with `maxUnavailable: 0` (zero downtime) and verifies all public endpoints.
 
-Rollback is a one-liner on the host: `docker compose -f docker-compose.demo.yml up -d --pull always`.
+Rollback: `docker compose -f docker-compose.demo.yml up -d --pull always` redeploys the Docker Compose demo.
 
 ### Chaos Mesh smoke test
 
@@ -360,7 +348,7 @@ clinic-monorepo/
 │   ├── docker-compose.yml
 │   ├── docker-compose.prebuilt.yml
 │   ├── docker-compose.demo.yml
-│   ├── deploy-demo.sh        # Kubernetes demo deploy (minikube host)
+│   ├── deploy-demo.sh        # Kubernetes demo deploy
 │   ├── docker/               # Dockerfiles for containerised deployment
 │   ├── k8s/                  # Kubernetes manifests for the demo stack
 │   │   ├── namespace.yaml
