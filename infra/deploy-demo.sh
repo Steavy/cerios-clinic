@@ -28,9 +28,13 @@ compose_yml="$REPO_DIR/docker-compose.demo.yml"
 # and two concurrent deploy-demo.sh invocations churn the same cluster and
 # trip each other's zero-downtime gate. The lock fd survives the re-exec below.
 exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
-  echo "Another deploy-demo run is in progress; this run defers to it"
-  exit 0
+# Wait for a concurrent deploy/undeploy to finish instead of deferring silently:
+# a silent no-op makes the calling workflow's endpoint verification run against
+# a stack that is mid-deploy (or down) and fail with an unhelpful curl timeout.
+LOCK_WAIT="${LOCK_WAIT:-600}"
+if ! flock -w "$LOCK_WAIT" 9; then
+  echo "Another deploy/undeploy run holds the deploy lock and did not release it within ${LOCK_WAIT}s; aborting"
+  exit 1
 fi
 
 dump_compose_pg() {
