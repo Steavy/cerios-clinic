@@ -371,7 +371,8 @@ clinic-monorepo/
 │       ├── unit-ci.yml       # CI workflow for unit tests
 │       ├── stryker-pages.yml # Stryker mutation tests + publish to report/stryker
 │       ├── allure-pages.yml  # Combined Allure + Stryker deploy to GitHub Pages
-│       └── mobile-build.yml  # Build & publish patient-mobile APK/image
+│       ├── mobile-build.yml  # Build & publish patient-mobile APK/image
+│       └── sast.yml          # SAST: CodeQL + Semgrep + Gitleaks
 ├── .env                  # Environment variables
 ├── .env.example
 ├── vitest.config.ts      # Vitest configuration
@@ -426,6 +427,29 @@ The workflow is triggered by:
 | `schedule` (`0 2 * * 0`)                     | Weekly, every Sunday at 02:00 UTC                                   |
 
 The `mutation` job runs the mutation tests (mutating `packages/portal-common` and `packages/shared-types`), the `publish` job force-pushes `reports/mutation/mutation.html` as `index.html` to `report/stryker` and then triggers the GitHub Pages deploy.
+
+---
+
+## Security
+
+### Dependency management
+
+- **Dependabot alerts** are enabled on this repository, so known vulnerabilities in the dependency tree are reported on the **Security → Dependabot** tab.
+- **Renovate** (`.github/workflows/renovate.yml` + `renovate-global.json`) keeps dependencies up to date automatically via pull requests.
+
+### SAST (static application security testing)
+
+The **SAST** workflow (`.github/workflows/sast.yml`) scans the source code on every push to `main`, on every pull request, and weekly (Mondays 06:00 UTC). It runs three complementary scanners:
+
+| Scanner     | What it checks                                                                                  |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| **CodeQL**  | JavaScript/TypeScript analysis (build-mode none) — free on this public repository               |
+| **Semgrep** | Community ruleset (`--config auto`, incl. `p/security-audit` and `p/secrets`)                   |
+| **Gitleaks**| Secrets scan of the working tree (no git-history scan, so already-removed historical leaks are not re-flagged) |
+
+Findings land in **Security → Code scanning**. The Gitleaks job is intentionally non-blocking (`continue-on-error: true`) because the demo credentials in `docker-compose`/`.env` files are intentional; flip it to a hard gate once the baseline is clean.
+
+Manual trigger: **Actions → SAST → Run workflow**.
 
 ---
 
