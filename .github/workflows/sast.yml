@@ -1,0 +1,94 @@
+name: SAST
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: sast-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codeql:
+    name: CodeQL (JavaScript/TypeScript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          build-mode: none
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+  semgrep:
+    name: Semgrep
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Run Semgrep
+        run: |
+          docker run --rm \
+            --volume "$PWD:/src" \
+            --workdir /src \
+            --env HOME=/tmp \
+            --user "$(id -u):$(id -g)" \
+            semgrep/semgrep:latest \
+            semgrep scan --config auto --sarif --output /src/semgrep.sarif /src
+
+      - name: Upload Semgrep SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+
+  secrets:
+    name: Secrets scan (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Scans the current working tree (no git-history scan) so already-removed
+      # historical leaks are not re-flagged on every PR. Demo credentials in
+      # docker-compose/.env files are intentional; review findings and flip
+      # continue-on-error to false once the baseline is clean.
+      - name: Run Gitleaks
+        continue-on-error: true
+        run: |
+          docker run --rm \
+            --volume "$PWD:/repo" \
+            --workdir /repo \
+            gitleaks/gitleaks:latest \
+            detect --source /repo --no-git --no-banner --redact \
+            --report-format sarif --report-path /repo/gitleaks.sarif
+
+      - name: Upload Gitleaks SARIF report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gitleaks-sarif
+          path: gitleaks.sarif
+          if-no-files-found: ignore
