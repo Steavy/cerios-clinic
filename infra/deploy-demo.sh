@@ -150,7 +150,7 @@ ensure_cluster() {
 # The smoke test only needs PodChaos, so the install is slimmed down to fit the
 # constrained demo node (4 vCPU / 4 GB running the whole clinic stack): the
 # chart defaults to 3 controller-manager replicas plus dashboard and dns-server
-# pods (~1 GB total), which pushed the controller readiness wait past 420s on
+# 1 pod (~1 GB total), which pushed the controller readiness wait past 420s on
 # run 30981289349. One controller replica + no dashboard + no dns-server (the
 # DNS mutating webhook is a known foot-gun on small clusters) is enough for the
 # gate.
