@@ -133,12 +133,20 @@ ensure_cluster() {
 # path (chart 2.8.x; the old all-in-one manifest URLs are dead), so helm is
 # bootstrapped on first use if absent. minikube v1.36 defaults to the docker
 # runtime, which matches the chart defaults; containerd gets explicit flags.
+#
+# The smoke test only needs PodChaos, so the install is slimmed down to fit the
+# constrained demo node (4 vCPU / 4 GB running the whole clinic stack): the
+# chart defaults to 3 controller-manager replicas plus dashboard and dns-server
+# pods (~1 GB total), which pushed the controller readiness wait past 420s on
+# run 30981289349. One controller replica + no dashboard + no dns-server (the
+# DNS mutating webhook is a known foot-gun on small clusters) is enough for the
+# gate.
 install_chaos_mesh() {
   if kubectl get crd podchaos.chaos-mesh.org >/dev/null 2>&1; then
     echo "Chaos Mesh already installed (CRD podchaos.chaos-mesh.org present)"
     return 0
   fi
-  echo "Chaos Mesh CRD missing; installing via helm (chart 2.8.3)"
+  echo "Chaos Mesh CRD missing; installing via helm (chart 2.8.3, slim profile)"
   if ! command -v helm >/dev/null 2>&1; then
     echo "helm not found; bootstrapping helm 3.17.2"
     curl -fsSL "https://get.helm.sh/helm-v3.17.2-linux-amd64.tar.gz" -o /tmp/helm-v3.17.2-linux-amd64.tar.gz
@@ -154,8 +162,12 @@ install_chaos_mesh() {
   case "$runtime" in
     containerd://*) extra=(--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock) ;;
   esac
-  helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh -n chaos-mesh --version 2.8.3 "${extra[@]}"
-  kubectl -n chaos-mesh rollout status deploy/chaos-controller-manager --timeout=420s >/dev/null
+  helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh -n chaos-mesh --version 2.8.3 \
+    --set controllerManager.replicaCount=1 \
+    --set dashboard.create=false \
+    --set dnsServer.create=false \
+    "${extra[@]}"
+  kubectl -n chaos-mesh rollout status deploy/chaos-controller-manager --timeout=600s >/dev/null
   kubectl -n chaos-mesh rollout status ds/chaos-daemon --timeout=300s >/dev/null
   echo "Chaos Mesh installed and chaos-controller-manager ready"
 }
