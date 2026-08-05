@@ -370,9 +370,10 @@ clinic-monorepo/
 │   └── workflows/
 │       ├── unit-ci.yml       # CI workflow for unit tests
 │       ├── stryker-pages.yml # Stryker mutation tests + publish to report/stryker
-│       ├── allure-pages.yml  # Combined Allure + Stryker deploy to GitHub Pages
+│       ├── allure-pages.yml  # Combined Allure + Stryker + DAST deploy to GitHub Pages
 │       ├── mobile-build.yml  # Build & publish patient-mobile APK/image
-│       └── sast.yml          # SAST: CodeQL + Semgrep + Gitleaks
+│       ├── sast.yml          # SAST: CodeQL + Semgrep + Gitleaks
+│       └── dast.yml          # DAST: daily OWASP ZAP scan + publish to report/zap
 ├── .env                  # Environment variables
 ├── .env.example
 ├── vitest.config.ts      # Vitest configuration
@@ -451,6 +452,22 @@ Findings land in **Security → Code scanning**. The Gitleaks job is intentional
 
 Manual trigger: **Actions → SAST → Run workflow**.
 
+### DAST (dynamic application security testing)
+
+The **DAST** workflow (`.github/workflows/dast.yml`) runs daily at 20:00 UTC (22:00 in the Netherlands during summer time, 21:00 during winter; GitHub cron cannot follow DST) and on demand. It starts the clinic stack locally from the published `ghcr.io/steavy/cerios-clinic` images (the same compose layout as the smoke test) and scans it with OWASP ZAP, covering the OWASP Top 10:
+
+| Target         | Scan type                                                     |
+| -------------- | ------------------------------------------------------------- |
+| `api-patient`  | `zap-api-scan` against the OpenAPI spec (port 3001)           |
+| `api-doctor`   | `zap-api-scan` against the OpenAPI spec (port 3002)           |
+| `api-assistant`| `zap-api-scan` against the OpenAPI spec (port 3003)           |
+| `api-admin`    | `zap-api-scan` against the OpenAPI spec (port 3004)           |
+| `keycloak`     | `zap-full-scan` crawl + active scan (port 8180)               |
+
+Scans are unauthenticated and target the public attack surface. The job fails when ZAP reports any **High** or **Critical** alert; the HTML/JSON reports are always uploaded as artifacts and published to GitHub Pages at https://steavy.github.io/cerios-clinic/dast/.
+
+Manual trigger: **Actions → DAST (OWASP ZAP) → Run workflow**.
+
 ---
 
 ## Patient Mobile App (Android)
@@ -476,7 +493,7 @@ For obtaining API tokens and testing protected endpoints from scripts, Postman, 
 Playwright smoke tests for this application run in [playwright-sparta](https://github.com/Steavy/playwright-sparta). After every smoke run — success **or** failure — the Allure report is published automatically to GitHub Pages. A nightly **Full Regression Suite** (all web Playwright projects) publishes its report through the same chain, so the History tab and Trend chart keep growing day after day. **Mobile App Tests** runs publish their own report under `/mobile/` (web and mobile reports live side by side, so one never overwrites the other):
 
 1. **Publish** — the `Publish Allure Report` workflow in `playwright-sparta` downloads the report artifact and force-pushes it as a single commit to the `report/allure` branch (web smoke/regression) or the `report/allure-mobile` branch (mobile app tests) of this repository (using a fine-grained PAT with Contents: read & write, stored as the `CLINIC_REPORT_TOKEN` secret in `playwright-sparta`).
-2. **Deploy** — the `Deploy Reports to Pages` workflow (`allure-pages.yml`) in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys a combined site to GitHub Pages: the `report/allure` branch at the site root, the `report/stryker` branch (the Stryker mutation report, see above) under `/strykerreport/`, and the `report/allure-mobile` branch under `/mobile/`. All reports live in a single GitHub Pages deployment.
+2. **Deploy** — the `Deploy Reports to Pages` workflow (`allure-pages.yml`) in this repository listens for a `repository_dispatch` event (`allure-report`) and deploys a combined site to GitHub Pages: the `report/allure` branch at the site root, the `report/stryker` branch (the Stryker mutation report, see above) under `/strykerreport/`, and the `report/allure-mobile` branch under `/mobile/`, and the `report/zap` branch (the DAST/OWASP ZAP reports, see [Security](#security)) under `/dast/`. All reports live in a single GitHub Pages deployment.
 
 Each run carries the previous report's `history/` forward, so the published report shows the **History** tab and a growing **Trend** chart (data for the last 20 runs).
 
@@ -484,5 +501,6 @@ Each run carries the previous report's `history/` forward, so the published repo
 - Allure web (test results): https://steavy.github.io/cerios-clinic/
 - Allure mobile (patient app tests): https://steavy.github.io/cerios-clinic/mobile/
 - Stryker (mutation testing): https://steavy.github.io/cerios-clinic/strykerreport/
+- DAST (OWASP ZAP security scans): https://steavy.github.io/cerios-clinic/dast/
 
 > Manually re-deploy the current reports any time via **Actions → Deploy Reports to Pages → Run workflow**. GitHub Pages must be enabled for this repository with source **GitHub Actions**.
