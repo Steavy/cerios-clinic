@@ -138,22 +138,6 @@ ensure_cluster() {
   kubectl config use-context "$CLUSTER_KUBE_NAME"
 }
 
-# Chaos Mesh is a cluster addon the post-deploy smoke-chaos-test gate depends on
-# (podchaos.chaos-mesh.org CRD). The CRDs live inside the cluster, so a cluster
-# recreate wipes them and the gate fails fast until someone reinstalls Chaos
-# Mesh by hand (see run 30979509221). Provisioning therefore reinstalls it
-# idempotently whenever the CRD is missing. Helm is the only supported install
-# path (chart 2.8.x; the old all-in-one manifest URLs are dead), so helm is
-# bootstrapped on first use if absent. minikube v1.36 defaults to the docker
-# runtime, which matches the chart defaults; containerd gets explicit flags.
-#
-# The smoke test only needs PodChaos, so the install is slimmed down to fit the
-# constrained demo node (4 vCPU / 4 GB running the whole clinic stack): the
-# chart defaults to 3 controller-manager replicas plus dashboard and dns-server
-# 1 pod (~1 GB total), which pushed the controller readiness wait past 420s on
-# run 30981289349. One controller replica + no dashboard + no dns-server (the
-# DNS mutating webhook is a known foot-gun on small clusters) is enough for the
-# gate.
 install_chaos_mesh() {
   if kubectl get crd podchaos.chaos-mesh.org >/dev/null 2>&1; then
     echo "Chaos Mesh already installed (CRD podchaos.chaos-mesh.org present)"
@@ -223,14 +207,6 @@ healthcheck_endpoints() {
   fi
 }
 
-# Zero-downtime gate: watches the cluster Services backing every public
-# endpoint. A service is "down" only when it has no Ready backend pod, which is
-# the only reliable signal of real downtime during a deploy. A raw latency gate
-# is unusable on this shared host: other tenants' workloads (e.g. a batch JVM
-# burning 2-4 cores) can push load to 80+ and make even a healthy service slow
-# past any curl timeout, which is not deploy downtime. The Service always has
-# >=1 Ready endpoint during a clean RollingUpdate (maxUnavailable 0), so any
-# DOWNTIME event is a genuine outage.
 watch_zero_downtime() {
   local log="$1"
   local endpoints=(
@@ -282,11 +258,26 @@ if [ "$(git -C "$REPO_DIR" rev-parse HEAD)" != "$START_SHA" ]; then
 fi
 
 # 2b. Skip the rollout when cerios-clinic main has not changed since the last
-#     successful deploy. Every forced restart of the full stack is churn, and
-#     the smoke-test -> Deploy Demo cascade can fire a run every few minutes;
-#     a no-op keeps the gate trivially green without touching running pods.
+#     successful deploy, UNLESS namespaces/CRDs are missing or FORCE_DEPLOY is set.
+FORCE_REDEPLOY=false
+
+if [ "${FORCE_DEPLOY:-false}" = "true" ]; then
+  echo "FORCE_DEPLOY flag is active; forcing deployment."
+  FORCE_REDEPLOY=true
+fi
+
+if ! kubectl get namespace "$NS" >/dev/null 2>&1; then
+  echo "App namespace '$NS' is missing; forcing deployment."
+  FORCE_REDEPLOY=true
+fi
+
+if ! kubectl get namespace "chaos-mesh" >/dev/null 2>&1 || ! kubectl get crd podchaos.chaos-mesh.org >/dev/null 2>&1; then
+  echo "Chaos Mesh namespace or CRD is missing; forcing deployment."
+  FORCE_REDEPLOY=true
+fi
+
 TARGET_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
-if [ -f "$MARKER_FILE" ] && [ "$(cat "$MARKER_FILE")" = "$TARGET_SHA" ]; then
+if [ "$FORCE_REDEPLOY" = "false" ] && [ -f "$MARKER_FILE" ] && [ "$(cat "$MARKER_FILE")" = "$TARGET_SHA" ]; then
   echo "No changes since last deploy ($(git -C "$REPO_DIR" rev-parse --short HEAD)); skipping rollout"
   healthcheck_endpoints
   kubectl -n "$NS" get pods -o wide
