@@ -1,0 +1,344 @@
+name: DAST (OWASP ZAP)
+
+# Dynamic Application Security Testing against a locally started copy of the
+# clinic stack (same prebuilt ghcr.io/steavy/cerios-clinic images and compose
+# layout as the smoke test), covering the OWASP Top 10 via OWASP ZAP:
+#   - api-patient  (3001), api-doctor (3002), api-assistant (3003),
+#     api-admin (3004)  -> scanned from their OpenAPI specs (zap-api-scan)
+#   - keycloak (8180)   -> crawled + active scanned (zap-full-scan)
+# The final step fails the job when any High/Critical alert is reported.
+
+on:
+  schedule:
+    # 20:00 UTC = 22:00 in the Netherlands during summer (CEST) and 21:00
+    # during winter (CET). GitHub cron is UTC-only and cannot follow DST.
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dast
+  cancel-in-progress: true
+
+env:
+  IMAGE_TAG: latest
+
+jobs:
+  owasp-zap:
+    name: OWASP Top 10 full scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Generate docker-compose.ci.yml
+        run: |
+          cat > docker-compose.ci.yml << COMPOSE
+          services:
+            postgres:
+              image: ghcr.io/steavy/cerios-clinic/postgres:${IMAGE_TAG}
+              container_name: clinic-postgres
+              environment:
+                POSTGRES_USER: clinic
+                POSTGRES_PASSWORD: clinic_secret
+                POSTGRES_DB: clinic_db
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U clinic -d clinic_db"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+
+            keycloak:
+              image: ghcr.io/steavy/cerios-clinic/keycloak:${IMAGE_TAG}
+              container_name: clinic-keycloak
+              command: start-dev --import-realm
+              environment:
+                KEYCLOAK_ADMIN: admin
+                KEYCLOAK_ADMIN_PASSWORD: admin_secret
+                KC_DB: postgres
+                KC_DB_URL: jdbc:postgresql://postgres:5432/clinic_db
+                KC_DB_USERNAME: clinic
+                KC_DB_PASSWORD: clinic_secret
+                KC_DB_SCHEMA: keycloak
+                KC_HEALTH_ENABLED: "true"
+                KC_HTTP_PORT: "8080"
+                KC_HTTP_MANAGEMENT_PORT: "9000"
+                KC_HOSTNAME_STRICT: "false"
+                KC_HTTP_ENABLED: "true"
+                KC_PROXY_HEADERS: xforwarded
+                KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+              ports:
+                - "8180:8080"
+              healthcheck:
+                test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.0\r\n\r\n' >&3 && cat <&3 | grep -q 'status' || exit 1"]
+                interval: 15s
+                timeout: 10s
+                retries: 20
+                start_period: 90s
+              depends_on:
+                postgres:
+                  condition: service_healthy
+
+            db-init:
+              image: ghcr.io/steavy/cerios-clinic/db-init:${IMAGE_TAG}
+              container_name: clinic-db-init
+              environment:
+                DATABASE_URL: "postgresql://clinic:clinic_secret@postgres:5432/clinic_db"
+                KEYCLOAK_URL: "http://keycloak:8080"
+                KEYCLOAK_REALM: clinic
+                KEYCLOAK_ADMIN_USER: admin
+                KEYCLOAK_ADMIN_PASSWORD: admin_secret
+                SEED_STAFF_PASSWORD: Clinic1234!
+                SEED_PATIENT_PASSWORD: Patient1234!
+              depends_on:
+                postgres:
+                  condition: service_healthy
+                keycloak:
+                  condition: service_healthy
+              restart: "no"
+
+            api-patient:
+              image: ghcr.io/steavy/cerios-clinic/api-patient:${IMAGE_TAG}
+              container_name: clinic-api-patient
+              ports:
+                - "3001:3001"
+              environment:
+                PORT: "3001"
+                NODE_ENV: production
+                ENABLE_SWAGGER: "true"
+                DATABASE_URL: "postgresql://clinic:clinic_secret@postgres:5432/clinic_db"
+                KEYCLOAK_URL: "http://keycloak:8080"
+                KEYCLOAK_PUBLIC_URL: "http://localhost:8180"
+                KEYCLOAK_REALM: clinic
+                KEYCLOAK_PATIENT_CLIENT_ID: patient-portal-client
+                KEYCLOAK_ADMIN_CLIENT_ID: api-service-client
+                KEYCLOAK_ADMIN_CLIENT_SECRET: api_service_secret_change_in_prod
+                API_PATIENT_CORS_ORIGINS: "http://localhost:5173"
+                PATIENT_PORTAL_URL: "http://localhost:5173"
+              depends_on:
+                db-init:
+                  condition: service_completed_successfully
+              healthcheck:
+                test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/health || exit 1"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+                start_period: 15s
+
+            api-doctor:
+              image: ghcr.io/steavy/cerios-clinic/api-doctor:${IMAGE_TAG}
+              container_name: clinic-api-doctor
+              ports:
+                - "3002:3002"
+              environment:
+                PORT: "3002"
+                NODE_ENV: production
+                ENABLE_SWAGGER: "true"
+                DATABASE_URL: "postgresql://clinic:clinic_secret@postgres:5432/clinic_db"
+                KEYCLOAK_URL: "http://keycloak:8080"
+                KEYCLOAK_PUBLIC_URL: "http://localhost:8180"
+                KEYCLOAK_REALM: clinic
+                KEYCLOAK_DOCTOR_CLIENT_ID: doctor-portal-client
+                KEYCLOAK_ADMIN_CLIENT_ID: api-service-client
+                KEYCLOAK_ADMIN_CLIENT_SECRET: api_service_secret_change_in_prod
+                API_DOCTOR_CORS_ORIGINS: "http://localhost:5174"
+              depends_on:
+                db-init:
+                  condition: service_completed_successfully
+              healthcheck:
+                test: ["CMD-SHELL", "wget -qO- http://localhost:3002/api/health || exit 1"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+                start_period: 15s
+
+            api-assistant:
+              image: ghcr.io/steavy/cerios-clinic/api-assistant:${IMAGE_TAG}
+              container_name: clinic-api-assistant
+              ports:
+                - "3003:3003"
+              environment:
+                PORT: "3003"
+                NODE_ENV: production
+                ENABLE_SWAGGER: "true"
+                DATABASE_URL: "postgresql://clinic:clinic_secret@postgres:5432/clinic_db"
+                KEYCLOAK_URL: "http://keycloak:8080"
+                KEYCLOAK_PUBLIC_URL: "http://localhost:8180"
+                KEYCLOAK_REALM: clinic
+                KEYCLOAK_ASSISTANT_CLIENT_ID: assistant-portal-client
+                KEYCLOAK_ADMIN_CLIENT_ID: api-service-client
+                KEYCLOAK_ADMIN_CLIENT_SECRET: api_service_secret_change_in_prod
+                API_ASSISTANT_CORS_ORIGINS: "http://localhost:5175"
+              depends_on:
+                db-init:
+                  condition: service_completed_successfully
+              healthcheck:
+                test: ["CMD-SHELL", "wget -qO- http://localhost:3003/api/health || exit 1"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+                start_period: 15s
+
+            api-admin:
+              image: ghcr.io/steavy/cerios-clinic/api-admin:${IMAGE_TAG}
+              container_name: clinic-api-admin
+              ports:
+                - "3004:3004"
+              environment:
+                PORT: "3004"
+                NODE_ENV: production
+                ENABLE_SWAGGER: "true"
+                DATABASE_URL: "postgresql://clinic:clinic_secret@postgres:5432/clinic_db"
+                KEYCLOAK_URL: "http://keycloak:8080"
+                KEYCLOAK_PUBLIC_URL: "http://localhost:8180"
+                KEYCLOAK_REALM: clinic
+                KEYCLOAK_ADMIN_PORTAL_CLIENT_ID: admin-portal-client
+                KEYCLOAK_ADMIN_CLIENT_ID: api-service-client
+                KEYCLOAK_ADMIN_CLIENT_SECRET: api_service_secret_change_in_prod
+                API_ADMIN_CORS_ORIGINS: "http://localhost:5176"
+              depends_on:
+                db-init:
+                  condition: service_completed_successfully
+              healthcheck:
+                test: ["CMD-SHELL", "wget -qO- http://localhost:3004/api/health || exit 1"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+                start_period: 15s
+
+          volumes:
+            postgres_data:
+          COMPOSE
+
+      - name: Start clinic stack
+        run: |
+          docker compose -f docker-compose.ci.yml up -d
+          echo "Waiting for stack to become healthy..."
+          for i in $(seq 1 60); do
+            ready=0
+            for endpoint in \
+              "http://localhost:3001/api/health" \
+              "http://localhost:3002/api/health" \
+              "http://localhost:3003/api/health" \
+              "http://localhost:3004/api/health" \
+              "http://localhost:8180/realms/clinic"; do
+              if curl -sf "$endpoint" > /dev/null 2>&1; then
+                ready=$((ready + 1))
+              fi
+            done
+            if [ "$ready" -eq 5 ]; then
+              echo "Stack is healthy!"
+              break
+            fi
+            echo "Attempt $i/60 - waiting 10s..."
+            sleep 10
+          done
+
+      - name: Scan api-patient (OpenAPI)
+        continue-on-error: true
+        run: |
+          docker run --rm --network host \
+            --volume "$PWD/zap:/zap/wrk" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py -t "http://localhost:3001/api/docs-json" -f openapi \
+              -r "zap-api-patient.html" -J "zap-api-patient.json"
+
+      - name: Scan api-doctor (OpenAPI)
+        continue-on-error: true
+        run: |
+          docker run --rm --network host \
+            --volume "$PWD/zap:/zap/wrk" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py -t "http://localhost:3002/api/docs-json" -f openapi \
+              -r "zap-api-doctor.html" -J "zap-api-doctor.json"
+
+      - name: Scan api-assistant (OpenAPI)
+        continue-on-error: true
+        run: |
+          docker run --rm --network host \
+            --volume "$PWD/zap:/zap/wrk" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py -t "http://localhost:3003/api/docs-json" -f openapi \
+              -r "zap-api-assistant.html" -J "zap-api-assistant.json"
+
+      - name: Scan api-admin (OpenAPI)
+        continue-on-error: true
+        run: |
+          docker run --rm --network host \
+            --volume "$PWD/zap:/zap/wrk" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py -t "http://localhost:3004/api/docs-json" -f openapi \
+              -r "zap-api-admin.html" -J "zap-api-admin.json"
+
+      - name: Scan keycloak (full crawl)
+        continue-on-error: true
+        run: |
+          docker run --rm --network host \
+            --volume "$PWD/zap:/zap/wrk" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py -t "http://localhost:8180" \
+              -r "zap-keycloak.html" -J "zap-keycloak.json"
+
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zap-reports
+          path: zap/
+          if-no-files-found: error
+
+      - name: Evaluate findings (OWASP Top 10 gate)
+        if: always()
+        run: |
+          python3 << 'PY'
+          import glob, json, os
+
+          reports = sorted(glob.glob("zap/zap-*.json"))
+          rows = []
+          for path in reports:
+              target = os.path.basename(path)[len("zap-"):-len(".json")]
+              try:
+                  with open(path, encoding="utf-8") as f:
+                      data = json.load(f)
+              except Exception as exc:
+                  rows.append((target, "report-error", f"could not read report: {exc}", 0))
+                  continue
+              for site in data.get("site", []):
+                  for alert in site.get("alerts", []):
+                      risk = str(alert.get("riskdesc", ""))
+                      if risk.startswith("High") or risk.startswith("Critical"):
+                          rows.append((target, risk, alert.get("alert", ""), len(alert.get("instances", []))))
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
+              out.write("## DAST findings (OWASP ZAP full scan)\n\n")
+              if not reports:
+                  out.write("No ZAP reports produced — scan steps failed.\n")
+              elif not rows:
+                  out.write("No High or Critical alerts found.\n")
+              else:
+                  out.write("| Target | Risk | Alert | Instances |\n")
+                  out.write("|--------|------|-------|-----------|\n")
+                  for target, risk, alert, count in rows:
+                      out.write(f"| {target} | {risk} | {alert} | {count} |\n")
+
+          if not reports:
+              print("No ZAP reports produced; failing the gate.")
+              raise SystemExit(1)
+          if rows:
+              print(f"{len(rows)} High/Critical finding(s); failing the gate.")
+              raise SystemExit(1)
+          print("No High/Critical alerts reported by ZAP.")
+          PY
+
+      - name: Capture API container logs
+        if: failure()
+        run: |
+          for container in clinic-api-patient clinic-api-doctor clinic-api-assistant clinic-api-admin clinic-keycloak; do
+            echo "=== $container ==="
+            docker logs "$container" 2>&1 | tail -50 || echo "(no logs)"
+          done
+
+      - name: Clean up
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v
