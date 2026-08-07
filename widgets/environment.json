@@ -1,0 +1,1 @@
+[{"values":["playwright"],"name":"framework"},{"values":["linux"],"name":"os_platform"},{"values":["5.14.0-570.60.1.el9_6.x86_64"],"name":"os_release"},{"values":["#1 SMP PREEMPT_DYNAMIC Wed Nov 5 05:00:59 EST 2025"],"name":"os_version"},{"values":["v22.23.2"],"name":"node_version"}]
