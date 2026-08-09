@@ -10,6 +10,13 @@ set -euo pipefail
 # healthy again. Any downtime event fails the script (and with it the Deploy
 # Demo workflow).
 #
+# Note: keycloak is deliberately excluded from the kill selector (it stays in
+# the watcher below). Its JVM takes ~3 min to become Ready, far longer than the
+# 15s kill cadence, so two keycloak kills inside one window would take both
+# replicas down at once and fail the gate spuriously (~19% per run). Like
+# postgres (1 replica, also not killed), slow-starting stateful services are
+# watched but not chaos-killed.
+#
 # Env:
 #   NS              namespace to test             (default clinic)
 #   CHAOS_DURATION  seconds the chaos window runs (default 120)
@@ -144,8 +151,10 @@ spec:
             - doctor-portal
             - assistant-portal
             - admin-portal
-            - keycloak
             - mailpit
+            # keycloak intentionally absent: slow JVM readiness (~3 min) vs
+            # 15s cadence makes double-kills take both replicas down at once.
+            # It remains watched by watch_zero_downtime (k8s_svcs below).
 EOF
 
 echo "Starting Chaos Mesh smoke check (duration=${CHAOS_DURATION}s, every=${CHAOS_INTERVAL}s)"
