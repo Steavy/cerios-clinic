@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   cleanup:
-    runs-on: [self-hosted, linux, x64, srt]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       INPUT_DAYS: ${{ inputs.days }}
@@ -27,29 +27,52 @@ jobs:
         run: |
           set -euo pipefail
           KEEP_DAYS="${INPUT_DAYS:-7}"
-          API="https://api.github.com/repos/Steavy/cerios-clinic/actions/artifacts"
+          REPO="${{ github.repository }}"
+          API="https://api.github.com/repos/$REPO/actions/artifacts"
           cutoff=$(date -u -d "$KEEP_DAYS days ago" +%Y-%m-%dT%H:%M:%SZ)
           echo "keeping artifacts newer than $cutoff"
+
+          # first pass: collect every artifact
+          : > /tmp/all_artifacts.tsv
           page=1
-          deleted=0
-          freed=0
           while :; do
             list=$(curl -sS -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" "$API?per_page=100&page=$page")
             n=$(echo "$list" | jq -r '.artifacts | length')
             [ "$n" = "0" ] && break
-            while IFS=$'\t' read -r id created size name; do
-              if [[ "$created" < "$cutoff" ]]; then
-                code=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
-                  -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
-                  "https://api.github.com/repos/Steavy/cerios-clinic/actions/artifacts/$id")
-                echo "deleted $name (id=$id, $created) -> HTTP $code"
-                if [ "$code" = "204" ]; then
-                  deleted=$((deleted+1))
-                  freed=$((freed+size))
-                fi
-              fi
-            done < <(echo "$list" | jq -r '.artifacts[] | [.id, .created_at, .size_in_bytes, .name] | @tsv')
+            echo "$list" | jq -r '.artifacts[] | [.id, .created_at, .size_in_bytes, .name] | @tsv' >> /tmp/all_artifacts.tsv
             page=$((page+1))
             [ "$page" -gt 20 ] && break
           done
-          echo "cleanup done: deleted $deleted artifacts, freed $((freed/1000000)) MB"
+
+          # newest artifact id per name -> always kept, regardless of age
+          keep_ids=$(sort -t$'\t' -k4,4 -k2,2r /tmp/all_artifacts.tsv | awk -F'\t' '!seen[$4]++ {print $1}')
+          keep_set=""
+          for k in $keep_ids; do keep_set="$keep_set $k"; done
+
+          # second pass: delete everything older than the cutoff, except the keepers
+          deleted=0
+          freed=0
+          kept=0
+          while IFS=$'\t' read -r id created size name; do
+            case " $keep_set " in
+              *" $id "*)
+                if [[ "$created" < "$cutoff" ]]; then
+                  echo "kept newest $name (id=$id, $created) beyond cutoff"
+                  kept=$((kept+1))
+                fi
+                continue
+                ;;
+            esac
+            if [[ "$created" < "$cutoff" ]]; then
+              code=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
+                -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/actions/artifacts/$id")
+              echo "deleted $name (id=$id, $created) -> HTTP $code"
+              if [ "$code" = "204" ]; then
+                deleted=$((deleted+1))
+                freed=$((freed+size))
+              fi
+            fi
+          done < /tmp/all_artifacts.tsv
+          rm -f /tmp/all_artifacts.tsv
+          echo "cleanup done: deleted $deleted artifacts, freed $((freed/1000000)) MB, kept newest per name: $kept"
