@@ -45,6 +45,7 @@ jobs:
           name: codeql-sarif
           path: results
           if-no-files-found: warn
+          retention-days: 7
 
   semgrep:
     name: Semgrep
@@ -75,6 +76,7 @@ jobs:
           name: semgrep-sarif
           path: semgrep.sarif
           if-no-files-found: warn
+          retention-days: 7
 
   secrets:
     name: Secrets scan (Gitleaks)
@@ -106,6 +108,7 @@ jobs:
           name: gitleaks-sarif
           path: gitleaks.sarif
           if-no-files-found: ignore
+          retention-days: 7
 
   publish:
     name: Publish SAST report to report/sast

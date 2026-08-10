@@ -101,7 +101,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=min,scope=${{ matrix.image }}
 
   build-demo-portals:
     name: Build demo ${{ matrix.image }}
@@ -163,7 +163,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}-demo
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-demo
+          cache-to: type=gha,mode=min,scope=${{ matrix.image }}-demo
 
   dispatch-smoke:
     name: Dispatch smoke test in playwright-sparta

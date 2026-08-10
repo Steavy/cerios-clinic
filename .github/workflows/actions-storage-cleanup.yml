@@ -1,0 +1,55 @@
+name: Actions Storage Cleanup
+
+on:
+  schedule:
+    - cron: '35 3 * * *'
+      timezone: Europe/Amsterdam
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Keep artifacts newer than this many days'
+        required: false
+        default: '7'
+        type: number
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: [self-hosted, linux, x64, srt]
+    timeout-minutes: 10
+    env:
+      INPUT_DAYS: ${{ inputs.days }}
+    steps:
+      - name: Delete artifacts older than cutoff
+        run: |
+          set -euo pipefail
+          KEEP_DAYS="${INPUT_DAYS:-7}"
+          API="https://api.github.com/repos/Steavy/cerios-clinic/actions/artifacts"
+          cutoff=$(date -u -d "$KEEP_DAYS days ago" +%Y-%m-%dT%H:%M:%SZ)
+          echo "keeping artifacts newer than $cutoff"
+          page=1
+          deleted=0
+          freed=0
+          while :; do
+            list=$(curl -sS -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" "$API?per_page=100&page=$page")
+            n=$(echo "$list" | jq -r '.artifacts | length')
+            [ "$n" = "0" ] && break
+            while IFS=$'\t' read -r id created size name; do
+              if [[ "$created" < "$cutoff" ]]; then
+                code=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
+                  -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/repos/Steavy/cerios-clinic/actions/artifacts/$id")
+                echo "deleted $name (id=$id, $created) -> HTTP $code"
+                if [ "$code" = "204" ]; then
+                  deleted=$((deleted+1))
+                  freed=$((freed+size))
+                fi
+              fi
+            done < <(echo "$list" | jq -r '.artifacts[] | [.id, .created_at, .size_in_bytes, .name] | @tsv')
+            page=$((page+1))
+            [ "$page" -gt 20 ] && break
+          done
+          echo "cleanup done: deleted $deleted artifacts, freed $((freed/1000000)) MB"

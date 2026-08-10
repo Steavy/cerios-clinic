@@ -290,6 +290,7 @@ jobs:
           name: zap-reports
           path: zap/
           if-no-files-found: error
+          retention-days: 7
 
       - name: Evaluate findings (OWASP Top 10 gate)
         if: always()

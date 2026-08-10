@@ -61,6 +61,7 @@ jobs:
           name: cerios-patient-mobile
           path: apps/patient-mobile/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+          retention-days: 7
 
       - name: Rename APK
         run: cp apps/patient-mobile/android/app/build/outputs/apk/release/app-release.apk cerios-patient-mobile-${{ inputs.version }}.apk

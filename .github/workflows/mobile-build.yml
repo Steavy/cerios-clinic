@@ -75,6 +75,7 @@ jobs:
           name: patient-mobile-apk
           path: apps/patient-mobile/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+          retention-days: 7
 
   publish-image:
     name: Publish patient-mobile image
