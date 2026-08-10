@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "../api";
@@ -21,15 +21,31 @@ export default function PatientsPage(): React.ReactElement {
 	const [patients, setPatients] = useState<PatientRow[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
+	const abortRef = useRef<AbortController | null>(null);
+
+	useEffect(() => {
+		return (): void => abortRef.current?.abort();
+	}, []);
 
 	const search = useCallback((q: string) => {
+		abortRef.current?.abort();
+		const controller = new AbortController();
+		abortRef.current = controller;
 		setQuery(q);
+		setPatients([]);
 		setLoading(true);
 		void api
-			.get<{ data: PatientRow[] }>("/patients", { params: q ? { q } : undefined })
-			.then(r => setPatients(r.data.data))
+			.get<{ data: PatientRow[] }>("/patients", { params: q ? { q } : undefined, signal: controller.signal })
+			.then(r => {
+				if (controller.signal.aborted) return;
+				setPatients(r.data.data);
+			})
 			.catch(() => {})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (!controller.signal.aborted) {
+					setLoading(false);
+				}
+			});
 	}, []);
 
 	useEffect(() => {

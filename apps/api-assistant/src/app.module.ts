@@ -7,6 +7,7 @@ import { AppointmentsModule } from "./appointments/appointments.module";
 import { AuthModule } from "./auth/auth.module";
 import { EventsModule as AppEventsModule } from "./events/events.module";
 import { HealthModule } from "./health/health.module";
+import { RequestLoggerMiddleware } from "./middleware/request-logger.middleware";
 import { PatientsModule } from "./patients/patients.module";
 import { PrescriptionsModule } from "./prescriptions/prescriptions.module";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -14,7 +15,12 @@ import { ReviewsModule } from "./reviews/reviews.module";
 
 @Module({
 	imports: [
-		ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+		ThrottlerModule.forRoot([
+			{
+				ttl: Number(process.env.THROTTLE_TTL) || 60_000,
+				limit: Number(process.env.THROTTLE_LIMIT) || 100,
+			},
+		]),
 		PrismaModule,
 		MailModule,
 		EventsModule,
@@ -34,6 +40,6 @@ import { ReviewsModule } from "./reviews/reviews.module";
 })
 export class AppModule implements NestModule {
 	configure(consumer: MiddlewareConsumer): void {
-		consumer.apply(SlowdownMiddleware).forRoutes("*");
+		consumer.apply(RequestLoggerMiddleware, SlowdownMiddleware).forRoutes("*");
 	}
 }
