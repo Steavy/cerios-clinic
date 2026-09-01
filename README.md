@@ -2,7 +2,7 @@
 
 # Clinic Monorepo
 
-This is a full-stack clinic management application. This guide gets you up and running with **Docker only** — no Node.js or other tools required.
+This is a full-stack clinic management application. This guide gets you up and running with **Docker only** — no Node.js or other test tools required.
 
 > **Developers**: see [DEVELOPMENT.md](DEVELOPMENT.md) for the local development setup with hot-reload.
 
