@@ -22,11 +22,25 @@ set -euo pipefail
 #   CHAOS_DURATION  seconds the chaos window runs (default 120)
 #   CHAOS_INTERVAL  seconds between kills         (default 15)
 #   MAX_WAIT        per-endpoint recovery wait    (default 300)
+#   PLAYWRIGHT_CMD  optional: shell command to run in the BACKGROUND for the
+#                   whole chaos window, as a browser-level smoke gate on top of
+#                   the curl/endpoint watcher. E.g. the Deploy Demo workflow
+#                   passes a `playwright test --config=...demo-smoke` invocation
+#                   that loads the public portals in a real browser while pods
+#                   are being killed. The command is re-run every few seconds
+#                   across the window; the gate passes if ANY pass succeeds and
+#                   fails the whole script if no pass ever renders (the demo UI
+#                   must come up during chaos, not just the Service endpoints).
+#                   Without it, this script behaves exactly as before.
+#   PLAYWRIGHT_TIMEOUT  max seconds to wait for PLAYWRIGHT_CMD after the chaos
+#                       window before giving up (default 300)
 
 NS="${NS:-clinic}"
 CHAOS_DURATION="${CHAOS_DURATION:-120}"
 CHAOS_INTERVAL="${CHAOS_INTERVAL:-15}"
 MAX_WAIT="${MAX_WAIT:-300}"
+PLAYWRIGHT_CMD="${PLAYWRIGHT_CMD:-}"
+PLAYWRIGHT_TIMEOUT="${PLAYWRIGHT_TIMEOUT:-300}"
 
 # Fail-early guard: Chaos Mesh must be installed (CRDs + controller).
 if ! kubectl get crd podchaos.chaos-mesh.org >/dev/null 2>&1; then
@@ -39,6 +53,8 @@ WATCHER_LOG="$(mktemp)"
 WATCHER_PID=""
 SCHED_FILE="$(mktemp)"
 DOWNTIME_COUNT=0
+PLAYWRIGHT_PID=""
+PLAYWRIGHT_LOG="$(mktemp)"
 
 endpoints=(
   "keycloak|http://localhost:8180/realms/clinic"
@@ -116,9 +132,10 @@ watch_zero_downtime() {
 
 cleanup() {
   [ -n "$WATCHER_PID" ] && kill "$WATCHER_PID" 2>/dev/null || true
+  [ -n "$PLAYWRIGHT_PID" ] && kill "$PLAYWRIGHT_PID" 2>/dev/null || true
   kubectl -n "$NS" delete schedule "$RUN_TAG" --ignore-not-found >/dev/null 2>&1 || true
   kubectl -n "$NS" delete podchaos -l "chaos-mesh.org/experiment=$RUN_TAG" --ignore-not-found >/dev/null 2>&1 || true
-  rm -f "$SCHED_FILE" "$WATCHER_LOG"
+  rm -f "$SCHED_FILE" "$WATCHER_LOG" "$PLAYWRIGHT_LOG"
 }
 trap cleanup EXIT
 
@@ -163,6 +180,35 @@ WATCHER_PID=$!
 
 kills_before="$(kubectl -n "$NS" get podchaos -o name 2>/dev/null | wc -l)"
 kubectl apply -f "$SCHED_FILE"
+
+# Optional browser-level smoke gate, launched in the BACKGROUND so it overlaps
+# the whole chaos window: while pods are being killed below, the command
+# (a playwright invocation that loads the public portals in a real browser) is
+# re-run every few seconds. The gate passes if ANY pass renders the portals
+# during the window, and fails if every pass failed (i.e. the UI never came up
+# while the other replicas were under fire). Result is signalled to the parent
+# via sentinel lines in PLAYWRIGHT_LOG.
+if [ -n "$PLAYWRIGHT_CMD" ]; then
+  echo "Starting Playwright smoke gate (looping during ${CHAOS_DURATION}s chaos window)..."
+  echo "$PLAYWRIGHT_CMD" > "$PLAYWRIGHT_LOG.command"
+  (
+    pw_passed=0
+    while [ "$SECONDS" -lt "$CHAOS_DURATION" ] && [ "$pw_passed" -eq 0 ]; do
+      if bash -c "$PLAYWRIGHT_CMD"; then
+        pw_passed=1
+        echo "PLAYWRIGHT_PASSED"
+      else
+        echo "Playwright pass failed; retrying within window..."
+        sleep 3
+      fi
+    done
+    if [ "$pw_passed" -ne 1 ]; then
+      echo "PLAYWRIGHT_FAILED"
+    fi
+  ) >> "$PLAYWRIGHT_LOG" 2>&1 &
+  PLAYWRIGHT_PID=$!
+fi
+
 sleep "$CHAOS_DURATION"
 kubectl delete schedule "$RUN_TAG" --ignore-not-found >/dev/null 2>&1 || true
 kills_after="$(kubectl -n "$NS" get podchaos -o name 2>/dev/null | wc -l)"
@@ -171,6 +217,51 @@ kills=$((kills_after - kills_before))
 kill "$WATCHER_PID" 2>/dev/null || true
 wait "$WATCHER_PID" 2>/dev/null || true
 WATCHER_PID=""
+
+# Collect the Playwright gate result. Give the loop a little extra time beyond
+# the window to finish its in-flight pass (PLAYWRIGHT_TIMEOUT) before deciding.
+PLAYWRIGHT_STATUS="skipped"
+if [ -n "$PLAYWRIGHT_PID" ]; then
+  echo "Waiting for Playwright smoke gate to finish (timeout=${PLAYWRIGHT_TIMEOUT}s)..."
+  waited=0
+  while kill -0 "$PLAYWRIGHT_PID" 2>/dev/null; do
+    if [ "$waited" -ge "$PLAYWRIGHT_TIMEOUT" ]; then
+      echo "::error::Playwright smoke gate timed out after ${PLAYWRIGHT_TIMEOUT}s"
+      kill "$PLAYWRIGHT_PID" 2>/dev/null || true
+      break
+    fi
+    sleep 2
+    waited=$((waited + 2))
+  done
+  if wait "$PLAYWRIGHT_PID" 2>/dev/null; then
+    PLAYWRIGHT_STATUS=0
+  else
+    PLAYWRIGHT_STATUS=$?
+  fi
+  PLAYWRIGHT_PID=""
+  if grep -q "PLAYWRIGHT_PASSED" "$PLAYWRIGHT_LOG"; then
+    echo "Playwright smoke gate: PASSED (demo portals rendered during chaos)"
+    PLAYWRIGHT_STATUS=0
+  else
+    echo "::error::Playwright smoke gate: FAILED (no pass rendered the portals during chaos)"
+    PLAYWRIGHT_STATUS=1
+  fi
+  if [ "$PLAYWRIGHT_STATUS" -ne 0 ]; then
+    echo ""
+    echo "## Chaos Mesh smoke check: FAILED (Playwright browser smoke gate)"
+    echo ""
+    echo "| Metric | Value |"
+    echo "|--------|-------|"
+    echo "| Duration | ${CHAOS_DURATION}s |"
+    echo "| Pod kills triggered | ${kills} |"
+    echo "| Downtime events | ${DOWNTIME_COUNT:-0} |"
+    echo "| Playwright smoke gate | FAILED |"
+    echo ""
+    echo "Playwright gate log:"
+    cat "$PLAYWRIGHT_LOG"
+    exit 1
+  fi
+fi
 
 DOWNTIME_COUNT="$(wc -l < "$WATCHER_LOG" | tr -d ' ')"
 if [ "$DOWNTIME_COUNT" -gt 0 ]; then
@@ -203,3 +294,6 @@ echo "| Duration | ${CHAOS_DURATION}s |"
 echo "| Pod kills triggered | ${kills} |"
 echo "| Downtime events | 0 |"
 echo "| Endpoints after recovery | all OK |"
+if [ -n "$PLAYWRIGHT_CMD" ]; then
+  echo "| Playwright smoke gate | PASSED |"
+fi
