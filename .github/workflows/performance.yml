@@ -1,0 +1,56 @@
+name: Performance Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Test scenario to run'
+        required: true
+        type: choice
+        options:
+          - smoke
+          - load
+          - stress
+          - spike
+          - soak
+          - keycloak
+          - db
+        default: smoke
+      duration:
+        description: 'Override duration (e.g. 10m). Leave empty to use script default.'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  perf:
+    runs-on: [self-hosted, linux, x64, srt]
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run k6 performance test
+        env:
+          SCENARIO: ${{ github.event.inputs.scenario }}
+          DURATION: ${{ github.event.inputs.duration }}
+        run: |
+          SCRIPT="k6/${SCENARIO}.js"
+          if [ ! -f "$SCRIPT" ]; then
+            echo "::error::Scenario script $SCRIPT not found"
+            exit 1
+          fi
+          echo "Running performance scenario: ${SCENARIO}"
+          docker run --rm -i grafana/k6 run - < "$SCRIPT"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results-${{ github.event.inputs.scenario }}-${{ github.run_id }}
+          path: |
+            stdout.txt
+            *.json
+          if-no-files-found: ignore
