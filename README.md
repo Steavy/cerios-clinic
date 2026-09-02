@@ -278,6 +278,30 @@ After a deploy, the workflow runs a **chaos smoke test** ([`infra/scripts/smoke-
 - Over a 120-second window one pod is killed every 15 seconds across the 10 app Deployments (2 replicas each).
 - A watcher polls every public endpoint and asserts **zero downtime**; any outage fails the workflow.
 
+## Performance Testing
+
+Load, stress, spike and soak tests for the demo stack live in [`performance-test.md`](performance-test.md) and use **k6** scripts under [`k6/`](k6/). The plan was derived from the testassist-mcp-server heuristics (SFDPOT, Quality Criteria, Bug Heuristics, RCRCRC).
+
+Seven scenarios are provided, each a self-contained k6 script:
+
+| Script | Type | Target | Duration |
+|--------|------|--------|----------|
+| `k6/smoke.js` | Baseline (1 VU) | All portals + APIs | 2 min |
+| `k6/load.js` | Load | Patient portal | 10 min |
+| `k6/stress.js` | Stress | All portals + APIs | 15 min |
+| `k6/spike.js` | Spike | Patient + Doctor portals | 3 min |
+| `k6/soak.js` | Soak | Full stack | 60 min |
+| `k6/keycloak.js` | Stress | Keycloak (8180) | 10 min |
+| `k6/db.js` | Stress | api-patient + Postgres | 10 min |
+
+Run a scenario locally with Docker:
+
+```bash
+docker run --rm -i grafana/k6 run - <k6/load.js
+```
+
+Or trigger it from CI via the **Performance Test** workflow (`.github/workflows/performance.yml`), which exposes a `scenario` dropdown (`workflow_dispatch`). Key SLIs (P95): portal load < 2s, API `/health` < 50ms, Keycloak token grant < 400ms, error rate < 0.1%. The full metric table, thresholds and risk areas are in `performance-test.md`.
+
 ---
 
 ## Troubleshooting
@@ -385,6 +409,8 @@ clinic-monorepo/
 ---
 
 ## Testing
+
+- **Performance testing** (k6 load/stress/spike/soak) is documented in [performance-test.md](performance-test.md) and runs via the [Performance Test](.github/workflows/performance.yml) workflow.
 
 ### Unit Tests (Vitest)
 
