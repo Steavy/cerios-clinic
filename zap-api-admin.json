@@ -1,0 +1,745 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.17.0",
+	"@generated": "Fri, 4 Sept 2026 22:06:35",
+	"created": "2026-09-04T22:06:35.672364205Z",
+	"insights":[
+		{
+			"level": "Low",
+			"reason": "Exceeded High",
+			"site": "http://localhost:3004",
+			"key": "insight.code.4xx",
+			"description": "Percentage of responses with status code 4xx",
+			"statistic": "99"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "20"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.endpoint.ctype.application/json",
+			"description": "Percentage of endpoints with content type application/json",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.endpoint.method.DELETE",
+			"description": "Percentage of endpoints with method DELETE",
+			"statistic": "21"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "54"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.endpoint.method.POST",
+			"description": "Percentage of endpoints with method POST",
+			"statistic": "11"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.endpoint.method.PUT",
+			"description": "Percentage of endpoints with method PUT",
+			"statistic": "11"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3004",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "51"
+		}
+	],
+	"site":[ 
+		{
+			"@name": "http://localhost:3004",
+			"@host": "localhost",
+			"@port": "3004",
+			"@ssl": "false",
+			"alerts": [ 
+				{
+					"pluginid": "100000",
+					"alertRef": "100000-1",
+					"alert": "A Client Error response code was returned by the server",
+					"name": "A Client Error response code was returned by the server",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>A response code of 401 was returned by the server.</p><p>This may indicate that the application is failing to handle unexpected input correctly.</p><p>Raised by the 'Alert on HTTP Response Code Error' script</p>",
+					"instances":[ 
+						{
+							"id": "6",
+							"uri": "http://localhost:3004/api/admin/assistants/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/id",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1914",
+							"uri": "http://localhost:3004/api/admin/assistants/id/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/id\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "3",
+							"uri": "http://localhost:3004/api/admin/doctors/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1917",
+							"uri": "http://localhost:3004/api/admin/doctors/id/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1425",
+							"uri": "http://localhost:3004/computeMetadata/v1/",
+							"nodeName": "http:\/\/localhost:3004\/computeMetadata\/v1\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1423",
+							"uri": "http://localhost:3004/latest/meta-data/",
+							"nodeName": "http:\/\/localhost:3004\/latest\/meta-data\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1474",
+							"uri": "http://localhost:3004/metadata/instance",
+							"nodeName": "http:\/\/localhost:3004\/metadata\/instance",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1480",
+							"uri": "http://localhost:3004/metadata/v1",
+							"nodeName": "http:\/\/localhost:3004\/metadata\/v1",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1435",
+							"uri": "http://localhost:3004/opc/v1/instance/",
+							"nodeName": "http:\/\/localhost:3004\/opc\/v1\/instance\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1446",
+							"uri": "http://localhost:3004/opc/v2/instance/",
+							"nodeName": "http:\/\/localhost:3004\/opc\/v2\/instance\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1484",
+							"uri": "http://localhost:3004/openstack/latest/meta_data.json",
+							"nodeName": "http:\/\/localhost:3004\/openstack\/latest\/meta_data.json",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "33",
+							"uri": "http://localhost:3004",
+							"nodeName": "http:\/\/localhost:3004",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1924",
+							"uri": "http://localhost:3004/",
+							"nodeName": "http:\/\/localhost:3004\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "16",
+							"uri": "http://localhost:3004/2133716105963410043",
+							"nodeName": "http:\/\/localhost:3004\/2133716105963410043",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "34",
+							"uri": "http://localhost:3004/api",
+							"nodeName": "http:\/\/localhost:3004\/api",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1925",
+							"uri": "http://localhost:3004/api/",
+							"nodeName": "http:\/\/localhost:3004\/api\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "17",
+							"uri": "http://localhost:3004/api/1091753818564821304",
+							"nodeName": "http:\/\/localhost:3004\/api\/1091753818564821304",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "41",
+							"uri": "http://localhost:3004/api/admin",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1928",
+							"uri": "http://localhost:3004/api/admin/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "22",
+							"uri": "http://localhost:3004/api/admin/1033297188923946328",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/1033297188923946328",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "45",
+							"uri": "http://localhost:3004/api/admin/assistants",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1930",
+							"uri": "http://localhost:3004/api/admin/assistants/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "25",
+							"uri": "http://localhost:3004/api/admin/assistants/7329565358245280915",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/7329565358245280915",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2172",
+							"uri": "http://localhost:3004/api/admin/assistants/actuator/health",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/actuator\/health",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "47",
+							"uri": "http://localhost:3004/api/admin/doctors",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1931",
+							"uri": "http://localhost:3004/api/admin/doctors/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "27",
+							"uri": "http://localhost:3004/api/admin/doctors/2670779403382794219",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/2670779403382794219",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "0",
+							"uri": "http://localhost:3004/api/admin/users",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/users",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1932",
+							"uri": "http://localhost:3004/api/admin/users/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/users\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "7",
+							"uri": "http://localhost:3004/api/feature-toggles",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1933",
+							"uri": "http://localhost:3004/api/feature-toggles/",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "30",
+							"uri": "http://localhost:3004/api/feature-toggles/121106540943764335",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/121106540943764335",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "8",
+							"uri": "http://localhost:3004/api/feature-toggles/key",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/key",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1935",
+							"uri": "http://localhost:3004/api/feature-toggles/key/",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/key\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "32",
+							"uri": "http://localhost:3004/api/health/7713027533255620321",
+							"nodeName": "http:\/\/localhost:3004\/api\/health\/7713027533255620321",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "11",
+							"uri": "http://localhost:3004/api/ui-toggles",
+							"nodeName": "http:\/\/localhost:3004\/api\/ui-toggles",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1934",
+							"uri": "http://localhost:3004/api/ui-toggles/",
+							"nodeName": "http:\/\/localhost:3004\/api\/ui-toggles\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "4",
+							"uri": "http://localhost:3004/api/admin/assistants",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants ()({email,firstName,lastName,department,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "407",
+							"uri": "http://localhost:3004/api/admin/assistants",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants ()({email,firstName,lastName,department,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1916",
+							"uri": "http://localhost:3004/api/admin/assistants/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/ ()({email,firstName,lastName,department,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1",
+							"uri": "http://localhost:3004/api/admin/doctors",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors ()({email,firstName,lastName,specialization,licenseNumber,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "365",
+							"uri": "http://localhost:3004/api/admin/doctors",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors ()({email,firstName,lastName,specialization,licenseNumber,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1918",
+							"uri": "http://localhost:3004/api/admin/doctors/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/ ()({email,firstName,lastName,specialization,licenseNumber,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "10",
+							"uri": "http://localhost:3004/api/feature-toggles/seed",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/seed",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1921",
+							"uri": "http://localhost:3004/api/feature-toggles/seed/",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/seed\/",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "5",
+							"uri": "http://localhost:3004/api/admin/assistants/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/id ()({firstName,lastName,department})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "585",
+							"uri": "http://localhost:3004/api/admin/assistants/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/id ()({firstName,lastName,department})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1915",
+							"uri": "http://localhost:3004/api/admin/assistants/id/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/id\/ ()({firstName,lastName,department})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2",
+							"uri": "http://localhost:3004/api/admin/doctors/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id ()({firstName,lastName,specialization,licenseNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "486",
+							"uri": "http://localhost:3004/api/admin/doctors/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id ()({firstName,lastName,specialization,licenseNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1920",
+							"uri": "http://localhost:3004/api/admin/doctors/id/",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id\/ ()({firstName,lastName,specialization,licenseNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "9",
+							"uri": "http://localhost:3004/api/feature-toggles/key",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/key ()({enabled,config:{}})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1919",
+							"uri": "http://localhost:3004/api/feature-toggles/key/",
+							"nodeName": "http:\/\/localhost:3004\/api\/feature-toggles\/key\/ ()({enabled,config:{}})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						}
+					],
+					"count": "53",
+					"systemic": false,
+					"solution": "",
+					"otherinfo": "",
+					"reference": "",
+					"cweid": "388",
+					"wascid": "20",
+					"sourceid": "13"
+				},
+				{
+					"pluginid": "10111",
+					"alertRef": "10111",
+					"alert": "Authentication Request Identified",
+					"name": "Authentication Request Identified",
+					"riskcode": "0",
+					"confidence": "1",
+					"riskdesc": "Informational (Low)",
+					"desc": "<p>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to \"Auto-Detect\" then this rule will change the authentication to match the request identified.</p>",
+					"instances":[ 
+						{
+							"id": "20",
+							"uri": "http://localhost:3004/api/admin/assistants",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants ()({email,firstName,lastName,department,password})",
+							"method": "POST",
+							"param": "email",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=email\nuserValue=zaproxy@example.com\npasswordParam=password"
+						},
+						{
+							"id": "13",
+							"uri": "http://localhost:3004/api/admin/doctors",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors ()({email,firstName,lastName,specialization,licenseNumber,password})",
+							"method": "POST",
+							"param": "email",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=email\nuserValue=zaproxy@example.com\npasswordParam=password"
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p>userParam=email</p><p>userValue=zaproxy@example.com</p><p>passwordParam=password</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/auth-req-id/</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "10"
+				},
+				{
+					"pluginid": "10049",
+					"alertRef": "10049-1",
+					"alert": "Non-Storable Content",
+					"name": "Non-Storable Content",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The response contents are not storable by caching components such as proxy servers. If the response does not contain sensitive, personal or user-specific information, it may benefit from being stored and cached, to improve performance.</p>",
+					"instances":[ 
+						{
+							"id": "18",
+							"uri": "http://localhost:3004/api/admin/doctors/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "DELETE ",
+							"otherinfo": ""
+						},
+						{
+							"id": "14",
+							"uri": "http://localhost:3004/api/admin/users",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/users",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "15",
+							"uri": "http://localhost:3004/api/admin/doctors",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors ()({email,firstName,lastName,specialization,licenseNumber,password})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "19",
+							"uri": "http://localhost:3004/api/admin/assistants/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/assistants\/id ()({firstName,lastName,department})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "PUT ",
+							"otherinfo": ""
+						},
+						{
+							"id": "12",
+							"uri": "http://localhost:3004/api/admin/doctors/id",
+							"nodeName": "http:\/\/localhost:3004\/api\/admin\/doctors\/id ()({firstName,lastName,specialization,licenseNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "PUT ",
+							"otherinfo": ""
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>The content may be marked as storable by ensuring that the following conditions are satisfied:</p><p>The request method must be understood by the cache and defined as being cacheable (\"GET\", \"HEAD\", and \"POST\" are currently defined as cacheable)</p><p>The response status code must be understood by the cache (one of the 1XX, 2XX, 3XX, 4XX, or 5XX response classes are generally understood)</p><p>The \"no-store\" cache directive must not appear in the request or response header fields</p><p>For caching by \"shared\" caches such as \"proxy\" caches, the \"private\" response directive must not appear in the response</p><p>For caching by \"shared\" caches such as \"proxy\" caches, the \"Authorization\" header field must not appear in the request, unless the response explicitly allows it (using one of the \"must-revalidate\", \"public\", or \"s-maxage\" Cache-Control response directives)</p><p>In addition to the conditions above, at least one of the following conditions must also be satisfied by the response:</p><p>It must contain an \"Expires\" header field</p><p>It must contain a \"max-age\" response directive</p><p>For \"shared\" caches such as \"proxy\" caches, it must contain a \"s-maxage\" response directive</p><p>It must contain a \"Cache Control Extension\" that allows it to be cached</p><p>It must have a status code that is defined as cacheable by default (200, 203, 204, 206, 300, 301, 404, 405, 410, 414, 501).</p>",
+					"otherinfo": "",
+					"reference": "<p>https://datatracker.ietf.org/doc/html/rfc7234</p><p>https://datatracker.ietf.org/doc/html/rfc7231</p><p>https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html</p>",
+					"cweid": "524",
+					"wascid": "13",
+					"sourceid": "9"
+				}
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}
