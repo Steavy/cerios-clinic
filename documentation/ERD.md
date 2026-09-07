@@ -20,7 +20,7 @@ erDiagram
 
     PATIENT {
         string id PK
-        string user_id FK UK
+        string user_id FK, UK
         datetime date_of_birth
         string phone
         string insurance_number
@@ -31,7 +31,7 @@ erDiagram
 
     DOCTOR {
         string id PK
-        string user_id FK UK
+        string user_id FK, UK
         string specialization
         string license_number
         datetime updated_at
@@ -39,7 +39,7 @@ erDiagram
 
     ASSISTANT {
         string id PK
-        string user_id FK UK
+        string user_id FK, UK
         string department
         datetime updated_at
     }
@@ -69,7 +69,7 @@ erDiagram
 
     REVIEW {
         string id PK
-        string appointment_id FK UK
+        string appointment_id FK, UK
         string patient_id FK
         string doctor_id FK
         int rating
@@ -79,7 +79,7 @@ erDiagram
 
     PRESCRIPTION {
         string id PK
-        string appointment_id FK UK
+        string appointment_id FK, UK
         string patient_id FK
         string doctor_id FK
         string notes
