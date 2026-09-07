@@ -5,89 +5,87 @@ This document defines the functional use cases for Cerios Clinic, organized by a
 ## Use Case Diagram
 
 ```mermaid
-flowchart TB
-    subgraph Actors
-        PAT["Patient"]
-        DOC["Doctor"]
-        ASST["Assistant"]
-        ADM["Admin"]
-        KC["Keycloak"]
+flowchart LR
+    PAT["Patient"]
+    DOC["Doctor"]
+    ASST["Assistant"]
+    ADM["Admin"]
+
+    subgraph Appointments ["Appointment Management"]
+        direction TB
+        A1["Book Appointment"]
+        A2["View Appointments"]
+        A3["Cancel Appointment"]
+        A4["Reschedule Appointment"]
+        A5["Confirm Appointment"]
+        A6["Complete Appointment"]
     end
 
-    subgraph AppointmentDomain ["Appointment Management"]
-        UC1["UC-01: Book Appointment"]
-        UC2["UC-02: View Appointments"]
-        UC3["UC-03: Cancel Appointment"]
-        UC4["UC-04: Reschedule Appointment"]
-        UC5["UC-05: Confirm Appointment"]
-        UC6["UC-06: Complete Appointment"]
+    subgraph Prescriptions ["Prescription Management"]
+        direction TB
+        R1["Create Prescription"]
+        R2["View Prescription"]
+        R3["Update Prescription"]
     end
 
-    subgraph PrescriptionDomain ["Prescription Management"]
-        UC7["UC-07: Create Prescription"]
-        UC8["UC-08: View Prescription"]
-        UC9["UC-09: Update Prescription"]
+    subgraph Reviews ["Review Management"]
+        direction TB
+        V1["Submit Review"]
+        V2["View Reviews"]
     end
 
-    subgraph ReviewDomain ["Review Management"]
-        UC10["UC-10: Submit Review"]
-        UC11["UC-11: View Reviews"]
+    subgraph Availability ["Availability Management"]
+        direction TB
+        L1["Set Unavailability"]
+        L2["View Doctor Availability"]
     end
 
-    subgraph AvailabilityDomain ["Availability Management"]
-        UC12["UC-12: Set Unavailability"]
-        UC13["UC-13: View Doctor Availability"]
+    subgraph Users ["User & Profile Management"]
+        direction TB
+        U1["Register Account"]
+        U2["Login"]
+        U3["View Profile"]
+        U4["Update Profile"]
+        U5["Create Staff Account"]
+        U6["Manage Feature Toggles"]
     end
 
-    subgraph UserDomain ["User & Profile Management"]
-        UC14["UC-14: Register Account"]
-        UC15["UC-15: Login"]
-        UC16["UC-16: View Profile"]
-        UC17["UC-17: Update Profile"]
-        UC18["UC-18: Create Staff Account"]
-        UC19["UC-19: Manage Feature Toggles"]
-    end
+    PAT --> A1
+    PAT --> A2
+    PAT --> A3
+    PAT --> L2
+    PAT --> R2
+    PAT --> V1
+    PAT --> V2
+    PAT --> U1
+    PAT --> U2
+    PAT --> U3
+    PAT --> U4
 
-    PAT --> UC1
-    PAT --> UC2
-    PAT --> UC3
-    PAT --> UC8
-    PAT --> UC10
-    PAT --> UC11
-    PAT --> UC13
-    PAT --> UC14
-    PAT --> UC15
-    PAT --> UC16
-    PAT --> UC17
+    DOC --> A2
+    DOC --> A5
+    DOC --> A6
+    DOC --> R1
+    DOC --> R2
+    DOC --> R3
+    DOC --> V2
+    DOC --> L1
+    DOC --> U2
+    DOC --> U3
+    DOC --> U4
 
-    DOC --> UC2
-    DOC --> UC5
-    DOC --> UC6
-    DOC --> UC7
-    DOC --> UC8
-    DOC --> UC9
-    DOC --> UC11
-    DOC --> UC12
-    DOC --> UC15
-    DOC --> UC16
-    DOC --> UC17
+    ASST --> A1
+    ASST --> A2
+    ASST --> A3
+    ASST --> A4
+    ASST --> R2
+    ASST --> U2
+    ASST --> U3
 
-    ASST --> UC1
-    ASST --> UC2
-    ASST --> UC3
-    ASST --> UC4
-    ASST --> UC8
-    ASST --> UC15
-    ASST --> UC16
-
-    ADM --> UC18
-    ADM --> UC19
-    ADM --> UC15
-    ADM --> UC16
-
-    UC1 -- "sends confirmation" --> KC
-    UC14 -- "creates account" --> KC
-    UC15 -- "authenticates" --> KC
+    ADM --> U2
+    ADM --> U3
+    ADM --> U5
+    ADM --> U6
 ```
 
 ---
