@@ -7,113 +7,113 @@ This document describes the database schema for Cerios Clinic, derived from the 
 ```mermaid
 erDiagram
     USER {
-        id PK
-        keycloak_id UK
-        email UK
-        first_name
-        last_name
-        role
-        created_at
-        updated_at
-        deleted_at
+        string id PK
+        string keycloak_id UK
+        string email UK
+        string first_name
+        string last_name
+        string role
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
     PATIENT {
-        id PK
-        user_id FK UK
-        date_of_birth
-        phone
-        insurance_number
-        photo
-        email_notifications_enabled
-        updated_at
+        string id PK
+        string user_id FK UK
+        datetime date_of_birth
+        string phone
+        string insurance_number
+        string photo
+        boolean email_notifications_enabled
+        datetime updated_at
     }
 
     DOCTOR {
-        id PK
-        user_id FK UK
-        specialization
-        license_number
-        updated_at
+        string id PK
+        string user_id FK UK
+        string specialization
+        string license_number
+        datetime updated_at
     }
 
     ASSISTANT {
-        id PK
-        user_id FK UK
-        department
-        updated_at
+        string id PK
+        string user_id FK UK
+        string department
+        datetime updated_at
     }
 
     APPOINTMENT {
-        id PK
-        patient_id FK
-        doctor_id FK
-        assistant_id FK
-        scheduled_at
-        status
-        notes
-        created_at
-        updated_at
+        string id PK
+        string patient_id FK
+        string doctor_id FK
+        string assistant_id FK
+        datetime scheduled_at
+        string status
+        string notes
+        datetime created_at
+        datetime updated_at
     }
 
     APPOINTMENT_STATUS_CHANGE {
-        id PK
-        appointment_id FK
-        previous_status
-        new_status
-        previous_scheduled_at
-        new_scheduled_at
-        changed_by_keycloak_id
-        changed_at
+        string id PK
+        string appointment_id FK
+        string previous_status
+        string new_status
+        datetime previous_scheduled_at
+        datetime new_scheduled_at
+        string changed_by_keycloak_id
+        datetime changed_at
     }
 
     REVIEW {
-        id PK
-        appointment_id FK UK
-        patient_id FK
-        doctor_id FK
-        rating
-        comment
-        created_at
+        string id PK
+        string appointment_id FK UK
+        string patient_id FK
+        string doctor_id FK
+        int rating
+        string comment
+        datetime created_at
     }
 
     PRESCRIPTION {
-        id PK
-        appointment_id FK UK
-        patient_id FK
-        doctor_id FK
-        notes
-        created_at
-        updated_at
+        string id PK
+        string appointment_id FK UK
+        string patient_id FK
+        string doctor_id FK
+        string notes
+        datetime created_at
+        datetime updated_at
     }
 
     PRESCRIPTION_ITEM {
-        id PK
-        prescription_id FK
-        medication_name
-        dosage
-        frequency
-        duration
-        instructions
+        string id PK
+        string prescription_id FK
+        string medication_name
+        string dosage
+        string frequency
+        string duration
+        string instructions
     }
 
     DOCTOR_UNAVAILABILITY {
-        id PK
-        doctor_id FK
-        start_date
-        end_date
-        reason
-        created_at
+        string id PK
+        string doctor_id FK
+        datetime start_date
+        datetime end_date
+        string reason
+        datetime created_at
     }
 
     FEATURE_TOGGLE {
-        id PK
-        key UK
-        enabled
-        description
-        config
-        created_at
-        updated_at
+        string id PK
+        string key UK
+        boolean enabled
+        string description
+        string config
+        datetime created_at
+        datetime updated_at
     }
 
     USER ||--o| PATIENT : "has profile"
