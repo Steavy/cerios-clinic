@@ -6,34 +6,28 @@ Level 1 breaks down the system into its core functional processes, showing data 
 
 ```mermaid
 flowchart TB
-    subgraph Processes ["Core Processes"]
-        P1["1.1 Appointment\nManagement"]
-        P2["1.2 Prescription\nManagement"]
-        P3["1.3 Review\nManagement"]
-        P4["1.4 Availability\nManagement"]
-        P5["1.5 User & Profile\nManagement"]
-        P6["1.6 Authentication\n& Authorization"]
-        P7["1.7 Feature Toggle\nManagement"]
-        P8["1.8 Notification\nService"]
-    end
+    P1["1.1 Appointment\nManagement"]
+    P2["1.2 Prescription\nManagement"]
+    P3["1.3 Review\nManagement"]
+    P4["1.4 Availability\nManagement"]
+    P5["1.5 User & Profile\nManagement"]
+    P6["1.6 Authentication\n& Authorization"]
+    P7["1.7 Feature Toggle\nManagement"]
+    P8["1.8 Notification\nService"]
 
-    subgraph DataStores ["Data Stores"]
-        DS1[("D1: Appointments")]
-        DS2[("D2: Prescriptions")]
-        DS3[("D3: Reviews")]
-        DS4[("D4: Users & Profiles")]
-        DS5[("D5: Doctor Availability")]
-        DS6[("D6: Feature Toggles")]
-    end
+    DS1[("D1: Appointments")]
+    DS2[("D2: Prescriptions")]
+    DS3[("D3: Reviews")]
+    DS4[("D4: Users & Profiles")]
+    DS5[("D5: Doctor Availability")]
+    DS6[("D6: Feature Toggles")]
 
-    subgraph Entities ["External Entities"]
-        PAT["Patient"]
-        DOC["Doctor"]
-        ASST["Assistant"]
-        ADM["Admin"]
-        KC["Keycloak"]
-        MAIL["Email Service"]
-    end
+    PAT["Patient"]
+    DOC["Doctor"]
+    ASST["Assistant"]
+    ADM["Admin"]
+    KC["Keycloak"]
+    MAIL["Email Service"]
 
     PAT --> P1
     PAT --> P3
@@ -60,10 +54,6 @@ flowchart TB
 
     P1 -- "status change" --> P8
     P2 -- "prescription created" --> P8
-
-    style Processes fill:#e1f5fe,stroke:#0288d1
-    style DataStores fill:#fff9c4,stroke:#f9a825
-    style Entities fill:#e8f5e9,stroke:#388e3c
 ```
 
 ---

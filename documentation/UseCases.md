@@ -7,11 +7,11 @@ This document defines the functional use cases for Cerios Clinic, organized by a
 ```mermaid
 flowchart TB
     subgraph Actors
-        PAT["🧑 Patient"]
-        DOC["👨‍⚕️ Doctor"]
-        ASST["👩‍💼 Assistant"]
-        ADM["🔧 Admin"]
-        KC["🔐 Keycloak"]
+        PAT["Patient"]
+        DOC["Doctor"]
+        ASST["Assistant"]
+        ADM["Admin"]
+        KC["Keycloak"]
     end
 
     subgraph AppointmentDomain ["Appointment Management"]

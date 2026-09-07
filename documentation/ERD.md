@@ -166,11 +166,6 @@ flowchart LR
     S -->|"cancel"| X["CANCELLED"]
     C -->|"complete"| D["COMPLETED"]
     C -->|"cancel"| X
-
-    style S fill:#fff9c4,stroke:#f9a825
-    style C fill:#c8e6c9,stroke:#388e3c
-    style D fill:#bbdefb,stroke:#1976d2
-    style X fill:#ffcdd2,stroke:#d32f2f
 ```
 
 ## Entity Descriptions

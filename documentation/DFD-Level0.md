@@ -6,22 +6,16 @@ The context diagram shows the Cerios Clinic system as a single process interacti
 
 ```mermaid
 flowchart TB
-    subgraph External ["External Entities"]
-        PATIENT["🧑 Patient"]
-        DOCTOR["👨‍⚕️ Doctor"]
-        ASSISTANT["👩‍💼 Assistant"]
-        ADMIN["🔧 Admin"]
-    end
+    PATIENT["Patient"]
+    DOCTOR["Doctor"]
+    ASSISTANT["Assistant"]
+    ADMIN["Admin"]
 
-    subgraph System ["Cerios Clinic System"]
-        PROCESS["1.0 Clinic Management System"]
-    end
+    PROCESS["1.0 Clinic Management System"]
 
-    subgraph ExternalSystems ["External Systems"]
-        KEYCLOAK["🔐 Keycloak\n(Authentication)"]
-        EMAIL["📧 Email Service\n(Mailpit)"]
-        DB[(("🗄️ PostgreSQL\nDatabase"))]
-    end
+    KEYCLOAK["Keycloak\n(Authentication)"]
+    EMAIL["Email Service\n(Mailpit)"]
+    DB[("PostgreSQL Database")]
 
     PATIENT -- "F1: Book Appointment\nF2: View Prescriptions\nF3: Submit Review" --> PROCESS
     DOCTOR -- "F4: Manage Schedule\nF5: Create Prescription\nF6: View Patients" --> PROCESS
@@ -36,10 +30,6 @@ flowchart TB
     PROCESS -- "F15: Auth Tokens" --> DOCTOR
     PROCESS -- "F15: Auth Tokens" --> ASSISTANT
     PROCESS -- "F15: Auth Tokens" --> ADMIN
-
-    style System fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style ExternalSystems fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style External fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
 ```
 
 ## Data Flows
