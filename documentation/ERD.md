@@ -161,14 +161,16 @@ erDiagram
 ### Allowed Status Transitions
 
 ```mermaid
-stateDiagram-v2
-    [*] --> SCHEDULED
-    SCHEDULED --> CONFIRMED : confirm
-    SCHEDULED --> CANCELLED : cancel
-    CONFIRMED --> COMPLETED : complete
-    CONFIRMED --> CANCELLED : cancel
-    COMPLETED --> [*]
-    CANCELLED --> [*]
+flowchart LR
+    S["SCHEDULED"] -->|"confirm"| C["CONFIRMED"]
+    S -->|"cancel"| X["CANCELLED"]
+    C -->|"complete"| D["COMPLETED"]
+    C -->|"cancel"| X
+
+    style S fill:#fff9c4,stroke:#f9a825
+    style C fill:#c8e6c9,stroke:#388e3c
+    style D fill:#bbdefb,stroke:#1976d2
+    style X fill:#ffcdd2,stroke:#d32f2f
 ```
 
 ## Entity Descriptions
