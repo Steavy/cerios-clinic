@@ -54,6 +54,8 @@ jobs:
 
       - name: Generate mobile .env (emulator profile)
         run: node apps/patient-mobile/setup-env.mjs emulator
+        env:
+          APP_VERSION: 0.0.0
 
       - name: Install local node_modules for React Native Gradle plugin
         run: npm --prefix apps/patient-mobile install
