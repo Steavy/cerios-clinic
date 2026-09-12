@@ -85,3 +85,24 @@ jobs:
             ### Setup
             See [MOBILE.md](https://github.com/${{ github.repository }}/blob/main/MOBILE.md) for instructions.
           files: cerios-patient-mobile-emulator-${{ inputs.version }}.apk
+
+  dispatch-tests:
+    name: Dispatch Mobile Tests
+    needs: build-apk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch mobile test workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "Steavy",
+              repo: "playwright-sparta",
+              workflow_id: "mobile-test-ci.yml",
+              ref: "main",
+              inputs: { 
+                "image-tag": "${{ github.sha }}",
+                "app-source": "steavy"
+              },
+            });

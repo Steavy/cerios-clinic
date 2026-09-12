@@ -148,6 +148,26 @@ jobs:
               inputs: { "image-tag": context.sha },
             });
 
+  dispatch-mobile-release:
+    name: Dispatch Mobile Release (Emulator)
+    runs-on: ubuntu-latest
+    needs: publish-image
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Dispatch mobile release workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "Steavy",
+              repo: "cerios-clinic",
+              workflow_id: "mobile-release-emulator.yml",
+              ref: "main",
+              inputs: { "version": "emulator-${{ github.sha }}" },
+            });
+
   notify-opencode-on-failure:
     name: Notify opencode on mobile build failure
     runs-on: ubuntu-latest
