@@ -55,6 +55,7 @@ ARG VITE_PATIENT_API_BASE_URL=http://localhost:3001/api
 ARG VITE_DOCTOR_API_BASE_URL=http://localhost:3002/api
 ARG VITE_ASSISTANT_API_BASE_URL=http://localhost:3003/api
 ARG VITE_ADMIN_API_BASE_URL=http://localhost:3004/api
+ARG VITE_APP_VERSION=0.0.0
 
 ENV VITE_KEYCLOAK_URL=${VITE_KEYCLOAK_URL}
 ENV VITE_KEYCLOAK_REALM=${VITE_KEYCLOAK_REALM}
@@ -66,13 +67,14 @@ ENV VITE_PATIENT_API_BASE_URL=${VITE_PATIENT_API_BASE_URL}
 ENV VITE_DOCTOR_API_BASE_URL=${VITE_DOCTOR_API_BASE_URL}
 ENV VITE_ASSISTANT_API_BASE_URL=${VITE_ASSISTANT_API_BASE_URL}
 ENV VITE_ADMIN_API_BASE_URL=${VITE_ADMIN_API_BASE_URL}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
 
 # Build shared-types (devDependency for type-checking) then the frontend.
-# Create empty .env so dotenv-cli in build scripts doesn't fail.
-RUN touch .env \
- && pnpm --filter @clinic/shared-types build \
- && pnpm --filter @clinic/portal-common build \
- && pnpm --filter @clinic/${APP_NAME} build
+# Create .env with VITE_APP_VERSION for dotenv-cli in build scripts.
+RUN echo "VITE_APP_VERSION=${VITE_APP_VERSION}" > .env \
+  && pnpm --filter @clinic/shared-types build \
+  && pnpm --filter @clinic/portal-common build \
+  && pnpm --filter @clinic/${APP_NAME} build
 
 # ── Stage 4: serve with nginx ─────────────────────────────
 FROM nginx:alpine AS runtime
