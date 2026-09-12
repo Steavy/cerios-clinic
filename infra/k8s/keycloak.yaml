@@ -1,6 +1,10 @@
 # Keycloak for the demo stack. Shares clinic_db (schema "keycloak"), so the
 # realm persists in postgres and --import-realm is only effective on a fresh
 # DB. sslRequired=none + demo redirect URIs are baked into clinic-realm.json.
+# NOTE: single replica on purpose. start-dev uses a per-pod (non-distributed)
+# Infinispan cache with no JGroups discovery; with replicas: 2 the round-robin
+# keycloak Service intermittently routes check-sso to the pod that does not
+# hold the AUTH_SESSION_ID -> login-page redirects -> flaky smoke tests.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,7 +13,7 @@ metadata:
   labels:
     app: keycloak
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
