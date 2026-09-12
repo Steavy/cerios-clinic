@@ -90,7 +90,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata
-        id: meta
+        id: meta_main
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.image }}
@@ -136,8 +136,8 @@ jobs:
             VITE_APP_VERSION=${{ steps.version.outputs.VERSION }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_main.outputs.tags }}
+          labels: ${{ steps.meta_main.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=min,scope=${{ matrix.image }}
 
@@ -173,7 +173,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata
-        id: meta
+        id: meta_demo
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.image }}
@@ -193,7 +193,7 @@ jobs:
           echo "VERSION=${DEMO_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Extract metadata
-        id: meta
+        id: meta_demo2
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.image }}
@@ -234,8 +234,8 @@ jobs:
             VITE_APP_VERSION=${{ steps.demo_version.outputs.VERSION }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_demo.outputs.tags }}
+          labels: ${{ steps.meta_demo.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}-demo
           cache-to: type=gha,mode=min,scope=${{ matrix.image }}-demo
 
