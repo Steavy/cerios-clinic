@@ -1,0 +1,29 @@
+================================================================================
+DEBUG: Medical History Asserter
+================================================================================
+Expected entry: {
+  "doctorName": "Dr. Michael Williams",
+  "specialty": "Neurology",
+  "date": "9 Sept 2026",
+  "summary": "Routine check - all normal"
+}
+---
+Actual entries found: [
+  {
+    "doctorName": "Dr. Michael Williams",
+    "specialty": "Neurology",
+    "date": "9 Sept 2026",
+    "summary": "Routine check - all normal"
+  },
+  {
+    "doctorName": "Dr. James Smith",
+    "specialty": "General Practice",
+    "date": "17 Aug 2026",
+    "summary": "General check-up - all clear"
+  }
+]
+---
+Number of entries: 2
+Doctor names in entries: [ 'Dr. Michael Williams', 'Dr. James Smith' ]
+Dates in entries: [ '9 Sept 2026', '17 Aug 2026' ]
+================================================================================

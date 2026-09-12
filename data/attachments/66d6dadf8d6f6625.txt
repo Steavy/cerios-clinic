@@ -1,0 +1,23 @@
+2026/09/12 19:34:53.335204 [INFO] Starting server on http://localhost:12000...
+  mw:driver-mobilecli listing devices +0ms
+  mw:driver-mobilecli found 1 device(s) +58ms
+  mw:driver-mobilecli connecting to ws://localhost:12000/ws +1ms
+2026/09/12 19:34:53.837430 [VERBOSE] WebSocket connection closed: websocket: close 1005 (no status)
+  mw:driver-mobilecli websocket connected +5ms
+  mw:driver-mobilecli listing devices +0ms
+  mw:driver-mobilecli found 1 device(s) +56ms
+  mw:driver-mobilecli resolved device Pixel_10_Pro (platform=android, type=emulator) +1ms
+  mw:driver-mobilecli running: /home/runner/work/playwright-sparta/playwright-sparta/playwright-sparta/node_modules/mobilecli/bin/mobilecli-linux-amd64 agent status --device Pixel_10_Pro +0ms
+  mw:driver-mobilecli agent status output: {
+  "status": "ok",
+  "data": {
+    "message": "Agent version 1.2.4 is installed on device",
+    "agent": {
+      "version": "1.2.4",
+      "bundleId": "com.mobilenext.devicekit"
+    }
+  }
+} +178ms
+2026/09/12 19:34:54.797603 [INFO] WebSocket Request ID: 1, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/12 19:34:55.833303 [VERBOSE] Warning: Failed to get iOS real devices: failed getting device list: dial unix /var/run/usbmuxd: connect: no such file or directory
+2026/09/12 19:35:05.139941 [VERBOSE] devicekit dump unavailable, falling back to uiautomator: no hierarchy found in devicekit dump
