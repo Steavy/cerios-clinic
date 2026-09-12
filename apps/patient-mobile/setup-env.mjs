@@ -6,6 +6,8 @@
 //   node apps/patient-mobile/setup-env.mjs emulator
 //   node apps/patient-mobile/setup-env.mjs lan
 //   node apps/patient-mobile/setup-env.mjs lan --ip=192.168.1.42
+//   node apps/patient-mobile/setup-env.mjs demo
+//   node apps/patient-mobile/setup-env.mjs test
 //
 // Optional environment variable for LAN profile:
 //   MOBILE_LAN_IP=192.168.1.42
@@ -17,7 +19,7 @@ import path from "path";
 const profile = (process.argv[2] ?? "emulator").toLowerCase();
 const extraArgs = process.argv.slice(3);
 
-if (profile !== "emulator" && profile !== "lan") {
+if (profile !== "emulator" && profile !== "lan" && profile !== "demo" && profile !== "test") {
 	console.error(
 		"Invalid profile. Use one of: emulator, lan\n" +
 			"Examples:\n" +
@@ -63,8 +65,11 @@ function detectLanIpv4() {
 }
 
 function resolveHost() {
-	if (profile === "emulator") {
+	if (profile === "emulator" || profile === "test") {
 		return "10.0.2.2";
+	}
+	if (profile === "demo") {
+		return "demo-sparta.mooo.com";
 	}
 
 	const argIp = extraArgs.find(arg => arg.startsWith("--ip="))?.slice("--ip=".length);
