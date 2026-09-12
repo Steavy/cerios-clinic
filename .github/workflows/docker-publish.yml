@@ -3,6 +3,8 @@ name: Build & Publish Docker Images
 on:
   push:
     branches: [main]
+    tags:
+      - "v*"
   workflow_dispatch:
 
 env:
@@ -39,22 +41,18 @@ jobs:
             dockerfile: infra/docker/Dockerfile.frontend
             build-args: |
               APP_NAME=patient-portal
-              VITE_APP_VERSION=0.0.0
           - image: doctor-portal
             dockerfile: infra/docker/Dockerfile.frontend
             build-args: |
               APP_NAME=doctor-portal
-              VITE_APP_VERSION=0.0.0
           - image: assistant-portal
             dockerfile: infra/docker/Dockerfile.frontend
             build-args: |
               APP_NAME=assistant-portal
-              VITE_APP_VERSION=0.0.0
           - image: admin-portal
             dockerfile: infra/docker/Dockerfile.frontend
             build-args: |
               APP_NAME=admin-portal
-              VITE_APP_VERSION=0.0.0
 
           # Database init
           - image: db-init
@@ -72,6 +70,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Need full history for git describe
 
       - name: Set lowercase repo name
         run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
@@ -97,13 +97,43 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=,format=long
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+          flavor: |
+            latest=auto
+
+      - name: Set version build arg
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERSION=0.0.0-dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.dockerfile }}
-          build-args: ${{ matrix.build-args }}
+          build-args: |
+            ${{ matrix.build-args }}
+            VITE_APP_VERSION=${{ steps.version.outputs.VERSION }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -123,6 +153,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Set lowercase repo name
         run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
@@ -149,6 +181,24 @@ jobs:
             type=raw,value=demo,enable={{is_default_branch}}
             type=sha,prefix=demo-,format=long
 
+      - name: Set version build arg
+        id: version
+        run: |
+          echo "VERSION=0.0.0-demo" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -166,6 +216,7 @@ jobs:
             VITE_DOCTOR_API_BASE_URL=http://demo-sparta.mooo.com:3002/api
             VITE_ASSISTANT_API_BASE_URL=http://demo-sparta.mooo.com:3003/api
             VITE_ADMIN_API_BASE_URL=http://demo-sparta.mooo.com:3004/api
+            VITE_APP_VERSION=${{ steps.version.outputs.VERSION }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -216,4 +267,4 @@ jobs:
                 'head-sha': context.sha,
                 'head-branch': context.ref.replace('refs/heads/', ''),
               },
-            })
+            )
