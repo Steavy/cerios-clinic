@@ -42,4 +42,15 @@ describe("PortalFooter", () => {
 		expect(footer).toBeInTheDocument();
 		expect(footer!.className).toContain("bg-brand-navy");
 	});
+
+	it("renders the version when provided", () => {
+		render(<PortalFooter portalName="Test Portal" version="1.2.3" />);
+		expect(screen.getByText(/v1\.2\.3/)).toBeInTheDocument();
+	});
+
+	it("does not render version when omitted", () => {
+		render(<PortalFooter portalName="Test Portal" />);
+		expect(screen.getByText(/Test Portal/)).toBeInTheDocument();
+		expect(screen.getByText(/©/)).not.toHaveTextContent(/v/);
+	});
 });

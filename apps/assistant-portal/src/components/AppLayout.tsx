@@ -147,7 +147,11 @@ export default function AppLayout(): React.ReactElement {
 				</main>
 			</div>
 
-			<PortalFooter portalName="Assistant Portal" showLogo={showFooterLogo} />
+			<PortalFooter
+				portalName="Assistant Portal"
+				showLogo={showFooterLogo}
+				version={import.meta.env.VITE_APP_VERSION}
+			/>
 		</div>
 	);
 }
