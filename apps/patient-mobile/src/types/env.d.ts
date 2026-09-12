@@ -3,6 +3,7 @@ declare module "@env" {
 	export const KEYCLOAK_URL: string;
 	export const KEYCLOAK_REALM: string;
 	export const KEYCLOAK_CLIENT_ID: string;
+	export const APP_VERSION: string;
 }
 
 // Hermes / React Native provide atob and btoa as globals at runtime.

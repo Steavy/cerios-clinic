@@ -14,6 +14,7 @@ import { launchCamera, launchImageLibrary, type ImagePickerResponse } from "reac
 
 import { useProfile, useUpdateProfile, useUploadProfilePhoto } from "../api/hooks";
 import { useAuth } from "../auth/AuthContext";
+import { APP_VERSION } from '@env';
 
 function formatDob(date?: string | null): string {
 	if (!date) return "";
@@ -181,6 +182,10 @@ function ProfileFormContent({
 			<TouchableOpacity style={styles.signOutBtn} onPress={onSignOut}>
 				<Text style={styles.signOutBtnText}>Sign Out</Text>
 			</TouchableOpacity>
+
+			<View style={styles.versionContainer}>
+				<Text style={styles.versionText}>v{APP_VERSION}</Text>
+			</View>
 		</ScrollView>
 	);
 }
@@ -382,4 +387,10 @@ const styles = StyleSheet.create({
 		marginTop: 12,
 	},
 	signOutBtnText: { color: "#EF4444", fontWeight: "600" as const, fontSize: 16 },
+	versionContainer: { paddingVertical: 10, alignItems: 'center' },
+	versionText: {
+		fontSize: 12,
+		color: '#9CA3AF',
+		fontWeight: '600',
+	},
 });
