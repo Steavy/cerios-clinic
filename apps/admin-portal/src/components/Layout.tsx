@@ -126,7 +126,7 @@ export default function Layout(): React.ReactElement {
 				</main>
 			</div>
 
-			<PortalFooter portalName="Admin Portal" showLogo={showFooterLogo} />
+			<PortalFooter portalName="Admin Portal" showLogo={showFooterLogo} version={import.meta.env.VITE_APP_VERSION} />
 		</div>
 	);
 }
