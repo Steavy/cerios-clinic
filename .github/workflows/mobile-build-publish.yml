@@ -152,29 +152,6 @@ jobs:
           cache-from: type=gha,scope=patient-mobile
           cache-to: type=gha,mode=max,scope=patient-mobile
 
-  dispatch-tests:
-    name: Dispatch Mobile Tests
-    runs-on: ubuntu-latest
-    needs: publish-image
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Dispatch mobile test workflow
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: "Steavy",
-              repo: "playwright-sparta",
-              workflow_id: "mobile-test-ci.yml",
-              ref: "main",
-              inputs: {
-                "image-tag": "${{ github.sha }}",
-                "app-source": "steavy"
-              },
-            });
-
   notify-opencode-on-failure:
     name: Notify opencode on mobile build failure
     runs-on: ubuntu-latest
