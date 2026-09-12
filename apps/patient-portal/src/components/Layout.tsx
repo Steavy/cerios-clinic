@@ -157,6 +157,9 @@ export default function Layout(): React.ReactElement {
 			{/* Main content */}
 			<main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<Outlet />
+				<div className="text-sm text-gray-300 mt-4 text-center">
+					<span className="font-bold">v{import.meta.env.VITE_APP_VERSION}</span>
+				</div>
 			</main>
 
 			<PortalFooter portalName="Patient Portal v2" showLogo={showFooterLogo} />
