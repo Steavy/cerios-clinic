@@ -181,10 +181,25 @@ jobs:
             type=raw,value=demo,enable={{is_default_branch}}
             type=sha,prefix=demo-,format=long
 
-      - name: Set version build arg
-        id: version
+      - name: Calculate demo version
+        id: demo_version
         run: |
-          echo "VERSION=0.0.0-demo" >> "$GITHUB_OUTPUT"
+          # Calculate version based on commit count since last tag
+          # Format: <major>.<minor>.<patch>-demo.<commit_count>
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          BASE_VERSION=${LATEST_TAG#v}
+          COMMIT_COUNT=$(git rev-list --count ${LATEST_TAG}..HEAD)
+          DEMO_VERSION="${BASE_VERSION}-demo.${COMMIT_COUNT}"
+          echo "VERSION=${DEMO_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=demo,enable={{is_default_branch}}
+            type=sha,prefix=demo-,format=long
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -216,7 +231,7 @@ jobs:
             VITE_DOCTOR_API_BASE_URL=http://demo-sparta.mooo.com:3002/api
             VITE_ASSISTANT_API_BASE_URL=http://demo-sparta.mooo.com:3003/api
             VITE_ADMIN_API_BASE_URL=http://demo-sparta.mooo.com:3004/api
-            VITE_APP_VERSION=${{ steps.version.outputs.VERSION }}
+            VITE_APP_VERSION=${{ steps.demo_version.outputs.VERSION }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
