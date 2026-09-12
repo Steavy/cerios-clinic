@@ -19,5 +19,5 @@
 		"typescript/prefer-nullish-coalescing": "error",
 		"typescript/require-await": "error"
 	},
-	"ignorePatterns": ["**/dist", "**/node_modules"]
+	"ignorePatterns": ["**/dist", "**/node_modules", "k6/**"]
 }
