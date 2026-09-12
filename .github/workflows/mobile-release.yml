@@ -44,7 +44,7 @@ jobs:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Generate mobile .env
-        run: node apps/patient-mobile/setup-env.mjs emulator
+        run: node apps/patient-mobile/setup-env.mjs demo
         env:
           APP_VERSION: ${{ inputs.version }}
 
