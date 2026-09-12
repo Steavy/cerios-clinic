@@ -34,19 +34,27 @@ jobs:
             dockerfile: infra/docker/Dockerfile.api
             build-args: APP_NAME=api-admin
 
-          # Frontend portals
-          - image: patient-portal
-            dockerfile: infra/docker/Dockerfile.frontend
-            build-args: APP_NAME=patient-portal
-          - image: doctor-portal
-            dockerfile: infra/docker/Dockerfile.frontend
-            build-args: APP_NAME=doctor-portal
-          - image: assistant-portal
-            dockerfile: infra/docker/Dockerfile.frontend
-            build-args: APP_NAME=assistant-portal
-          - image: admin-portal
-            dockerfile: infra/docker/Dockerfile.frontend
-            build-args: APP_NAME=admin-portal
+# Frontend portals
+           - image: patient-portal
+             dockerfile: infra/docker/Dockerfile.frontend
+             build-args: |
+               APP_NAME=patient-portal
+               VITE_APP_VERSION=0.0.0
+           - image: doctor-portal
+             dockerfile: infra/docker/Dockerfile.frontend
+             build-args: |
+               APP_NAME=doctor-portal
+               VITE_APP_VERSION=0.0.0
+           - image: assistant-portal
+             dockerfile: infra/docker/Dockerfile.frontend
+             build-args: |
+               APP_NAME=assistant-portal
+               VITE_APP_VERSION=0.0.0
+           - image: admin-portal
+             dockerfile: infra/docker/Dockerfile.frontend
+             build-args: |
+               APP_NAME=admin-portal
+               VITE_APP_VERSION=0.0.0
 
           # Database init
           - image: db-init
