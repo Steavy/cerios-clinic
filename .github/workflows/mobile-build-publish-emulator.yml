@@ -3,13 +3,8 @@ name: Build & Publish Mobile APK (Emulator)
 on:
   push:
     branches: [main]
-    paths:
-      - "apps/patient-mobile/**"
-      - "infra/docker/Dockerfile.mobile"
-      - ".nvmrc"
-      - "package.json"
-      - "pnpm-workspace.yaml"
-      - "pnpm-lock.yaml"
+    tags:
+      - "v*"
   workflow_dispatch:
 
 env:
