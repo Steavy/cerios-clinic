@@ -1,0 +1,50 @@
+2026/09/13 11:19:18.094255 [INFO] Starting server on http://localhost:12000...
+  mw:driver-mobilecli listing devices +0ms
+  mw:driver-mobilecli found 1 device(s) +55ms
+  mw:driver-mobilecli connecting to ws://localhost:12000/ws +0ms
+2026/09/13 11:19:18.598046 [VERBOSE] WebSocket connection closed: websocket: close 1005 (no status)
+  mw:driver-mobilecli websocket connected +6ms
+  mw:driver-mobilecli listing devices +0ms
+  mw:driver-mobilecli found 1 device(s) +56ms
+  mw:driver-mobilecli resolved device Pixel_10_Pro (platform=android, type=emulator) +0ms
+  mw:driver-mobilecli running: /home/runner/work/playwright-sparta/playwright-sparta/playwright-sparta/node_modules/mobilecli/bin/mobilecli-linux-amd64 agent status --device Pixel_10_Pro +1ms
+  mw:driver-mobilecli agent status output: {
+  "status": "ok",
+  "data": {
+    "message": "Agent version 1.2.4 is installed on device",
+    "agent": {
+      "version": "1.2.4",
+      "bundleId": "com.mobilenext.devicekit"
+    }
+  }
+} +142ms
+2026/09/13 11:19:19.947477 [INFO] WebSocket Request ID: 1, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:21.328113 [VERBOSE] Warning: Failed to get iOS real devices: failed getting device list: dial unix /var/run/usbmuxd: connect: no such file or directory
+2026/09/13 11:19:27.364534 [INFO] WebSocket Request ID: 2, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:31.086525 [INFO] WebSocket Request ID: 3, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:32.304150 [INFO] WebSocket Request ID: 4, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:33.327221 [INFO] WebSocket Request ID: 5, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:35.743989 [INFO] WebSocket Request ID: 6, Method: device.io.tap, Params: {"deviceId":"Pixel_10_Pro","x":540,"y":1225}
+2026/09/13 11:19:38.988717 [INFO] WebSocket Request ID: 7, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:41.179904 [INFO] WebSocket Request ID: 8, Method: device.io.button, Params: {"deviceId":"Pixel_10_Pro","button":"BACK"}
+2026/09/13 11:19:41.711379 [INFO] WebSocket Request ID: 9, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:43.333012 [INFO] WebSocket Request ID: 10, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:45.158610 [INFO] WebSocket Request ID: 11, Method: device.io.tap, Params: {"deviceId":"Pixel_10_Pro","x":540,"y":1386}
+2026/09/13 11:19:46.414525 [INFO] WebSocket Request ID: 12, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:47.789246 [INFO] WebSocket Request ID: 13, Method: device.io.button, Params: {"deviceId":"Pixel_10_Pro","button":"BACK"}
+2026/09/13 11:19:47.918360 [INFO] WebSocket Request ID: 14, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:50.233332 [INFO] WebSocket Request ID: 15, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:51.600368 [INFO] WebSocket Request ID: 16, Method: device.io.tap, Params: {"deviceId":"Pixel_10_Pro","x":540,"y":1562}
+2026/09/13 11:19:51.672484 [INFO] WebSocket Request ID: 17, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:53.518949 [INFO] WebSocket Request ID: 18, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:55.092946 [INFO] WebSocket Request ID: 19, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:56.062917 [INFO] WebSocket Request ID: 20, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:19:58.293917 [INFO] WebSocket Request ID: 21, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:20:00.739517 [INFO] WebSocket Request ID: 22, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:20:01.795542 [INFO] WebSocket Request ID: 23, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:20:02.842857 [INFO] WebSocket Request ID: 24, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:20:04.160400 [INFO] WebSocket Request ID: 25, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:20:05.602570 [INFO] WebSocket Request ID: 26, Method: device.dump.ui, Params: {"deviceId":"Pixel_10_Pro"}
+2026/09/13 11:20:07.117594 [VERBOSE] WebSocket connection closed: websocket: close 1005 (no status)
+2026/09/13 11:20:07.123267 [INFO] Received signal terminated, shutting down gracefully...
+2026/09/13 11:20:07.123385 [INFO] Server stopped

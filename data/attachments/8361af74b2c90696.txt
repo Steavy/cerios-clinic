@@ -1,0 +1,21 @@
+================================================================================
+DEBUG: Prescriptions Asserter
+================================================================================
+Expected prescription: {
+  "doctorName": "Dr. Michael Williams",
+  "date": "9 Sept 2026",
+  "medicationCount": 2
+}
+---
+Actual prescriptions found: [
+  {
+    "doctorName": "Dr. Michael Williams",
+    "date": "9 Sept 2026",
+    "medicationCount": 2
+  }
+]
+---
+Number of prescriptions: 1
+Doctor names in prescriptions: [ 'Dr. Michael Williams' ]
+Dates in prescriptions: [ '9 Sept 2026' ]
+================================================================================
