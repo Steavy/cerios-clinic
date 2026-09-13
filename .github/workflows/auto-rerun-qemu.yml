@@ -1,0 +1,59 @@
+name: Auto-rerun QEMU-crashed builds
+
+on:
+  workflow_run:
+    workflows: ["Build & Publish Docker Images"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  rerun-failed-jobs:
+    name: Cancel and re-run failed jobs (QEMU crash)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'timed_out' }}
+    steps:
+      - name: Check re-run guard (only first attempt)
+        id: guard
+        run: |
+          if [ "${{ github.event.workflow_run.run_attempt }}" -ne 1 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Run attempt ${{ github.event.workflow_run.run_attempt }}; already auto-rerun once, skipping."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch failed-job logs and scan for QEMU crash signature
+        id: scan
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          gh -R "$GITHUB_REPOSITORY" run view "$RUN_ID" --log-failed > /tmp/failed.log 2>&1 || true
+          if grep -qE "qemu: uncaught target signal [0-9]+|Illegal instruction" /tmp/failed.log; then
+            echo "qemu_crash=true" >> "$GITHUB_OUTPUT"
+            echo "QEMU crash signature found in run $RUN_ID."
+          else
+            echo "qemu_crash=false" >> "$GITHUB_OUTPUT"
+            echo "No QEMU crash signature found; not re-running."
+          fi
+
+      - name: Cancel and re-run failed jobs
+        if: steps.guard.outputs.skip == 'false' && steps.scan.outputs.qemu_crash == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          echo "Cancelling run $RUN_ID (no-op if already completed)..."
+          gh -R "$GITHUB_REPOSITORY" run cancel "$RUN_ID" || true
+          sleep 5
+          echo "Re-running failed jobs of run $RUN_ID..."
+          gh -R "$GITHUB_REPOSITORY" run rerun "$RUN_ID" --failed
+
+      - name: Notify if QEMU crash persists after auto-rerun
+        if: steps.guard.outputs.skip == 'true' && steps.scan.outputs.qemu_crash == 'true'
+        run: echo "::warning::QEMU crash still present after auto-rerun; opencode-fix has been notified via existing failure bridge."
