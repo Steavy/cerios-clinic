@@ -202,9 +202,13 @@
 			"redirectUris": ["com.cerios.patient://oauth2redirect"],
 			"webOrigins": [],
 			"attributes": {
-				"pkce.code.challenge.method": "S256"
+				"pkce.code.challenge.method": "S256",
+				"client.offline.session.idle.timeout": "15552000",
+				"client.offline.session.max.lifespan": "15552000",
+				"access.token.lifespan": "300"
 			},
 			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
+			"optionalClientScopes": ["offline_access"],
 			"protocolMappers": [
 				{
 					"name": "patient-mobile-audience",
