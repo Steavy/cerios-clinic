@@ -43,14 +43,18 @@ Na initieel inloggen in de patient-mobile demo-app (zonder uitloggen via het Pro
     - `"access.token.lifespan": "300"` (5 min; korte access token, refresh gebeurt automatisch via bestaande logica)
 - Realm-brede token/session-lifetimes: **niet** wijzigen.
 
-### 3. Demo-implementatie
+### 3. Demo-implementatie (gekozen pad: eerst main, dan reset + test)
 
-- Na merge op main + full reset van de demo (Keycloak-db weg → realm importeren). Bestaande testdata gaat verloren (neutraal: db-init seed herstelt testaccounts).
-- De demo-deploy (Deploy Demo workflow in playwright-sparta) past de nieuwe realm automatisch toe bij een clean reset.
+De demo krijgt de nieuwe realm **niet** vanuit de feature branch (demo-images `:demo`/`:latest` worden alleen op main gebouwd; `--import-realm` is alleen effectief op een verse DB). Gekozen volgorde:
+
+1. Implementeer alle wijzigingen op `feature/session-persistence`.
+2. Merge de branch naar main **vóór** de v1.0.0-tag (`docker-publish.yml` bouwt o.a. `keycloak:latest` met de nieuwe realm). De v1.0.0-releasetag blijft los hiervan: pas na acceptatie.
+3. Full reset demo: Deploy Demo workflow (playwright-sparta) op main → `deploy-demo.sh` doet `git reset --hard origin/main`, dropt bij clean reset o.a. het `keycloak`-schema in postgres → Keycloak importert `clinic-realm.json` vers. Bestaande testdata gaat verloren (neutraal: db-init seed herstelt testaccounts).
+4. Demo APK voor handmatige test: bouwen via **`workflow_dispatch` op `mobile-build-publish.yml`** — samen met stap 2 identiek aan de `demo`-release, dus de APK kan ook uit de (inmiddels gemergde) hoofd-branch; de branch-APK uit `feature/session-persistence` is na merge code-gelijk.
 
 ### 4. Verificatie
 
-Handmatige APK-test (demo-APK uit `mobile-build-publish.yml`):
+Handmatige APK-test (demo-APK uit `mobile-build-publish.yml`, branch- of main-build):
 
 1. Installeer de demo-APK.
 2. Log in als patient (testaccount).
@@ -58,6 +62,8 @@ Handmatige APK-test (demo-APK uit `mobile-build-publish.yml`):
 4. Wacht langer dan de oude 30-min-grens (of versnelde controle: omdat `access.token.lifespan` 5 min is, is wachten ≥ ~7 min voldoende om een refresh-cyclus te bewijzen).
 5. Start de app → gebruiker is nog ingelogd (geen login-scherm).
 6. Controle dat uitloggen via Profile de sessie wél beëindigt en een herstart terugkeert naar het login-scherm.
+
+Aanvullend na implementatie, vóór het mergen: statische controle van `clinic-realm.json` — JSON-validatie (`jq empty` / `python -m json.tool`) + review van de `clientScopes`/`attributes`-structuur tegen de Keycloak-import. Een foute config verschijnt anders pas bij de demo-reset.
 
 ## Acceptatiecriteria
 
