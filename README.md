@@ -304,6 +304,41 @@ Or trigger it from CI via the **Performance Test** workflow (`.github/workflows/
 
 ---
 
+## Versioning
+
+Every portal shows its version in the footer (`v{major}.{minor}.{patch}`); the patient mobile app shows it at the bottom of the Profile screen.
+
+### How the version is determined
+
+- **Web portals** — the version is baked in at build time via the `VITE_APP_VERSION` build arg in the [`Build & Publish Docker Images`](.github/workflows/docker-publish.yml) workflow.
+- **Patient mobile app (APK)** — the version is baked in via the `APP_VERSION` env var in [`mobile-build-publish.yml`](.github/workflows/mobile-build-publish.yml) (demo builds) — see [MOBILE.md](MOBILE.md).
+
+The **base version** (e.g. `0.2.4`) is the **latest semver git tag** (`v*`), resolved with:
+
+```bash
+git describe --tags --abbrev=0 --match 'v*'
+```
+
+It only changes when a developer creates a new release tag, for example:
+
+```bash
+git tag v0.3.0
+git push origin v0.3.0
+```
+
+Pushing a `v*` tag triggers a release build: the portals are released with that version (e.g. `VITE_APP_VERSION=v0.3.0`) and the image is published with `v0.3.0` tags.
+
+### Demo builds
+
+Demo images/APKs get the `{base}-demo.{commit_count}` format, e.g. `0.2.4-demo.179`:
+
+- `{base}` — from the latest `v*` tag (see above).
+- `{commit_count}` — number of commits since that tag; **increments automatically on every commit to `main`**.
+
+Because only `v*` tags count, the `demo-<sha>` / `emulator-<sha>` release tags created by the mobile workflows are ignored for versioning.
+
+---
+
 ## Troubleshooting
 
 ### "Cannot connect to Docker daemon"
@@ -395,7 +430,8 @@ clinic-monorepo/
 │       ├── unit-ci.yml       # CI workflow for unit tests
 │       ├── stryker-pages.yml # Stryker mutation tests + publish to report/stryker
 │       ├── allure-pages.yml  # Combined Allure + Stryker + DAST + SAST deploy to GitHub Pages
-│       ├── mobile-build.yml  # Build & publish patient-mobile APK/image
+│       ├── mobile-build-publish.yml        # Build & publish demo patient-mobile APK/image
+│       ├── mobile-build-publish-emulator.yml # Build & publish emulator patient-mobile APK/image
 │       ├── sast.yml          # SAST: CodeQL + Semgrep + Gitleaks + publish to report/sast
 │       └── dast.yml          # DAST: daily OWASP ZAP scan + publish to report/zap
 ├── .env                  # Environment variables
