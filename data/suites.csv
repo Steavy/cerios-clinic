@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","52436","first test","Patient Mobile App","Sun Sep 13 15:28:31 UTC 2026","passed","Sun Sep 13 15:29:24 UTC 2026","","patient-mobile-app/mobile.test.ts","",""
