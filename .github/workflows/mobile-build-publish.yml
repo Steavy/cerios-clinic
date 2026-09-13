@@ -28,6 +28,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Full history so git describe finds the latest v* tag
+
+      - name: Calculate demo version
+        id: demo_version
+        run: |
+          # Same logic as docker-publish.yml (build-demo-portals)
+          # Only semver tags (v*) count; demo-*/emulator-* release tags are ignored
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo "v0.0.0")
+          BASE_VERSION=${LATEST_TAG#v}
+          COMMIT_COUNT=$(git rev-list --count ${LATEST_TAG}..HEAD)
+          DEMO_VERSION="${BASE_VERSION}-demo.${COMMIT_COUNT}"
+          echo "VERSION=${DEMO_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Setup JDK 21
         uses: actions/setup-java@v5
@@ -55,7 +68,7 @@ jobs:
       - name: Generate mobile .env (demo profile)
         run: node apps/patient-mobile/setup-env.mjs demo
         env:
-          APP_VERSION: ${{ github.sha }}
+          APP_VERSION: ${{ steps.demo_version.outputs.VERSION }}
 
       - name: Install local node_modules for React Native Gradle plugin
         run: npm --prefix apps/patient-mobile install

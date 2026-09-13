@@ -184,9 +184,10 @@ jobs:
       - name: Calculate demo version
         id: demo_version
         run: |
-          # Calculate version based on commit count since last tag
+          # Calculate version based on commit count since last version tag
+          # Only semver tags (v*) count; demo-*/emulator-* release tags are ignored
           # Format: <major>.<minor>.<patch>-demo.<commit_count>
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo "v0.0.0")
           BASE_VERSION=${LATEST_TAG#v}
           COMMIT_COUNT=$(git rev-list --count ${LATEST_TAG}..HEAD)
           DEMO_VERSION="${BASE_VERSION}-demo.${COMMIT_COUNT}"
