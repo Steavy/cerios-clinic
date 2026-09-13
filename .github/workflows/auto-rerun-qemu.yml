@@ -30,7 +30,7 @@ jobs:
       - name: Fetch failed-job logs and scan for QEMU crash signature
         id: scan
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           gh -R "$GITHUB_REPOSITORY" run view "$RUN_ID" --log-failed > /tmp/failed.log 2>&1 || true
@@ -45,7 +45,7 @@ jobs:
       - name: Cancel and re-run failed jobs
         if: steps.guard.outputs.skip == 'false' && steps.scan.outputs.qemu_crash == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           echo "Cancelling run $RUN_ID (no-op if already completed)..."
