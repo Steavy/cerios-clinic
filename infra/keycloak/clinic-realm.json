@@ -28,6 +28,33 @@
 			{ "name": "admin", "description": "System administrator" }
 		]
 	},
+	"clientScopes": [
+		{
+			"name": "offline_access",
+			"description": "OpenID Connect built-in scope: offline access",
+			"protocol": "openid-connect",
+			"attributes": {
+				"consent.screen.text": "${offlineAccessScopeConsentText}",
+				"display.on.consent.screen": "true",
+				"include.in.token.scope": "true"
+			},
+			"protocolMappers": [
+				{
+					"name": "offline access",
+					"protocol": "openid-connect",
+					"protocolMapper": "oidc-offline-access-mapper",
+					"consentRequired": false,
+					"config": {
+						"access.token.claim": "true",
+						"id.token.claim": "false",
+						"userinfo.token.claim": "false",
+						"introspection.token.claim": "true",
+						"include.in.token.scope": "true"
+					}
+				}
+			]
+		}
+	],
 	"clients": [
 		{
 			"clientId": "patient-portal-client",
