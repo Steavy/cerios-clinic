@@ -9,7 +9,7 @@ const tokenEndpoint = `${oidcBaseUrl}/token`;
 const logoutEndpoint = `${oidcBaseUrl}/logout`;
 const revocationEndpoint = `${oidcBaseUrl}/revoke`;
 
-const SCOPES = "openid profile email roles";
+const SCOPES = "openid profile email roles offline_access";
 
 export interface StoredTokens {
 	accessToken: string;

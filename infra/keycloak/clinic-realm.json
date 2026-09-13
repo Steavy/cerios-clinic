@@ -28,6 +28,33 @@
 			{ "name": "admin", "description": "System administrator" }
 		]
 	},
+	"clientScopes": [
+		{
+			"name": "offline_access",
+			"description": "OpenID Connect built-in scope: offline access",
+			"protocol": "openid-connect",
+			"attributes": {
+				"consent.screen.text": "${offlineAccessScopeConsentText}",
+				"display.on.consent.screen": "true",
+				"include.in.token.scope": "true"
+			},
+			"protocolMappers": [
+				{
+					"name": "offline access",
+					"protocol": "openid-connect",
+					"protocolMapper": "oidc-offline-access-mapper",
+					"consentRequired": false,
+					"config": {
+						"access.token.claim": "true",
+						"id.token.claim": "false",
+						"userinfo.token.claim": "false",
+						"introspection.token.claim": "true",
+						"include.in.token.scope": "true"
+					}
+				}
+			]
+		}
+	],
 	"clients": [
 		{
 			"clientId": "patient-portal-client",
@@ -175,9 +202,13 @@
 			"redirectUris": ["com.cerios.patient://oauth2redirect"],
 			"webOrigins": [],
 			"attributes": {
-				"pkce.code.challenge.method": "S256"
+				"pkce.code.challenge.method": "S256",
+				"client.offline.session.idle.timeout": "15552000",
+				"client.offline.session.max.lifespan": "15552000",
+				"access.token.lifespan": "300"
 			},
 			"defaultClientScopes": ["basic", "openid", "profile", "email", "roles"],
+			"optionalClientScopes": ["offline_access"],
 			"protocolMappers": [
 				{
 					"name": "patient-mobile-audience",
