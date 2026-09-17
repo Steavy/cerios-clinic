@@ -49,7 +49,7 @@ jobs:
           ls -lh reports/mutation/
 
       - name: Upload Stryker HTML report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: stryker-html-report
           path: reports/mutation/mutation.html

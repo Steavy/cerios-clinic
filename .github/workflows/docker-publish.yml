@@ -215,7 +215,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Dispatch smoke test with built image SHA
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
@@ -234,7 +234,7 @@ jobs:
     if: failure() && !cancelled()
     steps:
       - name: Dispatch failure bridge in playwright-sparta
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
