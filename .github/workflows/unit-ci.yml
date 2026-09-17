@@ -1,4 +1,5 @@
 name: Unit Tests
+# self-heal: true
 
 on:
   push:
