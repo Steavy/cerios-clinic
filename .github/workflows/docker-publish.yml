@@ -1,4 +1,5 @@
 name: Build & Publish Docker Images
+# self-heal: true
 
 on:
   push:
