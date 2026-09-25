@@ -45,3 +45,11 @@ EU AI Act-risicoclassificatie voor de AI-inzet rond dit repo) staat in
 [`docs/ai-vision.md`](docs/ai-vision.md). **AI-owner is Steavy**; bij twijfel
 over scope of impact van een AI-wijziging: niet doorzetten, om
 beoordeling vragen.
+
+## Data en retentie
+
+Retentie-/verwijderafspraken voor demo-backups (clinic-db dumps:
+`KEEP_NEWEST=14`), scan-rapporten, fix-artefacten en de datainventarisatie
+staan in [`docs/data-retention.md`](docs/data-retention.md).
+**Data-eigenaar van de seeded testdata is Steavy.** Agents voeren geen
+verwijdering van dumps/backups uit zonder expliciete opdracht.
