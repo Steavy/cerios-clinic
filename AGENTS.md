@@ -37,3 +37,11 @@ promptversies en fix-contracten onder versiebeheer leven (opencode-fix,
 ai-readiness), en hoe AI-commits traceerbaar blijven — staat in
 [`docs/ai-development.md`](docs/ai-development.md). Lees dat document als
 je met AI-ondersteuning aan dit repo werkt of de AI-inrichting wijzigt.
+
+## AI-visie en eigenaarschap
+
+De AI-visie (doelstellingen, AI-owner, gedragscode en
+EU AI Act-risicoclassificatie voor de AI-inzet rond dit repo) staat in
+[`docs/ai-vision.md`](docs/ai-vision.md). **AI-owner is Steavy**; bij twijfel
+over scope of impact van een AI-wijziging: niet doorzetten, om
+beoordeling vragen.
