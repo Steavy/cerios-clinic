@@ -1,5 +1,10 @@
 name: opencode
 
+# /oc-werkflow: voert een headless OpenCode-agent uit n.a.v. een issue/PR-comment.
+# Hardening (2026-09-24): alleen mantainers uit de allowlist mogen triggeren;
+# wijzigingen landen uitsluitend via PR + groene CI + menselijke review (branch
+# protection op main blokkeert directe pushes van deze workflow-token).
+
 on:
   issue_comment:
     types: [created]
@@ -9,8 +14,8 @@ on:
 jobs:
   opencode:
     if: |
-      contains(github.event.comment.body, '/oc') ||
-      contains(github.event.comment.body, '/opencode')
+      (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) &&
+      contains(fromJson('["Steavy"]'), github.event.comment.user.login)
     runs-on: ubuntu-24.04
     permissions:
       id-token: write
@@ -32,7 +37,7 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Run opencode
-        uses: anomalyco/opencode/github@latest
+        uses: anomalyco/opencode/github@v1.18.32
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
