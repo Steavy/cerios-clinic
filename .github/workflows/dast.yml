@@ -1,4 +1,5 @@
 name: DAST (OWASP ZAP)
+# self-heal: true
 
 # Dynamic Application Security Testing against a locally started copy of the
 # clinic stack (same prebuilt ghcr.io/steavy/cerios-clinic images and compose

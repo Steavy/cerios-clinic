@@ -1,4 +1,5 @@
 name: Deploy Reports to Pages
+# self-heal: true
 
 on:
   repository_dispatch:

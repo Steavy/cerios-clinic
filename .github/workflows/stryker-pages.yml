@@ -1,4 +1,5 @@
 name: Stryker Mutation Report
+# self-heal: true
 
 on:
   workflow_dispatch:
