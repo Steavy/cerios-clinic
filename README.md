@@ -534,6 +534,16 @@ Manual trigger: **Actions → DAST (OWASP ZAP) → Run workflow**.
 
 ---
 
+## AI-Assisted Development
+
+AI-supported development follows a controlled, review-first workflow:
+
+- **`/oc` workflow** — Triggered by an issue or pull-request review comment containing `/oc` or `/opencode` from an allowlisted maintainer. `.github/workflows/opencode.yml` runs headless OpenCode with `opencode/big-pickle`; changes land only through a pull request with green CI and human review. Direct pushes to `main` are blocked by branch protection.
+- **Self-healing workflows** — Failed workflow runs are automatically analyzed and fixed through the `gh-workflow-fix` chain. Workflows carry a `self-heal: true` marker in their headers; see `AGENTS.md` for the operating rules.
+- **Weekly AI-readiness scan** — Every Thursday, a headless OpenCode session scans this repository and `playwright-sparta` with the Quality Transformation Coach MCP server. The 60-question scan covers five AI domains; reports are stored in the `playwright-sparta` repository under `ai-readiness/scans/`, including `ai-readiness-cerios-clinic.md`.
+
+---
+
 ## Patient Mobile App (Android)
 
 For building and running the React Native Android app, see **[MOBILE.md](MOBILE.md)**.
