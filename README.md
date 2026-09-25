@@ -543,6 +543,7 @@ AI-supported development follows a controlled, review-first workflow:
 - **AI vision & ownership** — The AI vision with goals, AI-owner (Steavy), code of conduct and EU AI Act risk classification is in [`docs/ai-vision.md`](docs/ai-vision.md).
 - **Data & retention** — Retention rules for demo DB dumps (`KEEP_NEWEST=14`), scan reports and fix artifacts, plus data ownership of the seeded test data (Steavy), are in [`docs/data-retention.md`](docs/data-retention.md).
 - **AI evaluation** — Repeatable prompt-injection test (fix-chain and direct-PR vectors) and a human review sample (every 5th AI PR, 5-point deep review) in [`docs/ai-evaluation.md`](docs/ai-evaluation.md).
+- **Monitoring, dashboard & AI rollback** — Weekly AI dashboard (fix-run count, success rate, time-to-fix, LLM token usage from the OmniRoute gateway) generated on the Techlab-box by `opencode-fix/bin/ai-dashboard.sh`; the rollback procedure for AI changes is in [`docs/ai-rollback.md`](docs/ai-rollback.md).
 - **Self-healing workflows** — Failed workflow runs are automatically analyzed and fixed through the `gh-workflow-fix` chain. Workflows carry a `self-heal: true` marker in their headers.
 - **Weekly AI-readiness scan** — Every Thursday, a headless OpenCode session scans this repository and `playwright-sparta` with the Quality Transformation Coach MCP server. The 60-question scan covers five AI domains; reports are stored in the `playwright-sparta` repository under `ai-readiness/scans/`, including `ai-readiness-cerios-clinic.md`.
 
