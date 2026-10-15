@@ -31,7 +31,7 @@ if [ -z "$DEMO_HOST_IP" ]; then
   echo "ERROR: demo host IP unknown. Set CERIOS_DEMO_HOST_IP or create /root/.cerios-demo-host-ip." >&2
   exit 1
 fi
-PUBLIC_APISERVER="https://$DEMO_HOST_IP:6443"
+PUBLIC_APISERVER="https://$DEMO_HOST_IP:6445"
 
 mkdir -p "$BACKUP_DIR"
 ts="$(date +%Y%m%d-%H%M%S)"
@@ -127,7 +127,7 @@ restore_backup() {
 ensure_cluster() {
   if docker inspect "$MINIKUBE_PROFILE" >/dev/null 2>&1 \
      && docker port "$MINIKUBE_PROFILE" 2>/dev/null | grep -q "0.0.0.0:3001" \
-     && curl -sk --max-time 10 -o /dev/null -w '%{http_code}' "https://127.0.0.1:6443/healthz" 2>/dev/null | grep -q '^200$'; then
+     && curl -sk --max-time 10 -o /dev/null -w '%{http_code}' "https://127.0.0.1:6445/healthz" 2>/dev/null | grep -q '^200$'; then
     echo "minikube cluster $MINIKUBE_PROFILE present with demo port mappings"
     return 0
   fi
