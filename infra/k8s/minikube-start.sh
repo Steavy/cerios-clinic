@@ -15,9 +15,11 @@ set -euo pipefail
 # container node ports (30001-30010); the host ports are the public endpoints:
 #
 #   host port -> container node port (service nodePort)
-#   6443       -> 8443  (apiserver; --apiserver-port must stay 8443 so the
+#   6445       -> 8443  (apiserver; --apiserver-port must stay 8443 so the
 #                        external mapping works, and --apiserver-ips adds the
-#                        public IP as a cert SAN)
+#                        public IP as a cert SAN). Host port 6443 is avoided
+#                        because the shared demo host's co-tenant k3s binds
+#                        *:6443 and 127.0.0.1:6444.
 #   3001-3004  -> 30001-30004  (APIs)
 #   5173-5176  -> 30005-30008  (portals)
 #   8180       -> 30009        (keycloak)
@@ -47,7 +49,7 @@ minikube start \
   --listen-address=0.0.0.0 \
   --apiserver-ips="$DEMO_HOST_IP" \
   --apiserver-port=8443 \
-  --ports=6443:8443 \
+  --ports=6445:8443 \
   --ports=3001:30001 \
   --ports=3002:30002 \
   --ports=3003:30003 \
