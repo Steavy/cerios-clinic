@@ -1,0 +1,1011 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.17.0",
+	"@generated": "Fri, 23 Oct 2026 22:53:55",
+	"created": "2026-10-23T22:53:55.895383328Z",
+	"insights":[
+		{
+			"level": "Medium",
+			"reason": "Exceeded High",
+			"site": "http://localhost:3001",
+			"key": "insight.code.4xx",
+			"description": "Percentage of responses with status code 4xx",
+			"statistic": "99"
+		},
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.error",
+			"description": "ZAP errors logged - see the zap.log file for details",
+			"statistic": "16"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "",
+			"key": "insight.network.failure",
+			"description": "Percentage of network failures",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.endpoint.ctype.application/json",
+			"description": "Percentage of endpoints with content type application/json",
+			"statistic": "98"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "69"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.endpoint.method.PATCH",
+			"description": "Percentage of endpoints with method PATCH",
+			"statistic": "8"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.endpoint.method.POST",
+			"description": "Percentage of endpoints with method POST",
+			"statistic": "18"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.endpoint.method.PUT",
+			"description": "Percentage of endpoints with method PUT",
+			"statistic": "2"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://localhost:3001",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "79"
+		}
+	],
+	"site":[ 
+		{
+			"@name": "http://localhost:3001",
+			"@host": "localhost",
+			"@port": "3001",
+			"@ssl": "false",
+			"alerts": [ 
+				{
+					"pluginid": "100000",
+					"alertRef": "100000-1",
+					"alert": "A Client Error response code was returned by the server",
+					"name": "A Client Error response code was returned by the server",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>A response code of 404 was returned by the server.</p><p>This may indicate that the application is failing to handle unexpected input correctly.</p><p>Raised by the 'Alert on HTTP Response Code Error' script</p>",
+					"instances":[ 
+						{
+							"id": "32",
+							"uri": "http://localhost:3001",
+							"nodeName": "http:\/\/localhost:3001",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2863",
+							"uri": "http://localhost:3001/",
+							"nodeName": "http:\/\/localhost:3001\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "20",
+							"uri": "http://localhost:3001/3483965491951911091",
+							"nodeName": "http:\/\/localhost:3001\/3483965491951911091",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "34",
+							"uri": "http://localhost:3001/api",
+							"nodeName": "http:\/\/localhost:3001\/api",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2864",
+							"uri": "http://localhost:3001/api/",
+							"nodeName": "http:\/\/localhost:3001\/api\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "21",
+							"uri": "http://localhost:3001/api/7003213757391735095",
+							"nodeName": "http:\/\/localhost:3001\/api\/7003213757391735095",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "41",
+							"uri": "http://localhost:3001/api/appointments",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1526",
+							"uri": "http://localhost:3001/api/appointments",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2",
+							"uri": "http://localhost:3001/api/appointments?limit=1.2&offset=1.2",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments (limit,offset)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1341",
+							"uri": "http://localhost:3001/api/appointments?limit=%3Bprint%28chr%28122%29.chr%2897%29.chr%28112%29.chr%2895%29.chr%28116%29.chr%28111%29.chr%28107%29.chr%28101%29.chr%28110%29%29%3B&offset=1.2",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments (limit,offset)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2867",
+							"uri": "http://localhost:3001/api/appointments/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "22",
+							"uri": "http://localhost:3001/api/appointments/6191681857117064055",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/6191681857117064055",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "48",
+							"uri": "http://localhost:3001/api/appointments/appointmentId",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2868",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "23",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/4396344174794120034",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/4396344174794120034",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3246",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/actuator/health",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/actuator\/health",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "15",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/reviews",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/reviews",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2869",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/reviews/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/reviews\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "3",
+							"uri": "http://localhost:3001/api/appointments/history?limit=1.2&offset=1.2",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/history (limit,offset)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1361",
+							"uri": "http://localhost:3001/api/appointments/history?limit=1.2&offset=%27%3Bprint%28chr%28122%29.chr%2897%29.chr%28112%29.chr%2895%29.chr%28116%29.chr%28111%29.chr%28107%29.chr%28101%29.chr%28110%29%29%3B%24var%3D%27",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/history (limit,offset)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2870",
+							"uri": "http://localhost:3001/api/appointments/history/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/history\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "4",
+							"uri": "http://localhost:3001/api/appointments/id",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2871",
+							"uri": "http://localhost:3001/api/appointments/id/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "24",
+							"uri": "http://localhost:3001/api/appointments/id/2082919713589847533",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/2082919713589847533",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "99",
+							"uri": "http://localhost:3001/api/auth",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2874",
+							"uri": "http://localhost:3001/api/auth/",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "25",
+							"uri": "http://localhost:3001/api/auth/2448775408468410853",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/2448775408468410853",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "11",
+							"uri": "http://localhost:3001/api/doctors",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2876",
+							"uri": "http://localhost:3001/api/doctors/",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "26",
+							"uri": "http://localhost:3001/api/doctors/3178156534245903722",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/3178156534245903722",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "182",
+							"uri": "http://localhost:3001/api/doctors/doctorId",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2880",
+							"uri": "http://localhost:3001/api/doctors/doctorId/",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "27",
+							"uri": "http://localhost:3001/api/doctors/doctorId/3013291089189322056",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/3013291089189322056",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "17",
+							"uri": "http://localhost:3001/api/doctors/doctorId/reviews",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/reviews",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2877",
+							"uri": "http://localhost:3001/api/doctors/doctorId/reviews/",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/reviews\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "12",
+							"uri": "http://localhost:3001/api/doctors/doctorId/slots?from=from&to=to",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/slots (from,to)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1485",
+							"uri": "http://localhost:3001/api/doctors/doctorId/slots?from=from&to=%27%3Bprint%28chr%28122%29.chr%2897%29.chr%28112%29.chr%2895%29.chr%28116%29.chr%28111%29.chr%28107%29.chr%28101%29.chr%28110%29%29%3B%24var%3D%27",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/slots (from,to)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2878",
+							"uri": "http://localhost:3001/api/doctors/doctorId/slots/",
+							"nodeName": "http:\/\/localhost:3001\/api\/doctors\/doctorId\/slots\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "189",
+							"uri": "http://localhost:3001/api/events",
+							"nodeName": "http:\/\/localhost:3001\/api\/events",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2881",
+							"uri": "http://localhost:3001/api/events/",
+							"nodeName": "http:\/\/localhost:3001\/api\/events\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "28",
+							"uri": "http://localhost:3001/api/events/665366400138907761",
+							"nodeName": "http:\/\/localhost:3001\/api\/events\/665366400138907761",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "18",
+							"uri": "http://localhost:3001/api/events/appointments",
+							"nodeName": "http:\/\/localhost:3001\/api\/events\/appointments",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2882",
+							"uri": "http://localhost:3001/api/events/appointments/",
+							"nodeName": "http:\/\/localhost:3001\/api\/events\/appointments\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "29",
+							"uri": "http://localhost:3001/api/health/4482017675058935726",
+							"nodeName": "http:\/\/localhost:3001\/api\/health\/4482017675058935726",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "197",
+							"uri": "http://localhost:3001/api/prescriptions",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1792",
+							"uri": "http://localhost:3001/api/prescriptions",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "13",
+							"uri": "http://localhost:3001/api/prescriptions?limit=1.2&offset=1.2",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions (limit,offset)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1486",
+							"uri": "http://localhost:3001/api/prescriptions?limit=%3Bprint%28chr%28122%29.chr%2897%29.chr%28112%29.chr%2895%29.chr%28116%29.chr%28111%29.chr%28107%29.chr%28101%29.chr%28110%29%29%3B&offset=1.2",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions (limit,offset)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2884",
+							"uri": "http://localhost:3001/api/prescriptions/",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "30",
+							"uri": "http://localhost:3001/api/prescriptions/467437288531415512",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions\/467437288531415512",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "14",
+							"uri": "http://localhost:3001/api/prescriptions/id",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions\/id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2886",
+							"uri": "http://localhost:3001/api/prescriptions/id/",
+							"nodeName": "http:\/\/localhost:3001\/api\/prescriptions\/id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "8",
+							"uri": "http://localhost:3001/api/profile",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2887",
+							"uri": "http://localhost:3001/api/profile/",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "31",
+							"uri": "http://localhost:3001/api/profile/3419171213792818100",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/3419171213792818100",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "7",
+							"uri": "http://localhost:3001/api/profile/feature-toggles",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/feature-toggles",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2889",
+							"uri": "http://localhost:3001/api/profile/feature-toggles/",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/feature-toggles\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "19",
+							"uri": "http://localhost:3001/api/ui-toggles",
+							"nodeName": "http:\/\/localhost:3001\/api\/ui-toggles",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2888",
+							"uri": "http://localhost:3001/api/ui-toggles/",
+							"nodeName": "http:\/\/localhost:3001\/api\/ui-toggles\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "5",
+							"uri": "http://localhost:3001/api/appointments/id/cancel",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/cancel",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2856",
+							"uri": "http://localhost:3001/api/appointments/id/cancel/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/cancel\/",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "6",
+							"uri": "http://localhost:3001/api/appointments/id/reschedule",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/reschedule ()({scheduledAt})",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2587",
+							"uri": "http://localhost:3001/api/appointments/id/reschedule",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/reschedule ()({scheduledAt})",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2855",
+							"uri": "http://localhost:3001/api/appointments/id/reschedule/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/id\/reschedule\/ ()({scheduledAt})",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "10",
+							"uri": "http://localhost:3001/api/profile/photo",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/photo ()(multipart:photo)",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "918",
+							"uri": "http://localhost:3001/api/profile/photo",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/photo ()(multipart:photo)",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3299",
+							"uri": "http://localhost:3001/api/profile/photo",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/photo ()(multipart:rtobject)",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2860",
+							"uri": "http://localhost:3001/api/profile/photo/",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/photo\/ ()(multipart:photo)",
+							"method": "PATCH",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "16",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/reviews",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/reviews ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1320",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/reviews",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/reviews ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2854",
+							"uri": "http://localhost:3001/api/appointments/appointmentId/reviews/",
+							"nodeName": "http:\/\/localhost:3001\/api\/appointments\/appointmentId\/reviews\/ ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "0",
+							"uri": "http://localhost:3001/api/auth/register",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/register ()({email,firstName,lastName,password,confirmPassword,dateOfBirth,phone})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "455",
+							"uri": "http://localhost:3001/api/auth/register",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/register ()({email,firstName,lastName,password,confirmPassword,dateOfBirth,phone})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2853",
+							"uri": "http://localhost:3001/api/auth/register/",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/register\/ ()({email,firstName,lastName,password,confirmPassword,dateOfBirth,phone})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "38",
+							"uri": "http://localhost:3001/api/auth/resend-verification",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/resend-verification ()({email})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "2595",
+							"uri": "http://localhost:3001/api/auth/resend-verification",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/resend-verification ()({email})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2857",
+							"uri": "http://localhost:3001/api/auth/resend-verification/",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/resend-verification\/ ()({email})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1",
+							"uri": "http://localhost:3001/api/auth/sync",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/sync",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2858",
+							"uri": "http://localhost:3001/api/auth/sync/",
+							"nodeName": "http:\/\/localhost:3001\/api\/auth\/sync\/",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2132",
+							"uri": "http://localhost:3001/computeMetadata/v1/",
+							"nodeName": "http:\/\/localhost:3001\/computeMetadata\/v1\/ ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2122",
+							"uri": "http://localhost:3001/latest/meta-data/",
+							"nodeName": "http:\/\/localhost:3001\/latest\/meta-data\/ ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2187",
+							"uri": "http://localhost:3001/metadata/instance",
+							"nodeName": "http:\/\/localhost:3001\/metadata\/instance ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2191",
+							"uri": "http://localhost:3001/metadata/v1",
+							"nodeName": "http:\/\/localhost:3001\/metadata\/v1 ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2154",
+							"uri": "http://localhost:3001/opc/v1/instance/",
+							"nodeName": "http:\/\/localhost:3001\/opc\/v1\/instance\/ ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2176",
+							"uri": "http://localhost:3001/opc/v2/instance/",
+							"nodeName": "http:\/\/localhost:3001\/opc\/v2\/instance\/ ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2198",
+							"uri": "http://localhost:3001/openstack/latest/meta_data.json",
+							"nodeName": "http:\/\/localhost:3001\/openstack\/latest\/meta_data.json ()({rating,comment})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "9",
+							"uri": "http://localhost:3001/api/profile",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile ()({firstName,lastName,dateOfBirth,phone,insuranceNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "590",
+							"uri": "http://localhost:3001/api/profile",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile ()({firstName,lastName,dateOfBirth,phone,insuranceNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2859",
+							"uri": "http://localhost:3001/api/profile/",
+							"nodeName": "http:\/\/localhost:3001\/api\/profile\/ ()({firstName,lastName,dateOfBirth,phone,insuranceNumber})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						}
+					],
+					"count": "89",
+					"systemic": false,
+					"solution": "",
+					"otherinfo": "",
+					"reference": "",
+					"cweid": "388",
+					"wascid": "20",
+					"sourceid": "61"
+				}
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}
