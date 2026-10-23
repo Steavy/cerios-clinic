@@ -197,6 +197,12 @@ All emails sent by the application are captured locally by Mailpit. No real emai
 
 Open http://localhost:8025 to view the inbox.
 
+In the clone-free and demo stacks the image comes from
+`ghcr.io/steavy/cerios-clinic/mailpit:latest`, built by
+`.github/workflows/docker-publish.yml` from `infra/docker/Dockerfile.mailpit`
+(pinned upstream version with the clinic defaults baked in). The dev stack
+(`infra/docker-compose.yml`) keeps pulling the upstream image.
+
 ---
 
 ## Docker Commands

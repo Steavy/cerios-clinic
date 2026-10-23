@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: mailpit
-          image: axllent/mailpit:latest
+          image: ghcr.io/steavy/cerios-clinic/mailpit:latest
           imagePullPolicy: Always
           resources:
             requests:

@@ -1,0 +1,8 @@
+# check=skip=SecretsUsedInArgOrEnv
+FROM axllent/mailpit:v1.32.0
+
+ENV MP_MAX_MESSAGES=500 \
+    MP_SMTP_AUTH_ACCEPT_ANY=true \
+    MP_SMTP_AUTH_ALLOW_INSECURE=true
+
+EXPOSE 1025 8025

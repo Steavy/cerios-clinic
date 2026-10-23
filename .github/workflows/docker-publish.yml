@@ -67,6 +67,9 @@ jobs:
           - image: postgres
             dockerfile: infra/docker/Dockerfile.postgres
             build-args: ""
+          - image: mailpit
+            dockerfile: infra/docker/Dockerfile.mailpit
+            build-args: ""
 
     steps:
       - name: Checkout
@@ -130,6 +133,58 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=min,scope=${{ matrix.image }}
 
+  verify-infra-images:
+    name: Verify ${{ matrix.image }} image
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: mailpit
+            health-path: /livez
+    steps:
+      - name: Set lowercase repo name
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Assert amd64 and arm64 are published
+        run: |
+          image="${REGISTRY}/${REPO_LC}/${{ matrix.image }}:latest"
+          platforms=$(docker buildx imagetools inspect "$image" \
+            --format '{{range .Manifest.Manifests}}{{.Platform.OS}}/{{.Platform.Architecture}}{{"\n"}}{{end}}')
+          echo "$platforms"
+          grep -qx 'linux/amd64' <<<"$platforms"
+          grep -qx 'linux/arm64' <<<"$platforms"
+
+      - name: Run the published image and probe it
+        run: |
+          image="${REGISTRY}/${REPO_LC}/${{ matrix.image }}:latest"
+          docker run -d --name verify-image -p 1025:1025 -p 8025:8025 "$image"
+          code=000
+          for _ in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8025${{ matrix.health-path }}" || true)
+            [ "$code" = "200" ] && break
+            sleep 2
+          done
+          echo "health ${{ matrix.health-path }} -> $code"
+          [ "$code" = "200" ]
+          timeout 5 bash -c ': >/dev/tcp/127.0.0.1/1025' && echo "smtp 1025 reachable"
+
+      - name: Container logs
+        if: failure()
+        run: docker logs verify-image || true
+
   build-demo-portals:
     name: Build demo ${{ matrix.image }}
     runs-on: ubuntu-latest
@@ -178,7 +233,7 @@ jobs:
           # Format: <major>.<minor>.<patch>-demo.<commit_count>
           LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo "v0.0.0")
           BASE_VERSION=${LATEST_TAG#v}
-          COMMIT_COUNT=$(git rev-list --count ${LATEST_TAG}..HEAD)
+          COMMIT_COUNT=$(git rev-list --count "${LATEST_TAG}"..HEAD)
           DEMO_VERSION="${BASE_VERSION}-demo.${COMMIT_COUNT}"
           echo "VERSION=${DEMO_VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -211,7 +266,7 @@ jobs:
   dispatch-smoke:
     name: Dispatch smoke test in playwright-sparta
     runs-on: ubuntu-latest
-    needs: [build-and-push, build-demo-portals]
+    needs: [build-and-push, build-demo-portals, verify-infra-images]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Dispatch smoke test with built image SHA

@@ -634,6 +634,11 @@ All emails sent by the application (password resets, etc.) are captured locally 
 
 Open http://localhost:8025 to view the inbox.
 
+The prebuilt and demo stacks pull `ghcr.io/steavy/cerios-clinic/mailpit:latest`
+(built from `infra/docker/Dockerfile.mailpit` by
+`.github/workflows/docker-publish.yml`); only the dev stack keeps the upstream
+Docker Hub image.
+
 ### Patient self-registration with email verification (test walkthrough)
 
 Patient self-registration creates an unverified Keycloak user and sends a verification email through Mailpit. Login is blocked until the user clicks the link.
