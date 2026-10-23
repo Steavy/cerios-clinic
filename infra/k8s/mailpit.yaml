@@ -1,5 +1,9 @@
 # Mailpit for the demo stack (SMTP sink + web UI).
 # Internal SMTP on mailpit:1025, external web UI on demo-sparta.mooo.com:8025.
+# NOTE: single replica on purpose, like keycloak.yaml. Mailpit stores messages
+# in a pod-local DB under /tmp (no PVC); with replicas: 2 the round-robin
+# Services send SMTP to one pod and the web UI to the other, so a delivered
+# message intermittently never shows up in the inbox (flaky mail round-trips).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,7 +12,7 @@ metadata:
   labels:
     app: mailpit
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
