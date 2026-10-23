@@ -4,8 +4,9 @@ set -euo pipefail
 # Chaos Mesh smoke check for the clinic demo stack (runs on the demo server).
 #
 # Kills one pod at a time (PodChaos, mode: one) across the app deployments
-# while a watcher polls every public endpoint and asserts ZERO DOWNTIME: with
-# 2 replicas per app, one pod kill must never make an endpoint unreachable.
+# while a watcher polls every public endpoint and asserts ZERO DOWNTIME: the
+# API and portal deployments run 2 replicas each, so one pod kill must never
+# make an endpoint unreachable.
 # After the window the deployments must recover and every endpoint must be
 # healthy again. Any downtime event fails the script (and with it the Deploy
 # Demo workflow).
@@ -15,7 +16,9 @@ set -euo pipefail
 # 15s kill cadence, so two keycloak kills inside one window would take both
 # replicas down at once and fail the gate spuriously (~19% per run). Like
 # postgres (1 replica, also not killed), slow-starting stateful services are
-# watched but not chaos-killed.
+# watched but not chaos-killed. mailpit is excluded for the same reason: it
+# runs 1 replica because its message DB is pod-local (see
+# infra/k8s/mailpit.yaml), so a kill is downtime, not a failover.
 #
 # Env:
 #   NS              namespace to test             (default clinic)
@@ -168,7 +171,8 @@ spec:
             - doctor-portal
             - assistant-portal
             - admin-portal
-            - mailpit
+            # mailpit intentionally absent: single replica with a pod-local
+            # message DB, so a kill is downtime, not a failover. Watched below.
             # keycloak intentionally absent: slow JVM readiness (~3 min) vs
             # 15s cadence makes double-kills take both replicas down at once.
             # It remains watched by watch_zero_downtime (k8s_svcs below).
