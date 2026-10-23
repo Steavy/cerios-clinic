@@ -67,7 +67,7 @@ services:
       start_period: 90s
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: ghcr.io/steavy/cerios-clinic/mailpit:latest
     container_name: clinic-mailpit
     ports:
       - "1025:1025"
