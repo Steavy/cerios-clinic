@@ -1,0 +1,58 @@
+{
+  "data": [
+    {
+      "id": "50329a45-d8a7-4085-ba92-dc64140295d2",
+      "userId": "bcedb3e0-e8b6-4e7a-920d-ea7b01d75145",
+      "specialization": "Cardiology",
+      "licenseNumber": "CARD-002-2024",
+      "updatedAt": "2026-11-07T07:22:11.135Z",
+      "user": {
+        "id": "bcedb3e0-e8b6-4e7a-920d-ea7b01d75145",
+        "keycloakId": "d610a9b8-aa91-4960-9beb-9576772edaf1",
+        "email": "dr.johnson@clinic.local",
+        "firstName": "Sarah",
+        "lastName": "Johnson",
+        "role": "doctor",
+        "createdAt": "2026-11-07T07:22:11.135Z",
+        "updatedAt": "2026-11-07T07:22:11.135Z",
+        "deletedAt": null
+      }
+    },
+    {
+      "id": "cfa2c5aa-9e53-4393-a92a-ff98ef2945f2",
+      "userId": "fc2f64d0-9808-4521-b2c4-36926b89af8c",
+      "specialization": "General Practice",
+      "licenseNumber": "GP-001-2024",
+      "updatedAt": "2026-11-07T07:22:11.139Z",
+      "user": {
+        "id": "fc2f64d0-9808-4521-b2c4-36926b89af8c",
+        "keycloakId": "1e9b3e1d-f421-4bd7-9e21-da2b87e32f14",
+        "email": "dr.smith@clinic.local",
+        "firstName": "James",
+        "lastName": "Smith",
+        "role": "doctor",
+        "createdAt": "2026-11-07T07:22:11.139Z",
+        "updatedAt": "2026-11-07T07:22:11.139Z",
+        "deletedAt": null
+      }
+    },
+    {
+      "id": "b162ccc9-a6e5-428b-aef0-e1d0519f9bf7",
+      "userId": "8b4b64f3-eaeb-4cd6-92fa-1e28b804292e",
+      "specialization": "Neurology",
+      "licenseNumber": "NEUR-003-2024",
+      "updatedAt": "2026-11-07T07:22:11.139Z",
+      "user": {
+        "id": "8b4b64f3-eaeb-4cd6-92fa-1e28b804292e",
+        "keycloakId": "8466907b-94d3-41a9-93e2-a2c0ac874047",
+        "email": "dr.williams@clinic.local",
+        "firstName": "Michael",
+        "lastName": "Williams",
+        "role": "doctor",
+        "createdAt": "2026-11-07T07:22:11.139Z",
+        "updatedAt": "2026-11-07T07:22:11.139Z",
+        "deletedAt": null
+      }
+    }
+  ]
+}
